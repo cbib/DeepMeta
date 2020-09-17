@@ -133,4 +133,3 @@ if __name__ == "__main__":
     train_detect(opt, opt.model_name)
     # train()
     # train(path_images=gv.meta_path_img, path_labels=gv.meta_path_lab)
-

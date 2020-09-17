@@ -152,9 +152,9 @@ class CosLRDecay(tf.keras.callbacks.Callback):
 
     def on_epoch_begin(self, epoch, logs=None):
         self.model.optimizer.lr = (
-                0.5
-                * (1 + math.cos(epoch * math.pi / self.nb_epochs))
-                * self.model.optimizer.lr
+            0.5
+            * (1 + math.cos(epoch * math.pi / self.nb_epochs))
+            * self.model.optimizer.lr
         )
         if self.model.optimizer.lr == 0.0:
             self.model.optimizer.lr = 1e-10

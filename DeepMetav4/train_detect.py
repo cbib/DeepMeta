@@ -1,7 +1,6 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
 
-import argparse
 import os
 
 import numpy as np

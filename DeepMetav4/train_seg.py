@@ -1,11 +1,8 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
 
-import argparse
 import os
 
-import numpy as np
-import tensorflow as tf
 import tensorflow.keras as keras
 
 import DeepMetav4.utils.data as data
