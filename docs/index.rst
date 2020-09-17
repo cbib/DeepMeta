@@ -20,8 +20,8 @@ Installation
 
 .. code-block:: bash
 
-   git clone git@github.com:EdgarLefevre/DeepMetav3.git
-   cd DeepMetav3
+   git clone git@github.com:EdgarLefevre/DeepMetav4.git
+   cd DeepMetav4
    conda env create -f environment.yml
 
 Set up global vars
@@ -83,8 +83,6 @@ Run inferecnce
    :caption: Contents:
 
    train
-   predict
-   stats
    models
 
 Indices and tables

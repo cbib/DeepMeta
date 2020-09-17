@@ -1,6 +1,12 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
 
+"""
+Train seg
+==========
+This files is used to train networks to segment images.
+"""
+
 import os
 
 import tensorflow.keras as keras

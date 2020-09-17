@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import predict
+import DeepMetav4.predict as predict
 import seaborn as sns
 import skimage.io as io
 
