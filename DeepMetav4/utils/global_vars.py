@@ -3,13 +3,14 @@
 
 import os
 
-import models.model_detection
-import models.model_resnet
-import models.model_unet
-import models.model_vgg16
-import models.small_plus_plus
 import pandas as pd
-import utils.utils
+
+import DeepMetav4.models.model_detection
+import DeepMetav4.models.model_resnet
+import DeepMetav4.models.model_unet
+import DeepMetav4.models.model_vgg16
+import DeepMetav4.models.small_plus_plus
+import DeepMetav4.utils.utils
 
 # THE ONLY VAR YOU NEED TO MODIFY
 PATH_DATA = "/home/elefevre/Datasets/deepmeta/Data/"
@@ -45,17 +46,17 @@ path_masked_img = os.path.join(PATH_DATA, "Metastases/masked_imgs/")
 meta_path_img = os.path.join(PATH_META, "Images_new/")
 meta_path_lab = os.path.join(PATH_META, "Labels_new/")
 
-numSouris = utils.utils.calcul_numSouris(path_souris)
+numSouris = DeepMetav4.utils.utils.calcul_numSouris(path_souris)
 
 
 model_list = {
-    "detection": models.model_detection.model_detection,
-    "detection_bn": models.model_detection.model_detection_bn,
-    "small++": models.small_plus_plus.small_plus_plus,
-    "unet": models.model_unet.unet,
-    "vgg16": models.model_vgg16.vgg16,
-    "resnet34": models.model_resnet.resnet34,
-    "resnet18": models.model_resnet.resnet18,
-    "resnet50": models.model_resnet.resnet50,
-    "resnetv2": models.model_resnet.resnetv2,
+    "detection": DeepMetav4.models.model_detection.model_detection,
+    "detection_bn": DeepMetav4.models.model_detection.model_detection_bn,
+    "small++": DeepMetav4.models.small_plus_plus.small_plus_plus,
+    "unet": DeepMetav4.models.model_unet.unet,
+    "vgg16": DeepMetav4.models.model_vgg16.vgg16,
+    "resnet34": DeepMetav4.models.model_resnet.resnet34,
+    "resnet18": DeepMetav4.models.model_resnet.resnet18,
+    "resnet50": DeepMetav4.models.model_resnet.resnet50,
+    "resnetv2": DeepMetav4.models.model_resnet.resnetv2,
 }

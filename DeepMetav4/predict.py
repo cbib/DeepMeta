@@ -8,9 +8,10 @@ import numpy as np
 import postprocessing.post_process_and_count as postprocess
 import skimage.io as io
 import tensorflow.keras as keras
-import utils.data as data
-import utils.global_vars as gv
-import utils.utils as utils
+
+import DeepMetav4.utils.data as data
+import DeepMetav4.utils.global_vars as gv
+import DeepMetav4.utils.utils as utils
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"

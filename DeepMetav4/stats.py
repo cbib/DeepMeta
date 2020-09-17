@@ -6,8 +6,9 @@ import pandas as pd
 import predict
 import seaborn as sns
 import skimage.io as io
-import utils.global_vars as gv
-import utils.utils as utils
+
+import DeepMetav4.utils.global_vars as gv
+import DeepMetav4.utils.utils as utils
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"

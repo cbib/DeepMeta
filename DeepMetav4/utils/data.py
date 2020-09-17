@@ -4,7 +4,6 @@
 import os
 import random
 
-import models.utils_model as utils_model
 import numpy as np
 import skimage.exposure as exposure
 import skimage.io as io
@@ -12,6 +11,8 @@ import skimage.measure as measure
 import tensorflow as tf
 import tensorflow.keras as keras
 import tensorflow.keras.callbacks as callbacks
+
+import DeepMetav4.models.utils_model as utils_model
 
 from . import global_vars as gv
 from . import utils

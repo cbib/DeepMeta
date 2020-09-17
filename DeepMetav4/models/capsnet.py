@@ -15,12 +15,13 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import utils_capsnet as uc
 from PIL import Image
 from tensorflow.keras import backend as K
 from tensorflow.keras import callbacks, layers, models, optimizers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.utils import to_categorical
+
+import DeepMetav4.models.utils_capsnet as uc
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"

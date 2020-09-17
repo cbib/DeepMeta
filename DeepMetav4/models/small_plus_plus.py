@@ -1,7 +1,7 @@
 import tensorflow.keras as keras
 import tensorflow.keras.layers as layers
 
-from . import utils_model
+import DeepMetav4.models.utils_model as utils_model
 
 
 def small_plus_plus(input_shape, filters=16):
