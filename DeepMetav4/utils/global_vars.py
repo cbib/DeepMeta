@@ -19,8 +19,8 @@ PATH_DATA = "/home/elefevre/Datasets/deepmeta/Data/"
 MAX_GPU_NUMBER = 6
 
 ##########################################################
-PATH_SAVE = "saved_models/"
-PATH_RES = "results/"
+PATH_SAVE = "data/saved_models/"
+PATH_RES = "data/results/"
 PATH_FILTERS_FEATURES = os.path.join(PATH_RES, "Filters_and_features/")
 
 PATH_CLASSIF = os.path.join(PATH_DATA, "Classif/")

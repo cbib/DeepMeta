@@ -1,4 +1,4 @@
-# DeepMetav3
+# DeepMetav4
 
 Deep learning techniques used to classify and segment lungs and metastasis on mice MRI images.
 
@@ -6,13 +6,13 @@ Deep learning techniques used to classify and segment lungs and metastasis on mi
 ## Usage
 ### Requirements
 
-This repo use python 3.6 and pip3.
+This repo use python 3.8 and conda.
 
 We recommand you to use a virtual environement (conda or venv).
 
 To install required librairies :
 ```shell script
-pip3 install -r requirements.txt
+conda env create -f environment.yml
 ```
 
 > The requirements file asssume that you have Nvidia Gpu and Cuda 10.1 installed on your computer, otherwise remove '-gpu' from tensoflow-gpu in requirements files.
@@ -62,10 +62,14 @@ todo : here stats + img of segmented metas
 # Souvenir de ce merveilleux code
 
 ## Train seg
-python train.py --batch_size=320 --model_name=small++ --n_epochs=200 --lr=0.0002 --patience=100 --meta=True --weighted=True --w1=10 --w2=20
+```shell script
+python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.0002 --patience=100 --meta=True --weighted=True --w1=10 --w2=20
+```
 
 ## Train classify
- python train.py --batch_size=640 --model_name=resnetv2 --n_epochs=200 --lr=0.01 --patience=1000 --meta=True
+```shell script
+ python -m DeepMetav4.train_detect --batch_size=32 --model_name=resnetv2 --n_epochs=200 --lr=0.01 --patience=1000 --meta=True
+```
 
 
 On avait plus ou moins fixer le model pour classifier les metas (pas de très bons res, on attend les nouvelles souris + sanity checker permettrait de ne pas louper de slice)

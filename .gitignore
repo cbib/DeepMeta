@@ -130,6 +130,5 @@ dmypy.json
 *.h5
 *.png
 *.pth
-saved_models/*
 
 .idea/*
