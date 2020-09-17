@@ -2,31 +2,35 @@
 
 Deep learning techniques used to classify and segment lungs and metastasis on mice MRI images.
 
-
-## Usage
-### Requirements
+## Installation
 
 This repo use python 3.8 and conda.
 
-We recommand you to use a virtual environement (conda or venv).
+We recommand you to use a fresh virtual environment.
 
 To install required librairies :
 ```shell script
 conda env create -f environment.yml
 ```
 
-> The requirements file asssume that you have Nvidia Gpu and Cuda 10.1 installed on your computer, otherwise remove '-gpu' from tensoflow-gpu in requirements files.
-### Training
-#### Set up gpus
+> The environment file asssume that you have at least one Nvidia Gpu installed on your computer.
+
+
+## Usage
+
+### Set up gpus
 The file `train.py` is used to train the networks, at the beginning of the file we can find Gpus ids, if you want to specify wich Gpu(s) to use just add or remove your ids in this line :
 ```python
 os.environ["CUDA_VISIBLE_DEVICES"] = "id0, id1, ...."
 ```
 if you want to use all gpus, comment this line.
+
+### Training
+
 #### Set up training
 In the file `utils/global_vars.py` you will find all the paths to the dataset and the saving paths, feel free to modify it to fit your repos.
 
-By calling `python train.py` you can pass some arguments that will define the setup of the training :
+By calling train scripts you can pass some arguments that will define the setup of the training :
 ```shell script
   --n_epochs N_EPOCHS   number of epochs of training
   --batch_size BATCH_SIZE
@@ -43,21 +47,47 @@ By calling `python train.py` you can pass some arguments that will define the se
   --patience PATIENCE   Set patience value for early stopper
 ```
 
+#### Run training
+If you want to train a network to detect lungs :
+```shell script
+python -m DeepMetav4.train_detect --batch_size=32 --model_name=resnetv2 --n_epochs=200 --lr=0.01
+```
+
+If you want to train a network to segment metastasis :
+```shell script
+python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.0002 --patience=100 --meta=True --weighted=True --w1=10 --w2=20
+```
+
+#### Availiable models
+ - Detection model
+ - resnet
+ - vgg
+ - unet
+ - small ++
+ - unet ++
 
 ### Prediction
-#### Set ups gpus
-See the same section in training.
-#### Set up prediction
+
 All the parameters you need to set are in the main section of the `predict.py` file.
 
 
 ## Lungs
+### Detection
 todo : here stats + img of segmented lungs
+### Segmentation
 ## Metastasis
+### Detection
+### Segmentation
 todo : here stats + img of segmented metas
 
+## Issue
 
+There is an issue with tensorflow 2.2, the graph construction takes around 10 min to be done. This is quiet
+disturbing. We can't do anything against that, except waiting for the next tensorflow release.
 
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------
 
 # Souvenir de ce merveilleux code
 
