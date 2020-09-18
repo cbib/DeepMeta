@@ -12,6 +12,8 @@ def test_data_lungs_classif():
     assert label[0].shape == (2,)
     assert dataset[0].dtype == np.float32
     assert label[0].dtype == np.float32
+    assert np.amax(dataset[0]) <= 1
+    assert np.amin(dataset[0]) >= 0
 
 
 def test_data_meta_classif():
@@ -22,6 +24,8 @@ def test_data_meta_classif():
     assert label[0].shape == (2,)
     assert dataset[0].dtype == np.float32
     assert label[0].dtype == np.float32
+    assert np.amax(dataset[0]) <= 1
+    assert np.amin(dataset[0]) >= 0
 
 
 def test_data_seg_lungs():
@@ -32,6 +36,8 @@ def test_data_seg_lungs():
     assert label[0].shape == (128, 128)
     assert dataset[0].dtype == np.float64
     assert label[0].dtype == bool
+    assert np.amax(dataset[0]) <= 1
+    assert np.amin(dataset[0]) >= 0
 
 
 def test_data_seg_meta():
@@ -42,3 +48,5 @@ def test_data_seg_meta():
     assert label[0].shape == (128, 128)
     assert dataset[0].dtype == np.float64
     assert label[0].dtype == bool
+    assert np.amax(dataset[0]) <= 1
+    assert np.amin(dataset[0]) >= 0
