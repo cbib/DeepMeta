@@ -133,7 +133,7 @@ def create_dataset_detect_meta(path_img, path_mask, tab, size):  # todo : refact
     return data_detec, label_detec
 
 
-def create_dataset(path_img, path_label, opt):
+def create_dataset(path_img, path_label, size):
     utils.print_gre("Creating dataset...")
     dataset = []
     label_list = []
@@ -142,7 +142,7 @@ def create_dataset(path_img, path_label, opt):
         try:
             img = io.imread(path_img + file, plugin="tifffile")
             label = io.imread(path_label + file, plugin="tifffile")
-            dataset.append((np.array(img) / 255).reshape(-1, opt.size, opt.size, 1))
+            dataset.append((np.array(img) / 255).reshape(-1, size, size, 1))
             label_list.append(label)
         except Exception:
             utils.print_red("Image {} not found.".format(file))
@@ -237,7 +237,9 @@ def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
 
 # function used to get data and model ready for training | todo: refactor
 def prepare_for_training(path_data, path_label, file_path, opt):
-    dataset, label = create_dataset(path_img=path_data, path_label=path_label, opt=opt)
+    dataset, label = create_dataset(
+        path_img=path_data, path_label=path_label, size=opt.size
+    )
     utils.print_gre("Prepare for Trainning...")
     n = range(np.shape(dataset)[0])
     n_sample = random.sample(list(n), len(n))
@@ -295,7 +297,9 @@ def contraste_and_reshape(souris, size=128):
     if len(souris.shape) > 2:
         data = []
         for i in np.arange(souris.shape[0]):
-            img_adapteq = exposure.equalize_adapthist(souris[i], clip_limit=0.03)
+            img_adapteq = exposure.equalize_adapthist(
+                souris[i], clip_limit=0.03
+            )  # clip_limit=0.03 de base
             data.append(img_adapteq)
         data = np.array(data).reshape(-1, size, size, 1)
         return data

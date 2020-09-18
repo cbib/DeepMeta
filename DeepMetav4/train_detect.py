@@ -27,7 +27,7 @@ def train_detect(args, model_name="detection"):
         save_name = "Metastases/model_"
     else:
         dataset, label = data.create_dataset_detect(
-            gv.path_img, gv.tab, gv.numSouris, args.size
+            gv.path_img_classif, gv.tab, gv.numSouris, args.size
         )
         save_name = "Poumons/model_"
     utils.print_gre("label 0 : {}".format(np.sum(np.transpose(label)[0])))

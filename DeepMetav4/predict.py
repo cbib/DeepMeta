@@ -3,13 +3,12 @@
 
 import os
 
-import DeepMetav4.models.utils_model as utils_model
 import numpy as np
-import DeepMetav4.postprocessing.post_process_and_count as postprocess
 import skimage.io as io
 import tensorflow.keras as keras
 
-import DeepMetav4.utils.data as data
+import DeepMetav4.models.utils_model as utils_model
+import DeepMetav4.postprocessing.post_process_and_count as postprocess
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
 
@@ -22,18 +21,20 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 def get_seg_dataset(full_souris, path_souris):
     if full_souris:
         mouse = io.imread(path_souris, plugin="tifffile")
+        # mouse = np.array(mouse)/np.amax(mouse)
     else:
         slices_list = utils.sorted_aphanumeric(os.listdir(path_souris))
         s = np.zeros((len(slices_list), 128, 128))
         for i in range(len(slices_list)):
             s[i] = io.imread(path_souris + slices_list[i])
         mouse = np.array(s)
-    return data.contraste_and_reshape(mouse)
+    # return data.contraste_and_reshape(mouse)
+    return np.array(mouse).reshape(-1, 128, 128, 1)
 
 
 def save_mask(dataset, seg, k, mask_path, path_result, name_folder):
     io.imsave(
-        "/home/elefevre/Projects/DeepMetav3/Dataset/Images/" + str(k + 128) + ".png",
+        "/home/elefevre/Projects/DeepMetav4/data/results/img/" + str(k + 128) + ".png",
         dataset[k] * 255,
     )
     io.imsave(mask_path + str(k + 128) + ".png", seg[k] * 255)
@@ -146,7 +147,7 @@ def methode_detect_seg(
             path_result,
             name_folder,
             mask=True,
-            mask_path="data/results/",
+            mask_path="data/results/mask/",
         )
     if stat:
         seg = create_vector_to_stat(detect_lungs, detect, seg)
@@ -167,6 +168,7 @@ if __name__ == "__main__":
     souris_8 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_8.tif")
     souris_28 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_28.tif")
     souris_56 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_56.tif")
+    souris_new = "/scratch/elefevre/Datasets/deepmeta/new_data/m2P_c2_05SansCorr_1.tif"
 
     # Modèle de détection #
 
@@ -187,11 +189,13 @@ if __name__ == "__main__":
     )
 
     slist = [souris_8, souris_28, souris_56]
+    # slist = [souris_new]
     nlist = [
         "souris_8",
         "souris_28",
         "souris_56",
     ]  # 28 saine, 8 petites meta, 56 grosses meta
+    nlist = ["souris test"]
 
     for i, souris in enumerate(slist):
         utils.print_red(nlist[i])
@@ -206,6 +210,7 @@ if __name__ == "__main__":
             detect_l=path_model_detect,
             seg_l=path_model_seg,
         )
+        print(detect)
         print(np.sum(detect))
 
         """

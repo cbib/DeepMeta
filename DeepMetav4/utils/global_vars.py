@@ -13,8 +13,8 @@ import DeepMetav4.models.small_plus_plus
 import DeepMetav4.utils.utils
 
 # THE ONLY VAR YOU NEED TO MODIFY
-# PATH_DATA = "/home/elefevre/Datasets/deepmeta/Data/"
-PATH_DATA = "/home/edgar/Documents/Datasets/Data/"
+PATH_DATA = "/home/elefevre/Datasets/deepmeta/Data/"
+# PATH_DATA = "/home/edgar/Documents/Datasets/Data/"
 
 MAX_GPU_NUMBER = 6
 
@@ -34,7 +34,7 @@ tab_meta = pd.read_csv(os.path.join(PATH_META, "tab_meta.csv")).values
 path_img_classif = os.path.join(PATH_CLASSIF, "Images/")
 
 path_mask = os.path.join(PATH_LUNGS, "Masques/")
-path_img = os.path.join(PATH_LUNGS, "Images/")
+path_img = os.path.join(PATH_LUNGS, "Images_old/")
 path_lab = os.path.join(PATH_LUNGS, "Labels/")
 
 path_gen_img = os.path.join(PATH_DATA, "Dataset_generated/Images/")

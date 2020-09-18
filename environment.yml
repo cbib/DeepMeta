@@ -10,6 +10,7 @@ dependencies:
   - appdirs=1.4.3=py_1
   - astor=0.8.1=pyh9f0ad1d_0
   - astunparse=1.6.3=py_0
+  - attrs=20.2.0=pyh9f0ad1d_0
   - babel=2.8.0=py_0
   - blinker=1.4=py_1
   - blosc=1.20.1=he1b5a44_0
@@ -67,6 +68,7 @@ dependencies:
   - imageio=2.9.0=py_0
   - imagesize=1.2.0=py_0
   - importlib-metadata=1.7.0=py38h32f6830_0
+  - iniconfig=1.0.1=pyh9f0ad1d_0
   - jasper=1.900.1=h07fcdf6_1006
   - jinja2=2.11.2=pyh9f0ad1d_0
   - jpeg=9d=h516909a_0
@@ -107,6 +109,7 @@ dependencies:
   - markdown=3.2.2=py_0
   - markupsafe=1.1.1=py38h1e0a361_1
   - matplotlib-base=3.3.2=py38h91b0d89_0
+  - more-itertools=8.5.0=py_0
   - mysql-common=8.0.21=2
   - mysql-libs=8.0.21=hf3661c5_2
   - ncurses=6.2=he6710b0_1
@@ -129,9 +132,11 @@ dependencies:
   - pillow=7.2.0=py38h9776b28_1
   - pip=20.2.2=py38_0
   - pixman=0.38.0=h516909a_1003
+  - pluggy=0.13.1=py38h32f6830_2
   - pre-commit=2.7.1=py38h32f6830_0
   - protobuf=3.13.0=py38h950e882_0
   - pthread-stubs=0.4=h14c3975_1001
+  - py=1.9.0=pyh9f0ad1d_0
   - py-opencv=4.4.0=py38h23f93f0_2
   - pyasn1=0.4.8=py_0
   - pyasn1-modules=0.2.7=py_0
@@ -141,6 +146,7 @@ dependencies:
   - pyopenssl=19.1.0=py_1
   - pyparsing=2.4.7=pyh9f0ad1d_0
   - pysocks=1.7.1=py38h32f6830_1
+  - pytest=6.0.2=py38h32f6830_0
   - python=3.8.5=h1103e12_7_cpython
   - python-dateutil=2.8.1=py_0
   - python_abi=3.8=1_cp38
