@@ -17,7 +17,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 PATH_MODEL = (
-    "/home/elefevre/deepmeta/DeepMetav3/saved_models/Metastases/best_resnet50.h5"
+    gv.PATH_SAVE + "Metastases/best_resnet50.h5"
 )
 PATH_IMG = gv.PATH_DATA + "Metastases/Images/7084.tif"
 PATH_MASK = gv.PATH_DATA + "Metastases/Labels/7084.tif"

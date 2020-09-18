@@ -13,8 +13,8 @@ import DeepMetav4.models.small_plus_plus
 import DeepMetav4.utils.utils
 
 # THE ONLY VAR YOU NEED TO MODIFY
-PATH_DATA = "/home/elefevre/Datasets/deepmeta/Data/"
-# PATH_DATA = "/home/edgar/Documents/Datasets/Data/"
+# PATH_DATA = "/home/elefevre/Datasets/deepmeta/Data/"
+PATH_DATA = "/home/edgar/Documents/Datasets/Data/"
 
 MAX_GPU_NUMBER = 6
 

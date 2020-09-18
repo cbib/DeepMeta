@@ -83,6 +83,7 @@ Run inferecnce
    :caption: Contents:
 
    train
+   stats
    models
 
 Indices and tables
