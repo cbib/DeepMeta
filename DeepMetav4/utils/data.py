@@ -264,6 +264,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
                 loss=utils_model.weighted_cross_entropy,
                 optimizer=tf.keras.optimizers.Adam(lr=opt.lr),
             )
+            model_seg.summary()
     else:
         with strategy.scope():
             dataset = dataset.reshape(-1, opt.size, opt.size, 1)[n_sample]

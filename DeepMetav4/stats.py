@@ -28,7 +28,7 @@ def inverse_binary_mask(msk):
 def stats_pixelbased(y_true, y_pred):  # todo: trop de calcul à chaque appel pour rien
     """Calculates pixel-based statistics
     (Dice, Jaccard, Precision, Recall, F-measure)
-    Takes in raw prediction and truth data in order to calculate accuracy
+    Takes in raw_data prediction and truth data in order to calculate accuracy
     metrics for pixel based classfication. Statistics were chosen according
     to the guidelines presented in Caicedo et al. (2018) Evaluation of Deep
     Learning Strategies for Nucleus Segmentation in Fluorescence Images.
