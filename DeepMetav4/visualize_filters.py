@@ -16,9 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-PATH_MODEL = (
-    gv.PATH_SAVE + "Metastases/best_resnet50.h5"
-)
+PATH_MODEL = gv.PATH_SAVE + "Metastases/best_resnet50.h5"
 PATH_IMG = gv.PATH_DATA + "Metastases/Images/7084.tif"
 PATH_MASK = gv.PATH_DATA + "Metastases/Labels/7084.tif"
 

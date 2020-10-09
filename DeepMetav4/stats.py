@@ -3,10 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import DeepMetav4.predict as predict
 import seaborn as sns
 import skimage.io as io
 
+import DeepMetav4.predict as predict
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
 

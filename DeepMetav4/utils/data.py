@@ -30,20 +30,32 @@ def create_dataset_detect(path_img, tab, numSouris, size):
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
     :param tab: tableau résumant les identifiants et annotations pour les souris.
-    :param numSouris: numéro de souris annotées (cf tableau deuxième colonne).
 
     :return:
         - data_detec : ensemble des slices de souris où les poumons ont été annotés.
         - label_detec : label de chaque slices 1 présentant des poumons, 0 sinon.
     """
     utils.print_gre("Creating dataset...")
-    data_detec = []
-    label_detec = []
+    data_detec_0 = []
+    label_detec_0 = []
+    data_detec_1 = []
+    label_detec_1 = []
     for i in range(len(tab)):
-        if tab[i, 1] in numSouris:
+        try:
             im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
-            data_detec.append(im / 255)
-            label_detec.append(tab[i, 3])
+            if tab[i, 3] == 1:
+                data_detec_1.append(im / 255)
+                label_detec_1.append(1)
+            else:
+                data_detec_0.append(im / 255)
+                label_detec_0.append(0)
+        except Exception:
+            utils.print_red("IMG {} not found".format(i))
+    list_size = len(data_detec_0)
+    data_detec_1 = data_detec_1[0:list_size]
+    label_detec_1 = label_detec_1[0:list_size]
+    data_detec = data_detec_0 + data_detec_1
+    label_detec = label_detec_0 + label_detec_1
     data_detec = np.array(data_detec)
     label_detec = np.array(label_detec)
     no = range(len(data_detec))
@@ -252,7 +264,6 @@ def prepare_for_training(path_data, path_label, file_path, opt):
             dataset, label = get_label_weights(
                 dataset, label, n_sample, opt.w1, opt.w2, size=opt.size
             )
-            dataset = tf.cast(dataset, dtype=tf.float32)
             model_seg = gv.model_list[opt.model_name](input_shape)
             checkpoint = callbacks.ModelCheckpoint(
                 file_path,
