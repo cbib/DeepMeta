@@ -147,6 +147,7 @@ def create_dataset(path_img, path_label, size):
         except Exception:
             utils.print_red("Image {} not found.".format(file))
     utils.print_gre("Created !")
+    utils.print_gre("Nb of images: {}".format(len(dataset)))
     return np.array(dataset), np.array(label_list, dtype=np.bool)
 
 
@@ -251,6 +252,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
             dataset, label = get_label_weights(
                 dataset, label, n_sample, opt.w1, opt.w2, size=opt.size
             )
+            dataset = tf.cast(dataset, dtype=tf.float32)
             model_seg = gv.model_list[opt.model_name](input_shape)
             checkpoint = callbacks.ModelCheckpoint(
                 file_path,
@@ -264,7 +266,6 @@ def prepare_for_training(path_data, path_label, file_path, opt):
                 loss=utils_model.weighted_cross_entropy,
                 optimizer=tf.keras.optimizers.Adam(lr=opt.lr),
             )
-            model_seg.summary()
     else:
         with strategy.scope():
             dataset = dataset.reshape(-1, opt.size, opt.size, 1)[n_sample]
