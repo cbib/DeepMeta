@@ -12,7 +12,7 @@ import DeepMetav4.postprocessing.post_process_and_count as postprocess
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -20,8 +20,8 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 def get_seg_dataset(full_souris, path_souris):
     if full_souris:
-        mouse = io.imread(path_souris, plugin="tifffile")
-        # mouse = np.array(mouse)/np.amax(mouse)
+        mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
+        mouse = np.array(mouse) / np.amax(mouse)
     else:
         slices_list = utils.sorted_aphanumeric(os.listdir(path_souris))
         s = np.zeros((len(slices_list), 128, 128))
@@ -34,10 +34,10 @@ def get_seg_dataset(full_souris, path_souris):
 
 def save_mask(dataset, seg, k, mask_path, path_result, name_folder):
     io.imsave(
-        "/home/elefevre/Projects/DeepMetav4/data/results/img/" + str(k + 128) + ".png",
+        path_result + "/img/" + str(k) + ".png",
         dataset[k] * 255,
     )
-    io.imsave(mask_path + str(k + 128) + ".png", seg[k] * 255)
+    io.imsave(mask_path + str(k) + ".png", seg[k] * 255)
     im = ((dataset[k] * 255).reshape(128, 128) * seg[k].reshape(128, 128)).astype(
         np.uint8
     )
@@ -138,20 +138,23 @@ def methode_detect_seg(
         dataset = apply_mask(select_slices(dataset, detect_lungs), seg_lungs)
     detect = predict_detect(dataset, path_model_detect)
     dataset = select_slices(dataset_og, detect)
-    seg = predict_seg(dataset, path_model_seg)
-    if save:
-        dataset = dataset.reshape(len(dataset), 128, 128)
-        save_res(
-            dataset,
-            seg,
-            path_result,
-            name_folder,
-            mask=True,
-            mask_path="data/results/mask/",
-        )
-    if stat:
-        seg = create_vector_to_stat(detect_lungs, detect, seg)
-    return detect, seg
+    if dataset.sum() != 0:
+        seg = predict_seg(dataset, path_model_seg)
+        if save:
+            dataset = dataset.reshape(len(dataset), 128, 128)
+            save_res(
+                dataset,
+                seg,
+                path_result,
+                name_folder,
+                mask=True,
+                mask_path="data/results/mask/",
+            )
+        if stat:
+            seg = create_vector_to_stat(detect_lungs, detect, seg)
+        return detect, seg
+    else:
+        return None, None
 
 
 def postprocess_loop(seg):
@@ -168,7 +171,7 @@ if __name__ == "__main__":
     souris_8 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_8.tif")
     souris_28 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_28.tif")
     souris_56 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_56.tif")
-    souris_new = "/scratch/elefevre/Datasets/deepmeta/new_data/m2P_c2_05SansCorr_1.tif"
+    souris_new = "/home/edgar/Documents/Datasets/deepmeta/new_data/OG_DATA/test_data/m2Pc_c1_10Corr_1.tif"
 
     # Modèle de détection #
 
@@ -180,7 +183,9 @@ if __name__ == "__main__":
 
     # Modèle de segmentation #
 
-    path_model_seg = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted24.h5")
+    path_model_seg = os.path.join(
+        gv.PATH_SAVE, "Poumons/128model_small++_weighted24.h5"
+    )
 
     # Modèle seg meta #
 
@@ -188,13 +193,13 @@ if __name__ == "__main__":
         gv.PATH_SAVE, "Metastases/128model_small++_weighted1015.h5"
     )
 
-    slist = [souris_8, souris_28, souris_56]
-    # slist = [souris_new]
-    nlist = [
-        "souris_8",
-        "souris_28",
-        "souris_56",
-    ]  # 28 saine, 8 petites meta, 56 grosses meta
+    # slist = [souris_8, souris_28, souris_56]
+    slist = [souris_new]
+    # nlist = [
+    #     "souris_8",
+    #     "souris_28",
+    #     "souris_56",
+    # ]  # 28 saine, 8 petites meta, 56 grosses meta
     nlist = ["souris test"]
 
     for i, souris in enumerate(slist):

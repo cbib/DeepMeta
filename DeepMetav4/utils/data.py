@@ -27,6 +27,7 @@ def shuffle_lists(lista, listb, seed=42):
 
 
 def create_dataset_detect(path_img, tab, numSouris, size):
+    # todo: refactor (label vectors -> construct with np.ones and np.zeros at the end)
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
     :param tab: tableau résumant les identifiants et annotations pour les souris.
@@ -37,27 +38,26 @@ def create_dataset_detect(path_img, tab, numSouris, size):
     """
     utils.print_gre("Creating dataset...")
     data_detec_0 = []
-    label_detec_0 = []
     data_detec_1 = []
-    label_detec_1 = []
     for i in range(len(tab)):
+        # if i > 11161: # only new batch of images
         try:
             im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
             if tab[i, 3] == 1:
-                data_detec_1.append(im / 255)
-                label_detec_1.append(1)
+                data_detec_1.append(im / np.amax(im))
             else:
-                data_detec_0.append(im / 255)
-                label_detec_0.append(0)
+                data_detec_0.append(im / np.amax(im))
         except Exception:
             utils.print_red("IMG {} not found".format(i))
     list_size = len(data_detec_0)
+    random.shuffle(data_detec_1)
     data_detec_1 = data_detec_1[0:list_size]
-    label_detec_1 = label_detec_1[0:list_size]
     data_detec = data_detec_0 + data_detec_1
-    label_detec = label_detec_0 + label_detec_1
+    label_detec = np.concatenate(
+        (np.zeros((len(data_detec_0),)), np.ones((len(data_detec_1),)))
+    )
+    data_detec, label_detec = shuffle_lists(data_detec, label_detec)
     data_detec = np.array(data_detec)
-    label_detec = np.array(label_detec)
     no = range(len(data_detec))
     no_sample = random.sample(list(no), len(no))
     data_detec = data_detec.reshape(-1, size, size, 1)[no_sample].astype("float32")
