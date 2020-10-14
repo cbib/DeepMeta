@@ -4,6 +4,7 @@
 import os
 import random
 
+import cv2
 import numpy as np
 import skimage.exposure as exposure
 import skimage.io as io
@@ -26,8 +27,23 @@ def shuffle_lists(lista, listb, seed=42):
     return lista, listb
 
 
+def rotate_img(img):
+    # get image height, width
+    (h, w) = img.shape[:2]
+    # calculate the center of the image
+    center = (w / 2, h / 2)
+    scale = 1.0
+
+    M = cv2.getRotationMatrix2D(center, 90, scale)
+    r90 = cv2.warpAffine(img, M, (h, w))
+    M = cv2.getRotationMatrix2D(center, 180, scale)
+    r180 = cv2.warpAffine(img, M, (h, w))
+    M = cv2.getRotationMatrix2D(center, 270, scale)
+    r270 = cv2.warpAffine(img, M, (h, w))
+    return r90, r180, r270
+
+
 def create_dataset_detect(path_img, tab, numSouris, size):
-    # todo: refactor (label vectors -> construct with np.ones and np.zeros at the end)
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
     :param tab: tableau résumant les identifiants et annotations pour les souris.
@@ -40,13 +56,22 @@ def create_dataset_detect(path_img, tab, numSouris, size):
     data_detec_0 = []
     data_detec_1 = []
     for i in range(len(tab)):
-        # if i > 11161: # only new batch of images
         try:
             im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
             if tab[i, 3] == 1:
-                data_detec_1.append(im / np.amax(im))
+                im = im / np.amax(im)
+                im90, im180, im270 = rotate_img(im)
+                data_detec_1.append(im)
+                data_detec_1.append(im90)
+                data_detec_1.append(im180)
+                data_detec_1.append(im270)
             else:
-                data_detec_0.append(im / np.amax(im))
+                im = im / np.amax(im)
+                im90, im180, im270 = rotate_img(im)
+                data_detec_0.append(im)
+                data_detec_0.append(im90)
+                data_detec_0.append(im180)
+                data_detec_0.append(im270)
         except Exception:
             utils.print_red("IMG {} not found".format(i))
     list_size = len(data_detec_0)
@@ -225,14 +250,6 @@ def weight_map(label, a, b, size=128):
         weight[k] = w
 
     return weight
-
-
-def get_gpu_number(_gpu):
-    try:
-        nb = len(os.environ["CUDA_VISIBLE_DEVICES"].split(","))
-    except Exception:
-        nb = _gpu
-    return nb
 
 
 def get_label_weights(dataset, label, n_sample, w1, w2, size=128):

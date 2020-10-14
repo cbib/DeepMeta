@@ -1,4 +1,4 @@
-name: tf2.1
+name: deepmeta
 channels:
   - conda-forge
   - defaults
@@ -6,7 +6,7 @@ dependencies:
   - _libgcc_mutex=0.1=main
   - _tflow_select=2.1.0=gpu
   - absl-py=0.10.0=py36_0
-  - aiohttp=3.6.2=py36h7b6447c_0
+  - aiohttp=3.6.3=py36h7b6447c_0
   - appdirs=1.4.3=py_1
   - astor=0.8.1=py36_0
   - async-timeout=3.0.1=py36_0
@@ -14,9 +14,11 @@ dependencies:
   - blas=1.0=mkl
   - blinker=1.4=py36_0
   - brotlipy=0.7.0=py36h7b6447c_1000
+  - bzip2=1.0.8=h7b6447c_0
   - c-ares=1.16.1=h7b6447c_0
   - ca-certificates=2020.6.20=hecda079_0
   - cachetools=4.1.1=py_0
+  - cairo=1.14.12=h8948797_3
   - certifi=2020.6.20=py36h9880bd3_2
   - cffi=1.14.3=py36he30daa8_0
   - cfgv=3.2.0=py_0
@@ -33,30 +35,35 @@ dependencies:
   - dbus=1.13.16=hb2f20db_0
   - decorator=4.4.2=py_0
   - distlib=0.3.1=pyh9f0ad1d_0
-  - editdistance=0.5.3=py36h831f99a_1
-  - expat=2.2.9=he6710b0_2
+  - editdistance=0.5.3=py36h831f99a_2
+  - expat=2.2.10=he6710b0_2
+  - ffmpeg=4.0=hcdf2ecd_0
   - filelock=3.0.12=pyh9f0ad1d_0
   - fontconfig=2.13.0=h9420a91_0
-  - freetype=2.10.2=h5ab3b9f_0
+  - freeglut=3.0.0=hf484d3e_5
+  - freetype=2.10.3=h5ab3b9f_0
   - gast=0.2.2=py36_0
   - glib=2.65.0=h3eb4bd4_0
   - google-auth=1.22.1=py_0
   - google-auth-oauthlib=0.4.1=py_2
   - google-pasta=0.2.0=py_0
+  - graphite2=1.3.14=h23475e2_0
   - grpcio=1.31.0=py36hf8bcb03_0
   - gst-plugins-base=1.14.0=hbbd80ab_1
   - gstreamer=1.14.0=hb31296c_0
-  - h5py=2.10.0=py36hd6299e0_1
-  - hdf5=1.10.6=hb1b8bf9_0
+  - h5py=2.8.0=py36h989c5e5_3
+  - harfbuzz=1.8.8=hffaf4a1_0
+  - hdf5=1.10.2=hba1933b_1
   - icu=58.2=he6710b0_3
-  - identify=1.5.5=pyh9f0ad1d_0
+  - identify=1.5.6=pyh9f0ad1d_0
   - idna=2.10=py_0
   - idna_ssl=1.1.0=py36_0
   - imageio=2.9.0=py_0
-  - importlib-metadata=1.7.0=py36_0
-  - importlib_metadata=1.7.0=0
-  - importlib_resources=1.5.0=py36h9f0ad1d_0
+  - importlib-metadata=2.0.0=py_1
+  - importlib_metadata=2.0.0=1
+  - importlib_resources=3.0.0=py36h9f0ad1d_1
   - intel-openmp=2020.2=254
+  - jasper=2.0.14=h07fcdf6_1
   - jpeg=9b=h024ee3a_2
   - keras-applications=1.0.8=py_1
   - keras-preprocessing=1.1.0=py_1
@@ -67,11 +74,15 @@ dependencies:
   - libffi=3.3=he6710b0_2
   - libgcc-ng=9.1.0=hdf63c60_0
   - libgfortran-ng=7.3.0=hdf63c60_0
+  - libglu=9.0.0=hf484d3e_1
+  - libopencv=3.4.2=hb342d67_1
+  - libopus=1.3.1=h7b6447c_0
   - libpng=1.6.37=hbc83047_0
-  - libprotobuf=3.13.0=hd408876_0
+  - libprotobuf=3.13.0.1=hd408876_0
   - libstdcxx-ng=9.1.0=hdf63c60_0
   - libtiff=4.1.0=h2733197_1
   - libuuid=1.0.3=h1bed415_2
+  - libvpx=1.7.0=h439df22_0
   - libxcb=1.14=h7b6447c_0
   - libxml2=2.9.10=he19cac6_1
   - lz4-c=1.9.2=heb0550a_3
@@ -90,14 +101,17 @@ dependencies:
   - numpy-base=1.19.1=py36hfa32c7d_0
   - oauthlib=3.1.0=py_0
   - olefile=0.46=py36_0
+  - opencv=3.4.2=py36h6fd60c2_1
   - openssl=1.1.1h=h516909a_0
   - opt_einsum=3.1.0=py_0
   - pandas=1.1.3=py36he6710b0_0
   - pcre=8.44=he6710b0_0
   - pillow=7.2.0=py36hb39fc2d_0
   - pip=20.2.3=py36_0
-  - pre-commit=2.7.1=py36h9f0ad1d_0
-  - protobuf=3.13.0=py36he6710b0_1
+  - pixman=0.40.0=h7b6447c_0
+  - pre-commit=2.7.1=py36h9f0ad1d_1
+  - protobuf=3.13.0.1=py36he6710b0_1
+  - py-opencv=3.4.2=py36hb342d67_1
   - pyasn1=0.4.8=py_0
   - pyasn1-modules=0.2.8=py_0
   - pycparser=2.20=py_2
@@ -136,7 +150,7 @@ dependencies:
   - tornado=6.0.4=py36h7b6447c_1
   - typing_extensions=3.7.4.3=py_0
   - urllib3=1.25.10=py_0
-  - virtualenv=20.0.20=py36h9f0ad1d_1
+  - virtualenv=20.0.34=py36h9f0ad1d_0
   - werkzeug=1.0.1=py_0
   - wheel=0.35.1=py_0
   - wrapt=1.12.1=py36h7b6447c_1
@@ -146,4 +160,4 @@ dependencies:
   - zipp=3.3.0=py_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.4.5=h9ceee32_0
-prefix: /home/edgar/miniconda3/envs/tf2.1
+prefix: /home/edgar/miniconda3/envs/deepmeta
