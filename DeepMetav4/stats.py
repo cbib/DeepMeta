@@ -86,7 +86,7 @@ def qualite_model(num, path_model_seg):
     """
     # todo: PATH !!!!!????? Voir pour gerer les metas ! Enorme dégat !!!
 
-    path_model_detect = os.path.join(gv.PATH_SAVE, "Poumons/model_detection.h5")
+    path_model_detect = os.path.join(gv.PATH_SAVE, "Poumons/best_detection.h5")
     path_test = gv.PATH_DATA + "Souris_Test/"
 
     path_souris = os.path.join(path_test, "souris_" + str(num) + ".tif")
@@ -252,7 +252,7 @@ def create_csv(
 
 if __name__ == "__main__":
 
-    model_detect_lungs = os.path.join(gv.PATH_SAVE, "Poumons/model_detection.h5")
+    model_detect_lungs = os.path.join(gv.PATH_SAVE, "Poumons/best_detection.h5")
     model_seg_lungs = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted24.h5")
 
     model_detect = os.path.join(gv.PATH_SAVE, "Metastases/best_resnet50.h5")

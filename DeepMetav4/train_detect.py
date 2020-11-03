@@ -3,7 +3,6 @@
 
 import os
 
-import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -30,8 +29,6 @@ def train_detect(args, model_name="detection"):
             gv.path_img_classif, gv.tab, gv.numSouris, args.size
         )
         save_name = "Poumons/model_"
-    utils.print_gre("label 0 : {}".format(np.sum(np.transpose(label)[0])))
-    utils.print_gre("label 1 : {}".format(np.sum(np.transpose(label)[1])))
     input_shape = (
         args.size,
         args.size,

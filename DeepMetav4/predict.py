@@ -171,7 +171,7 @@ if __name__ == "__main__":
     souris_8 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_8.tif")
     souris_28 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_28.tif")
     souris_56 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_56.tif")
-    souris_new = "/home/edgar/Documents/Datasets/deepmeta/new_data/OG_DATA/test_data/m2Pc_c1_10Corr_1.tif"
+    souris_new = "/home/edgar/Documents/Datasets/deepmeta/new_data/OG_DATA/test_data/m2Pc_c1_10Corr_1.tif"  # noqa
 
     # Modèle de détection #
 
@@ -183,9 +183,7 @@ if __name__ == "__main__":
 
     # Modèle de segmentation #
 
-    path_model_seg = os.path.join(
-        gv.PATH_SAVE, "Poumons/128model_small++_weighted24.h5"
-    )
+    path_model_seg = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted_24.h5")
 
     # Modèle seg meta #
 

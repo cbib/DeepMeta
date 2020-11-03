@@ -88,6 +88,8 @@ def create_dataset_detect(path_img, tab, numSouris, size):
     data_detec = data_detec.reshape(-1, size, size, 1)[no_sample].astype("float32")
     label_detec = keras.utils.to_categorical(label_detec[no_sample])
     utils.print_gre("Created !")
+    utils.print_gre("label 0 : {}".format(len(data_detec_0)))
+    utils.print_gre("label 1 : {}".format(len(data_detec_1)))
     return data_detec, label_detec
 
 
