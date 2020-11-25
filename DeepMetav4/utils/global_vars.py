@@ -52,6 +52,7 @@ numSouris = DeepMetav4.utils.utils.calcul_numSouris(path_souris)
 model_list = {
     "detection": DeepMetav4.models.model_detection.model_detection,
     "detection_bn": DeepMetav4.models.model_detection.model_detection_bn,
+    "detection_stride": DeepMetav4.models.model_detection.model_detection_stride,
     "small++": DeepMetav4.models.small_plus_plus.small_plus_plus,
     "unet": DeepMetav4.models.model_unet.unet,
     "vgg16": DeepMetav4.models.model_vgg16.vgg16,

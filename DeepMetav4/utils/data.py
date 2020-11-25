@@ -12,6 +12,8 @@ import skimage.measure as measure
 import tensorflow as tf
 import tensorflow.keras as keras
 import tensorflow.keras.callbacks as callbacks
+from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage.interpolation import map_coordinates
 
 import DeepMetav4.models.utils_model as utils_model
 
@@ -43,6 +45,36 @@ def rotate_img(img):
     return r90, r180, r270
 
 
+def elastic_transform(image, alpha=60, sigma=4, random_state=None):
+    """Elastic deformation of images as described in [Simard2003]_.
+    .. [Simard2003] Simard, Steinkraus and Platt, "Best Practices for
+       Convolutional Neural Networks applied to Visual Document Analysis", in
+       Proc. of the International Conference on Document Analysis and
+       Recognition, 2003.
+    """
+    if random_state is None:
+        random_state = np.random.RandomState(None)
+
+    shape = image.shape
+    dx = (
+        gaussian_filter(
+            (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+        )
+        * alpha
+    )
+    dy = (
+        gaussian_filter(
+            (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+        )
+        * alpha
+    )
+
+    x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]))
+    indices = np.reshape(y + dy, (-1, 1)), np.reshape(x + dx, (-1, 1))
+
+    return map_coordinates(image, indices, order=1).reshape(shape)
+
+
 def create_dataset_detect(path_img, tab, numSouris, size):
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
@@ -65,6 +97,7 @@ def create_dataset_detect(path_img, tab, numSouris, size):
                 data_detec_1.append(im90)
                 data_detec_1.append(im180)
                 data_detec_1.append(im270)
+                # data_detec_1.append(elastic_transform(im))
             else:
                 im = im / np.amax(im)
                 im90, im180, im270 = rotate_img(im)
@@ -72,8 +105,10 @@ def create_dataset_detect(path_img, tab, numSouris, size):
                 data_detec_0.append(im90)
                 data_detec_0.append(im180)
                 data_detec_0.append(im270)
-        except Exception:
+                # data_detec_0.append(elastic_transform(im))
+        except Exception as e:
             utils.print_red("IMG {} not found".format(i))
+            utils.print_red("\t" + str(e))
     list_size = len(data_detec_0)
     random.shuffle(data_detec_1)
     data_detec_1 = data_detec_1[0:list_size]

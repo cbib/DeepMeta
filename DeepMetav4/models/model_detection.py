@@ -103,3 +103,47 @@ def model_detection_bn(input_shape, lr, n_classes=2, w_decay=0.0001):
     )
 
     return model
+
+
+def model_detection_stride(input_shape, lr, n_classes=2):
+    inputs = layers.Input(input_shape)
+
+    b1_c = layers.Conv2D(32, (3, 3), activation="linear", padding="same", strides=2)(
+        inputs
+    )
+    b1_c = layers.Dropout(rate=0.2)(b1_c)  # initially 0.5
+    b1_l = layers.LeakyReLU(alpha=0.1)(b1_c)
+
+    b2_c = layers.Conv2D(64, (3, 3), activation="linear", padding="same", strides=2)(
+        b1_l
+    )
+    b2_c = layers.Dropout(rate=0.2)(b2_c)
+    b2_l = layers.LeakyReLU(alpha=0.1)(b2_c)
+
+    b3_c = layers.Conv2D(128, (3, 3), activation="linear", padding="same", strides=2)(
+        b2_l
+    )
+    b3_c = layers.Dropout(rate=0.2)(b3_c)
+    b3_l = layers.LeakyReLU(alpha=0.1)(b3_c)
+
+    b4_c = layers.Conv2D(256, (3, 3), activation="linear", padding="same", strides=2)(
+        b3_l
+    )
+    b4_c = layers.Dropout(rate=0.2)(b4_c)
+    b4_l = layers.LeakyReLU(alpha=0.1)(b4_c)
+
+    flat = layers.Flatten()(b4_l)
+
+    b4_d = layers.Dense(128, activation="linear")(flat)
+    b4_l = layers.LeakyReLU(alpha=0.1)(b4_d)
+
+    outputs = layers.Dense(n_classes, activation="softmax")(b4_l)
+
+    model = keras.Model(inputs=[inputs], outputs=[outputs])
+    model.compile(
+        loss=keras.losses.binary_crossentropy,
+        optimizer=keras.optimizers.Adam(lr=lr),
+        metrics=["accuracy"],
+    )
+
+    return model

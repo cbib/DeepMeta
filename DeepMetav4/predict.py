@@ -4,11 +4,13 @@
 import os
 
 import numpy as np
+import pandas as pd
 import skimage.io as io
 import tensorflow.keras as keras
 
 import DeepMetav4.models.utils_model as utils_model
 import DeepMetav4.postprocessing.post_process_and_count as postprocess
+import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
 
@@ -28,8 +30,8 @@ def get_seg_dataset(full_souris, path_souris):
         for i in range(len(slices_list)):
             s[i] = io.imread(path_souris + slices_list[i])
         mouse = np.array(s)
-    # return data.contraste_and_reshape(mouse)
-    return np.array(mouse).reshape(-1, 128, 128, 1)
+    return data.contraste_and_reshape(mouse)
+    # return np.array(mouse).reshape(-1, 128, 128, 1)
 
 
 def save_mask(dataset, seg, k, mask_path, path_result, name_folder):
@@ -123,7 +125,7 @@ def methode_detect_seg(
     Méthode 2D qui permet de segmenter slice par slice.
     """
     dataset = get_seg_dataset(full_souris, path_souris)
-    dataset_og = get_seg_dataset(full_souris, path_souris)
+    # dataset_og = get_seg_dataset(full_souris, path_souris)
     if meta:
         detect_lungs, seg_lungs = methode_detect_seg(
             path_souris,
@@ -137,7 +139,7 @@ def methode_detect_seg(
         )
         dataset = apply_mask(select_slices(dataset, detect_lungs), seg_lungs)
     detect = predict_detect(dataset, path_model_detect)
-    dataset = select_slices(dataset_og, detect)
+    # dataset = select_slices(dataset_og, detect)
     if dataset.sum() != 0:
         seg = predict_seg(dataset, path_model_seg)
         if save:
@@ -191,57 +193,67 @@ if __name__ == "__main__":
         gv.PATH_SAVE, "Metastases/128model_small++_weighted1015.h5"
     )
 
-    # slist = [souris_8, souris_28, souris_56]
-    slist = [souris_new]
-    # nlist = [
-    #     "souris_8",
-    #     "souris_28",
-    #     "souris_56",
-    # ]  # 28 saine, 8 petites meta, 56 grosses meta
-    nlist = ["souris test"]
+    slist = [souris_8, souris_28, souris_56, souris_new]
+    # slist = [souris_new]
+    nlist = [
+        "souris_8",
+        "souris_28",
+        "souris_56",
+        "souris_new_batch",
+    ]  # 28 saine, 8 petites meta, 56 grosses meta
+    # nlist = ["souris test"]
 
-    for i, souris in enumerate(slist):
-        utils.print_red(nlist[i])
-        detect, seg = methode_detect_seg(
-            souris,
-            path_model_detect,
-            path_model_seg,
-            gv.PATH_RES,
-            nlist[i],
-            save=True,
-            meta=False,
-            detect_l=path_model_detect,
-            seg_l=path_model_seg,
-        )
-        print(detect)
-        print(np.sum(detect))
+    # for i, souris in enumerate(slist):
+    #     utils.print_red(nlist[i])
+    #     detect, seg = methode_detect_seg(
+    #         souris,
+    #         path_model_detect,
+    #         path_model_seg,
+    #         gv.PATH_RES,
+    #         nlist[i],
+    #         save=True,
+    #         meta=False,
+    #         detect_l=path_model_detect,
+    #         seg_l=path_model_seg,
+    #     )
+    #     print(detect)
+    #     print(np.sum(detect))
 
-        """
-        ########################################################################################################################
-        # TEST
-        #
-        gt_list = ["60-66", "0", "70-72"]
-        dataset = get_seg_dataset(True, souris)
-        res = predict_detect(dataset, path_model_detect)
-        seg = predict_seg(dataset, path_model_seg)
-        # seg = postprocess_loop(seg)
-        # save_res(dataset, res, seg, gv.PATH_RES, nlist[i], True)
-        dataset_lungs = []
-        test = []
-        for j, elt in enumerate(res):
-            if elt == 1:
-                # im_concat = tf.concat([dataset[j],
-                tf.expand_dims(seg[j].astype(np.double), -1)], 2)
-                # dataset_lungs.append(np.array(im_concat))  # * seg[j])
-                dataset_lungs.append(dataset[j] * seg[j].reshape(128, 128, 1))
-                test.append(j)
-        dataset_lungs = np.array(dataset_lungs)  # .reshape(-1, 128, 128, 2)
-        # print(np.amax(dataset_lungs))
-        res_meta = predict_detect(dataset_lungs, path_model_detect_meta)
-        print(res_meta)
-        print(str(np.sum(res_meta)) + "/" + gt_list[i])
-        print(len(res_meta))
-        # for j, elt in enumerate(res_meta):
-        #     print(str(test[j]) + " : " + str(res_meta[j]))
-        ########################################################################################################################
-        """
+    LAST_IMG_NB = 12646
+    PATH_CSV = "~/Documents/Datasets/deepmeta/Data/Classif/Tableau_General.csv"
+
+    tab = pd.read_csv(PATH_CSV)
+
+    model_seg = keras.models.load_model(
+        path_model_seg,
+        custom_objects={"weighted_cross_entropy": utils_model.weighted_cross_entropy},
+    )
+    for index, row in tab.iterrows():
+        if (row[0] > LAST_IMG_NB) and (row["Slice"] == 1):
+            print(row[0])
+            try:
+                img = io.imread(
+                    "/home/edgar/Documents/Datasets/deepmeta/Data/Classif/Images/img_"
+                    + str(row[0])
+                    + ".tif"
+                ).astype(np.uint8)
+                img_ = np.array(img) / np.amax(img)
+                img_ = img_.reshape(1, 128, 128, 1)
+                mask = (
+                    (model_seg.predict(img_) > 0.5).astype(np.uint8).reshape(128, 128)
+                )
+                if np.amax(mask) > 0:
+                    io.imsave(
+                        "/home/edgar/Documents/Datasets/deepmeta/new_data/processed/poumons/png/"  # noqa
+                        + str(row[0])
+                        + ".tif",
+                        img,
+                    )
+                    io.imsave(
+                        "/home/edgar/Documents/Datasets/deepmeta/new_data/processed/poumons/mask/"  # noqa
+                        + str(row[0])
+                        + ".tif",
+                        mask * 255,
+                    )
+            except Exception as e:
+                print(e)

@@ -10,7 +10,6 @@ import DeepMetav4.predict as predict
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
@@ -46,6 +45,7 @@ def stats_pixelbased(y_true, y_pred):  # todo: trop de calcul à chaque appel po
         Comparing labeled to unlabeled data will produce low accuracy scores.
         Make sure to input the same type of data for `y_true` and `y_pred`
     """
+    y_pred = y_pred.reshape(128, 128)
     if y_pred.shape != y_true.shape:
         raise ValueError(
             "Shape of inputs need to match. Shape of prediction "
@@ -112,9 +112,11 @@ def qualite_model(num, path_model_seg):
     detect, seg = predict.methode_detect_seg(
         path_souris, path_model_detect, path_model_seg, gv.PATH_RES, name_folder
     )
-    seg_pred = seg[detect_annot]
+    # print(n)
+    # print(len(seg))
+    # seg_pred = seg[detect_annot.astype(np.uint8)]
     # Calcul IoU
-    IoU = [stats_pixelbased(seg_true[j], seg_pred[j]).get("IoU") for j in range(n)]
+    IoU = [stats_pixelbased(seg_true[j], seg[j]).get("IoU") for j in range(n)]
     return IoU
 
 
@@ -253,7 +255,7 @@ def create_csv(
 if __name__ == "__main__":
 
     model_detect_lungs = os.path.join(gv.PATH_SAVE, "Poumons/best_detection.h5")
-    model_seg_lungs = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted24.h5")
+    model_seg_lungs = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted_24.h5")
 
     model_detect = os.path.join(gv.PATH_SAVE, "Metastases/best_resnet50.h5")
 
@@ -267,26 +269,23 @@ if __name__ == "__main__":
     # unet4 = os.path.join(gv.PATH_SAVE, "Metastases/128model_unet_weighted1015.h5")
     # unet5 = os.path.join(gv.PATH_SAVE, "Metastases/128model_small++_weighted1015.h5")
 
-    list_num = [8, 56]
-    list_path = [small_unet]  # , small_unet_wei, unet, unet2] #, unet3]
+    list_num = [8, 28, 56]
+    list_path = [model_seg_lungs]  # , small_unet_wei, unet, unet2] #, unet3]
 
     # enregistrer csv
 
     create_csv(
         list_num,
         list_path,
-        model_detect,
-        model_detect_lungs=model_detect_lungs,
-        model_seg_lungs=model_seg_lungs,
+        model_detect_lungs,
     )
 
     # use csv
     for num in list_num:
         utils.print_red("souris " + str(num))
         result, label = get_values_from_csv(
-            gv.PATH_RES + "csv/csv_iou_souris_" + str(num) + ".csv", ["10-15"]
-        )  # , "15-25", "15-20", "10-20"])
-        # print(result)
+            gv.PATH_RES + "csv/csv_iou_souris_" + str(num) + ".csv", ["small++"]
+        )
         print(np.mean(result))
         plot_iou(result, label, str(num), save=True)
         box_plot(result, label, str(num), save=True)
