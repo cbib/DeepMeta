@@ -19,29 +19,29 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 # Function used to train Lungs detection (ie is there lungs in this image)
 def train_detect(args, model_name="detection"):
     utils.print_red("Training Detect : ")
-    if args.meta:
+    if args["meta"]:
         dataset, label = data.create_dataset_detect_meta(
-            gv.path_gen_img, gv.path_gen_lab, gv.tab_meta, args.size
+            gv.path_gen_img, gv.path_gen_lab, gv.tab_meta, args["size"]
         )
         save_name = "Metastases/model_"
     else:
         dataset, label = data.create_dataset_detect(
-            gv.path_img_classif, gv.tab, gv.numSouris, args.size
+            gv.path_img_classif, gv.tab, gv.numSouris, args["size"]
         )
         save_name = "Poumons/model_"
     input_shape = (
-        args.size,
-        args.size,
+        args["size"],
+        args["size"],
         1,
     )
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
-        model_detect = gv.model_list[model_name](input_shape, args.lr)
+        model_detect = gv.model_list[model_name](input_shape, args["lr"])
         es = keras.callbacks.EarlyStopping(
             monitor="val_accuracy",
             mode="max",
             verbose=1,
-            patience=opt.patience,
+            patience=args["patience"],
             min_delta=0.00001,
             restore_best_weights=True,
         )
@@ -57,13 +57,13 @@ def train_detect(args, model_name="detection"):
             dataset,
             label,
             validation_split=0.2,
-            batch_size=args.batch_size,
-            epochs=args.n_epochs,
-            callbacks=[es, checkpoint, utils.CosLRDecay(args.n_epochs, args.lr)],
+            batch_size=args["batch_size"],
+            epochs=args["n_epochs"],
+            callbacks=[es, checkpoint, utils.CosLRDecay(args["n_epochs"], args["lr"])],
         )
     utils.plot_learning_curves(history, name="detect", metric="accuracy")
 
 
 if __name__ == "__main__":
-    opt = utils.get_args()
-    train_detect(opt, opt.model_name)
+    opt = vars(utils.get_args())
+    train_detect(opt)
