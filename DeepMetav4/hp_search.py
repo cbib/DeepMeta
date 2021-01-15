@@ -9,11 +9,11 @@ from tensorflow import keras
 import DeepMetav4.utils.utils as utils
 from DeepMetav4.train_detect import train_detect
 
-ray.init()
+ray.init(num_cpus=10, num_gpus=1)
 
-EPOCHS = 10
-num_samples = 10
-experiment_name = "test"
+EPOCHS = 100
+num_samples = 25
+experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
 
 # config = {
@@ -28,9 +28,10 @@ config = vars(utils.get_args())
 # WANDB
 # adding wandb keys
 config["wandb"] = {
-    "project": "first-try",
+    "project": "deepmeta-detect-lungs",
     "api_key_file": "2087297064263382243a621b1bcdd37fcf1c6bb4",
 }
+
 config["lr"] = tune.choice([0.01, 0.1, 0.001])
 config["batch_size"] = tune.choice([32, 64, 128])
 
