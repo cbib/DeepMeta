@@ -26,12 +26,6 @@ num_samples = 10
 experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
 
-# config = {
-#     "lr": tune.choice([0.01, 0.1, 0.001,]),
-#     "batch_size": tune.choice([32, 64, 128]),
-#     "neurons": tune.choice([64, 128, 256]),
-#     "dropout": tune.choice([0.0, 0.1, 0.2]),
-# }
 config = vars(utils.get_args())
 
 
@@ -42,8 +36,8 @@ config["wandb"] = {
     "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
 }
 
-config["lr"] = tune.choice([0.01, 0.1, 0.001])
-config["batch_size"] = tune.choice([32, 64, 128])
+config["lr"] = tune.choice([0.001, 0.002, 0.0001, 0.0002])
+config["batch_size"] = tune.choice([64, 128, 256])
 config["model_name"] = "detection"
 
 
