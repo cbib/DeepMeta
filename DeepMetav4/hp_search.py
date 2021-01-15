@@ -19,10 +19,10 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-ray.init(num_cpus=10, num_gpus=1)
+ray.init(num_cpus=15, num_gpus=1)
 
-EPOCHS = 100
-num_samples = 25
+EPOCHS = 25
+num_samples = 10
 experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
 
@@ -39,7 +39,7 @@ config = vars(utils.get_args())
 # adding wandb keys
 config["wandb"] = {
     "project": "deepmeta-detect-lungs",
-    "api_key_file": "2087297064263382243a621b1bcdd37fcf1c6bb4",
+    "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
 }
 
 config["lr"] = tune.choice([0.01, 0.1, 0.001])
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         num_samples=num_samples,
         search_alg=search_alg,
         scheduler=scheduler,
-        resources_per_trial={"cpu": 4, "gpu": 1},
+        resources_per_trial={"cpu": 10, "gpu": 1},
     )
 
 ray.shutdown()
