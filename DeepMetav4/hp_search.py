@@ -1,6 +1,7 @@
 import os
 
 import ray
+import tensorflow as tf
 from ray import tune
 from ray.tune.integration.wandb import WandbLogger
 from ray.tune.logger import DEFAULT_LOGGERS
@@ -8,8 +9,9 @@ from ray.tune.schedulers import AsyncHyperBandScheduler
 from ray.tune.suggest.hyperopt import HyperOptSearch
 from tensorflow import keras
 
+import DeepMetav4.utils.data as data
+import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
-from DeepMetav4.train_detect import train_detect
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
@@ -42,6 +44,7 @@ config["wandb"] = {
 
 config["lr"] = tune.choice([0.01, 0.1, 0.001])
 config["batch_size"] = tune.choice([32, 64, 128])
+config["model_name"] = "detection"
 
 
 class TuneReporter(keras.callbacks.Callback):
@@ -52,6 +55,43 @@ class TuneReporter(keras.callbacks.Callback):
             keras_info=logs,
             val_loss=logs["val_loss"],
             val_accuracy=logs["val_accuracy"],
+        )
+
+
+def train_detect(args, model_name="detection"):
+    utils.print_red("Training Detect : ")
+    if args["meta"]:
+        dataset, label = data.create_dataset_detect_meta(
+            gv.path_gen_img, gv.path_gen_lab, gv.tab_meta, args["size"]
+        )
+    else:
+        dataset, label = data.create_dataset_detect(
+            gv.path_img_classif, gv.tab, gv.numSouris, args["size"]
+        )
+    input_shape = (
+        args["size"],
+        args["size"],
+        1,
+    )
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        model_detect = gv.model_list[model_name](input_shape, args["lr"])
+        es = keras.callbacks.EarlyStopping(
+            monitor="val_accuracy",
+            mode="max",
+            verbose=1,
+            patience=args["patience"],
+            min_delta=0.00001,
+            restore_best_weights=True,
+        )
+        tr = TuneReporter()
+        model_detect.fit(
+            dataset,
+            label,
+            validation_split=0.2,
+            batch_size=args["batch_size"],
+            epochs=args["n_epochs"],
+            callbacks=[es, utils.CosLRDecay(args["n_epochs"], args["lr"]), tr],
         )
 
 
