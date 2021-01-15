@@ -1,3 +1,5 @@
+import os
+
 import ray
 from ray import tune
 from ray.tune.integration.wandb import WandbLogger
@@ -8,6 +10,12 @@ from tensorflow import keras
 
 import DeepMetav4.utils.utils as utils
 from DeepMetav4.train_detect import train_detect
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
+os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
+# loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 
 ray.init(num_cpus=10, num_gpus=1)
 
