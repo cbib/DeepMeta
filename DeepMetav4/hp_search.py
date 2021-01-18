@@ -1,16 +1,13 @@
 import os
 
 import ray
-import tensorflow as tf
 from ray import tune
 from ray.tune.integration.wandb import WandbLogger
 from ray.tune.logger import DEFAULT_LOGGERS
 from ray.tune.schedulers import AsyncHyperBandScheduler
 from ray.tune.suggest.hyperopt import HyperOptSearch
-from tensorflow import keras
 
-import DeepMetav4.utils.data as data
-import DeepMetav4.utils.global_vars as gv
+import DeepMetav4.train_detect as t_detect
 import DeepMetav4.utils.utils as utils
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -22,18 +19,7 @@ num_samples = 10
 experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
 
-
-class TuneReporter(keras.callbacks.Callback):
-    """Tune Callback for Keras."""
-
-    def on_epoch_end(self, epoch, logs=None):
-        tune.report(
-            keras_info=logs,
-            val_loss=logs["val_loss"],
-            val_accuracy=logs["val_accuracy"],
-        )
-
-
+"""
 def train_detect(args, model_name="detection"):
     utils.print_red("Training Detect : ")
     if args["meta"]:
@@ -60,7 +46,7 @@ def train_detect(args, model_name="detection"):
             min_delta=0.00001,
             restore_best_weights=True,
         )
-        tr = TuneReporter()
+        tr = tune_rep.TuneReporter()
         model_detect.fit(
             dataset,
             label,
@@ -69,7 +55,7 @@ def train_detect(args, model_name="detection"):
             epochs=args["n_epochs"],
             callbacks=[es, utils.CosLRDecay(args["n_epochs"], args["lr"]), tr],
         )
-
+"""
 
 if __name__ == "__main__":
     ray.init(num_cpus=20, num_gpus=2)
@@ -99,7 +85,7 @@ if __name__ == "__main__":
     # search_alg = ConcurrencyLimiter(search_alg, max_concurrent=2)
 
     analysis = tune.run(
-        train_detect,
+        t_detect.train_detect,
         loggers=DEFAULT_LOGGERS + (WandbLogger,),
         config=config,
         local_dir="ray_results",

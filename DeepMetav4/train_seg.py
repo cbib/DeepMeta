@@ -11,6 +11,7 @@ import os
 
 import tensorflow.keras as keras
 
+import DeepMetav4.tune_reporter as tune_rep
 import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
@@ -21,7 +22,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-def train(path_images=gv.path_img, path_labels=gv.path_lab):
+def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
     file_path = data.save_model_name(opt, gv.PATH_SAVE)
     dataset, label, model_seg, checkpoint, metric = data.prepare_for_training(
         path_images, path_labels, file_path, opt
@@ -29,14 +30,18 @@ def train(path_images=gv.path_img, path_labels=gv.path_lab):
     earlystopper = keras.callbacks.EarlyStopping(
         patience=opt.patience, verbose=1, min_delta=0.00001, restore_best_weights=True
     )
-
+    cb_list = [earlystopper, checkpoint, utils.CosLRDecay(opt.n_epochs, opt.lr)]
+    if hp_search:
+        cb_list.append(
+            tune_rep.TuneReporter("val_loss")
+        )  # todo: use iou or dice (for lungs at least)
     history = model_seg.fit(
         dataset,
         label,
         validation_split=0.2,
         batch_size=opt.batch_size,
         epochs=opt.n_epochs,
-        callbacks=[earlystopper, checkpoint, utils.CosLRDecay(opt.n_epochs, opt.lr)],
+        callbacks=cb_list,
     )
     utils.plot_learning_curves(history, "segmentation_" + opt.model_name, metric)
 

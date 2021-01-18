@@ -6,6 +6,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras as keras
 
+import DeepMetav4.tune_reporter as tune_rep
 import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
@@ -17,7 +18,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 # Function used to train Lungs detection (ie is there lungs in this image)
-def train_detect(args, model_name="detection"):
+def train_detect(args, model_name="detection", hp_search=True):
     utils.print_red("Training Detect : ")
     if args["meta"]:
         dataset, label = data.create_dataset_detect_meta(
@@ -45,21 +46,26 @@ def train_detect(args, model_name="detection"):
             min_delta=0.00001,
             restore_best_weights=True,
         )
-        file_path = os.path.join(gv.PATH_SAVE, save_name + model_name + ".h5")
-        checkpoint = keras.callbacks.ModelCheckpoint(
-            file_path,
-            monitor="val_accuracy",
-            verbose=1,
-            save_best_only=True,
-            mode="max",
-        )
+        cb_list = [es, utils.CosLRDecay(args["n_epochs"], args["lr"])]
+        if hp_search:
+            cb_list.append(tune_rep.TuneReporter())
+        else:
+            file_path = os.path.join(gv.PATH_SAVE, save_name + model_name + ".h5")
+            checkpoint = keras.callbacks.ModelCheckpoint(
+                file_path,
+                monitor="val_accuracy",
+                verbose=1,
+                save_best_only=True,
+                mode="max",
+            )
+            cb_list.append(checkpoint)
         history = model_detect.fit(
             dataset,
             label,
             validation_split=0.2,
             batch_size=args["batch_size"],
             epochs=args["n_epochs"],
-            callbacks=[es, checkpoint, utils.CosLRDecay(args["n_epochs"], args["lr"])],
+            callbacks=cb_list,
         )
     utils.plot_learning_curves(history, name="detect", metric="accuracy")
 
