@@ -67,7 +67,8 @@ def train_detect(args, model_name="detection", hp_search=True):
             epochs=args["n_epochs"],
             callbacks=cb_list,
         )
-    utils.plot_learning_curves(history, name="detect", metric="accuracy")
+        if not hp_search:
+            utils.plot_learning_curves(history, name="detect", metric="accuracy")
 
 
 if __name__ == "__main__":
