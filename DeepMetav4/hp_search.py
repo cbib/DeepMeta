@@ -15,47 +15,9 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = 12
+num_samples = 12  # mandatory ?
 experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
-
-"""
-def train_detect(args, model_name="detection"):
-    utils.print_red("Training Detect : ")
-    if args["meta"]:
-        dataset, label = data.create_dataset_detect_meta(
-            gv.path_gen_img, gv.path_gen_lab, gv.tab_meta, args["size"]
-        )
-    else:
-        dataset, label = data.create_dataset_detect(
-            gv.path_img_classif, gv.tab, gv.numSouris, args["size"]
-        )
-    input_shape = (
-        args["size"],
-        args["size"],
-        1,
-    )
-    strategy = tf.distribute.MirroredStrategy()
-    with strategy.scope():
-        model_detect = gv.model_list[model_name](input_shape, args["lr"])
-        es = keras.callbacks.EarlyStopping(
-            monitor="val_accuracy",
-            mode="max",
-            verbose=1,
-            patience=args["patience"],
-            min_delta=0.00001,
-            restore_best_weights=True,
-        )
-        tr = tune_rep.TuneReporter()
-        model_detect.fit(
-            dataset,
-            label,
-            validation_split=0.2,
-            batch_size=args["batch_size"],
-            epochs=args["n_epochs"],
-            callbacks=[es, utils.CosLRDecay(args["n_epochs"], args["lr"]), tr],
-        )
-"""
 
 if __name__ == "__main__":
     ray.init(num_cpus=20, num_gpus=2)
@@ -82,7 +44,6 @@ if __name__ == "__main__":
         metric="val_accuracy",
         mode="max",
     )
-    # search_alg = ConcurrencyLimiter(search_alg, max_concurrent=2)
 
     analysis = tune.run(
         t_detect.train_detect,
@@ -92,7 +53,7 @@ if __name__ == "__main__":
         name=experiment_name,
         num_samples=num_samples,
         search_alg=search_alg,
-        scheduler=scheduler,
+        # scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
     )
     print(

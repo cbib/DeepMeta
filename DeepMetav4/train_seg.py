@@ -30,7 +30,7 @@ def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
     earlystopper = keras.callbacks.EarlyStopping(
         patience=opt.patience, verbose=1, min_delta=0.00001, restore_best_weights=True
     )
-    cb_list = [earlystopper, checkpoint, utils.CosLRDecay(opt.n_epochs, opt.lr)]
+    cb_list = [earlystopper, checkpoint, utils.CosLRDecay(opt["n_epochs"], opt["lr"])]
     if hp_search:
         cb_list.append(
             tune_rep.TuneReporter("val_loss")
@@ -39,16 +39,16 @@ def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
         dataset,
         label,
         validation_split=0.2,
-        batch_size=opt.batch_size,
-        epochs=opt.n_epochs,
+        batch_size=opt["batch_size"],
+        epochs=opt["n_epochs"],
         callbacks=cb_list,
     )
-    utils.plot_learning_curves(history, "segmentation_" + opt.model_name, metric)
+    utils.plot_learning_curves(history, "segmentation_" + opt["model_name"], metric)
 
 
 if __name__ == "__main__":
-    opt = utils.get_args()
-    if opt.meta:
+    opt = vars(utils.get_args())
+    if opt["meta"]:
         train(path_images=gv.meta_path_img, path_labels=gv.meta_path_lab)
     else:
         train()

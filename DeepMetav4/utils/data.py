@@ -305,20 +305,20 @@ def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
 # function used to get data and model ready for training | todo: refactor
 def prepare_for_training(path_data, path_label, file_path, opt):
     dataset, label = create_dataset(
-        path_img=path_data, path_label=path_label, size=opt.size
+        path_img=path_data, path_label=path_label, size=opt["size"]
     )
     utils.print_gre("Prepare for Trainning...")
     n = range(np.shape(dataset)[0])
     n_sample = random.sample(list(n), len(n))
-    input_shape = (opt.size, opt.size, 1)
+    input_shape = (opt["size"], opt["size"], 1)
     utils.print_gre("Getting model...")
     strategy = tf.distribute.MirroredStrategy()
-    if opt.weighted:
+    if opt["weighted"]:
         with strategy.scope():
             dataset, label = get_label_weights(
-                dataset, label, n_sample, opt.w1, opt.w2, size=opt.size
+                dataset, label, n_sample, opt["w1"], opt["w2"], size=opt["size"]
             )
-            model_seg = gv.model_list[opt.model_name](input_shape)
+            model_seg = gv.model_list[opt["model_name"]](input_shape)
             checkpoint = callbacks.ModelCheckpoint(
                 file_path,
                 monitor="val_loss",
@@ -329,13 +329,13 @@ def prepare_for_training(path_data, path_label, file_path, opt):
             metric = "loss"
             model_seg.compile(
                 loss=utils_model.weighted_cross_entropy,
-                optimizer=tf.keras.optimizers.Adam(lr=opt.lr),
+                optimizer=tf.keras.optimizers.Adam(lr=opt["lr"]),
             )
     else:
         with strategy.scope():
-            dataset = dataset.reshape(-1, opt.size, opt.size, 1)[n_sample]
-            label = label.reshape(-1, opt.size, opt.size, 1)[n_sample]
-            model_seg = gv.model_list[opt.model_name](input_shape)
+            dataset = dataset.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
+            label = label.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
+            model_seg = gv.model_list[opt["model_name"]](input_shape)
             checkpoint = callbacks.ModelCheckpoint(
                 file_path,
                 monitor="val_accuracy",
@@ -345,7 +345,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
             )
             metric = "accuracy"
             model_seg.compile(
-                optimizer=tf.keras.optimizers.Adam(lr=opt.lr),
+                optimizer=tf.keras.optimizers.Adam(lr=opt["lr"]),
                 loss="binary_crossentropy",
                 metrics=["accuracy"],
             )  # todo : fix mean iou
