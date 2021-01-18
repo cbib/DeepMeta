@@ -15,7 +15,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = 10
+num_samples = 12
 experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
 
@@ -94,6 +94,8 @@ if __name__ == "__main__":
         search_alg=search_alg,
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
+        metric="val_accuracy",
+        mode="max",
     )
     print("Best hyperparameters found were: ", analysis.best_config)
     ray.shutdown()
