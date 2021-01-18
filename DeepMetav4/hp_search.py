@@ -13,32 +13,14 @@ import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.utils as utils
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-
-ray.init(num_cpus=15, num_gpus=1)
-
-EPOCHS = 25
 num_samples = 10
 experiment_name = "detect_lungs"
 checkpoint_dir = "ray_logs"
-
-config = vars(utils.get_args())
-
-
-# WANDB
-# adding wandb keys
-config["wandb"] = {
-    "project": "deepmeta-detect-lungs",
-    "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
-}
-
-config["lr"] = tune.choice([0.001, 0.002, 0.0001, 0.0002])
-config["batch_size"] = tune.choice([64, 128, 256])
-config["model_name"] = "detection"
 
 
 class TuneReporter(keras.callbacks.Callback):
@@ -90,6 +72,21 @@ def train_detect(args, model_name="detection"):
 
 
 if __name__ == "__main__":
+    ray.init(num_cpus=20, num_gpus=2)
+
+    config = vars(utils.get_args())
+
+    # WANDB
+    # adding wandb keys
+    config["wandb"] = {
+        "project": "deepmeta-detect-lungs",
+        "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
+    }
+
+    config["lr"] = tune.choice([0.001, 0.002, 0.0001, 0.0002])
+    config["batch_size"] = tune.choice([64, 128, 256])
+    config["model_name"] = "detection"
+
     scheduler = AsyncHyperBandScheduler(
         time_attr="training_iteration", metric="val_accuracy", mode="max"
     )
@@ -103,7 +100,6 @@ if __name__ == "__main__":
 
     analysis = tune.run(
         train_detect,
-        # WANDB
         loggers=DEFAULT_LOGGERS + (WandbLogger,),
         config=config,
         local_dir="ray_results",
@@ -113,5 +109,5 @@ if __name__ == "__main__":
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
     )
-
-ray.shutdown()
+    print("Best hyperparameters found were: ", analysis.best_config)
+    ray.shutdown()
