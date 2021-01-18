@@ -94,8 +94,9 @@ if __name__ == "__main__":
         search_alg=search_alg,
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
-        metric="val_accuracy",
-        mode="max",
     )
-    print("Best hyperparameters found were: ", analysis.best_config)
+    print(
+        "Best hyperparameters found were: ",
+        analysis.get_best_config(metric="val_accuracy", mode="max"),
+    )
     ray.shutdown()
