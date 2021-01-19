@@ -16,7 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 12  # mandatory ?
-experiment_name = "detect_lungs"
+experiment_name = "detect_metas"
 checkpoint_dir = "ray_logs"
 
 if __name__ == "__main__":
@@ -34,6 +34,7 @@ if __name__ == "__main__":
     config["lr"] = tune.choice([0.001, 0.002, 0.0001, 0.0002])
     config["batch_size"] = tune.choice([64, 128, 256])
     config["model_name"] = "detection"
+    config["meta"] = True
 
     scheduler = AsyncHyperBandScheduler(
         time_attr="training_iteration", metric="val_accuracy", mode="max"
@@ -53,7 +54,7 @@ if __name__ == "__main__":
         name=experiment_name,
         num_samples=num_samples,
         search_alg=search_alg,
-        scheduler=scheduler,
+        # scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
     )
     print(

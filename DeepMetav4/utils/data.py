@@ -246,12 +246,12 @@ def create_dataset_concat(path_img, path_label, path_mask, opt):
 
 
 def save_model_name(opt, path_save):
-    if opt.meta:
-        res = "Metastases/" + str(opt.size) + "model_" + opt.model_name
+    if opt["meta"]:
+        res = "Metastases/" + str(opt["size"]) + "model_" + opt["model_name"]
     else:
-        res = "Poumons/" + str(opt.size) + "model_" + opt.model_name
-    if opt.weighted:
-        res += "_weighted" + str(opt.w1) + str(opt.w2)
+        res = "Poumons/" + str(opt["size"]) + "model_" + opt["model_name"]
+    if opt["weighted"]:
+        res += "_weighted" + str(opt["w1"]) + str(opt["w2"])
     res += ".h5"
     return os.path.join(path_save, res)
 

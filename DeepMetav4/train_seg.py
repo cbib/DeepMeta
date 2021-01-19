@@ -19,7 +19,7 @@ import DeepMetav4.utils.utils as utils
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+# os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
@@ -28,7 +28,10 @@ def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
         path_images, path_labels, file_path, opt
     )
     earlystopper = keras.callbacks.EarlyStopping(
-        patience=opt.patience, verbose=1, min_delta=0.00001, restore_best_weights=True
+        patience=opt["patience"],
+        verbose=1,
+        min_delta=0.00001,
+        restore_best_weights=True,
     )
     cb_list = [earlystopper, checkpoint, utils.CosLRDecay(opt["n_epochs"], opt["lr"])]
     if hp_search:

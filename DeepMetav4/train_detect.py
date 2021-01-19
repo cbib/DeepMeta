@@ -14,7 +14,7 @@ import DeepMetav4.utils.utils as utils
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+# os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 # Function used to train Lungs detection (ie is there lungs in this image)
@@ -22,7 +22,7 @@ def train_detect(args, model_name="detection", hp_search=True):
     utils.print_red("Training Detect : ")
     if args["meta"]:
         dataset, label = data.create_dataset_detect_meta(
-            gv.path_gen_img, gv.path_gen_lab, gv.tab_meta, args["size"]
+            gv.meta_path_img, gv.meta_path_lab, gv.tab_meta, args["size"]
         )
         save_name = "Metastases/model_"
     else:
@@ -73,4 +73,4 @@ def train_detect(args, model_name="detection", hp_search=True):
 
 if __name__ == "__main__":
     opt = vars(utils.get_args())
-    train_detect(opt)
+    train_detect(opt, hp_search=False)
