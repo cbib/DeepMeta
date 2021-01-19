@@ -53,7 +53,7 @@ if __name__ == "__main__":
         name=experiment_name,
         num_samples=num_samples,
         search_alg=search_alg,
-        # scheduler=scheduler,
+        scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
     )
     print(
