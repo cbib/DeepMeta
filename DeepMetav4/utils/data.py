@@ -151,7 +151,7 @@ def create_dataset_detect_meta(path_img, path_mask, tab, size):  # todo : refact
     label_detec_1 = []
     for i in range(len(tab)):
         # if tab[i, 5] == 1: # since we use an optimized tab for metas
-        if tab[i, 7] == 0:
+        if tab[i, 4] == 0:
             # sampled_prefix = random.sample(prefix, 4)
             for pref in prefix:
                 try:
