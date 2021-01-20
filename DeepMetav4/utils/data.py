@@ -75,6 +75,42 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
     return map_coordinates(image, indices, order=1).reshape(shape)
 
 
+def concat_and_normalize(l0, l1):
+    inv = False
+    if len(l1) < len(l0):
+        tmp = l1
+        l1 = l0
+        l0 = tmp
+        inv = True
+    list_size = len(l0)
+    random.shuffle(l1)
+    l1 = l1[0:list_size]
+    data_detec = l0 + l1
+    if inv:
+        label_detec = np.concatenate(
+            (
+                np.ones(
+                    list_size,
+                ),
+                np.zeros(
+                    list_size,
+                ),
+            )
+        )
+    else:
+        label_detec = np.concatenate(
+            (
+                np.zeros(
+                    list_size,
+                ),
+                np.ones(
+                    list_size,
+                ),
+            )
+        )
+    return shuffle_lists(data_detec, label_detec)
+
+
 def create_dataset_detect(path_img, tab, size):
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
@@ -109,14 +145,15 @@ def create_dataset_detect(path_img, tab, size):
         except Exception as e:
             utils.print_red("IMG {} not found".format(i))
             utils.print_red("\t" + str(e))
-    list_size = len(data_detec_0)
-    random.shuffle(data_detec_1)
-    data_detec_1 = data_detec_1[0:list_size]
-    data_detec = data_detec_0 + data_detec_1
-    label_detec = np.concatenate(
-        (np.zeros((len(data_detec_0),)), np.ones((len(data_detec_1),)))
-    )
-    data_detec, label_detec = shuffle_lists(data_detec, label_detec)
+    # list_size = len(data_detec_0)
+    # random.shuffle(data_detec_1)
+    # data_detec_1 = data_detec_1[0:list_size]
+    # data_detec = data_detec_0 + data_detec_1
+    # label_detec = np.concatenate(
+    #     (np.zeros((len(data_detec_0),)), np.ones((len(data_detec_1),)))
+    # )
+    # data_detec, label_detec = shuffle_lists(data_detec, label_detec)
+    data_detec, label_detec = concat_and_normalize(data_detec_0, data_detec_1)
     data_detec = np.array(data_detec)
     no = range(len(data_detec))
     no_sample = random.sample(list(no), len(no))
