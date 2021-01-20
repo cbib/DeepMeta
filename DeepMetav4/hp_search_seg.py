@@ -25,7 +25,7 @@ class CustomStopper(tune.Stopper):
         self.should_stop = False
 
     def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_loss"] < 10:
+        if not self.should_stop and result["val_loss"] < 1:  # todo: use IOU
             self.should_stop = True
         return self.should_stop
 
@@ -46,9 +46,10 @@ if __name__ == "__main__":
     }
 
     config["lr"] = tune.uniform(0.00001, 0.1)
-    config["batch_size"] = tune.uniform(16, 256)
+    config["batch_size"] = tune.randint(16, 256)
     config["model_name"] = "small++"
     config["meta"] = True
+    config["weighted"] = True
 
     utils.print_gre(config)
     # scheduler = AsyncHyperBandScheduler(
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         num_samples=num_samples,
         search_alg=search_alg,
         scheduler=scheduler,
-        resources_per_trial={"cpu": 10, "gpu": 1},
+        resources_per_trial={"cpu": 20, "gpu": 2},
         stop=CustomStopper(),
     )
     print(
