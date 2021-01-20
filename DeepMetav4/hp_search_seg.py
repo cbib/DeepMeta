@@ -50,6 +50,7 @@ if __name__ == "__main__":
     config["model_name"] = "small++"
     config["meta"] = False
 
+    utils.print_gre(config)
     # scheduler = AsyncHyperBandScheduler(
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration", metric="val_loss", mode="min"
@@ -72,6 +73,6 @@ if __name__ == "__main__":
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_accuracy", mode="max"),
+        analysis.get_best_config(metric="val_loss", mode="min"),
     )
     ray.shutdown()
