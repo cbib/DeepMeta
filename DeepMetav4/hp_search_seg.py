@@ -45,10 +45,10 @@ if __name__ == "__main__":
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
-    config["lr"] = tune.choice([0.001, 0.002, 0.0001, 0.0002])
-    config["batch_size"] = tune.choice([64, 128, 256])
-    config["model_name"] = "detection"
-    config["meta"] = True
+    config["lr"] = tune.uniform(0.00001, 0.1)
+    config["batch_size"] = tune.uniform(16, 256)
+    config["model_name"] = "small++"
+    config["meta"] = False
 
     # scheduler = AsyncHyperBandScheduler(
     scheduler = HyperBandForBOHB(
