@@ -174,69 +174,69 @@ def apply_mask(img, path_img, path_mask):
     return im * im_mask
 
 
-def create_dataset_detect_meta(path_img, path_mask, tab, size):  # todo : refactor
-    utils.print_gre("Creating dataset...")
-    prefix = ["", "90_", "180_", "270_", "t_", "t_90_", "t_180_", "t_270_"]
-    data_detec_0 = []
-    label_detec_0 = []
-    data_detec_1 = []
-    label_detec_1 = []
-    for i in range(len(tab)):
-        # if tab[i, 5] == 1: # since we use an optimized tab for metas
-        if tab[i, 3] == 0:
-            # sampled_prefix = random.sample(prefix, 4)
-            for pref in prefix:
-                try:
-                    # im = io.imread(
-                    #     path_img + pref + str(int(tab[i, 0])) + ".tif",
-                    # plugin='tifffile')
-                    # .tif if not generated
-                    im = apply_mask(
-                        pref + str(int(tab[i, 0])) + ".png", path_img, path_mask
-                    )
-                    # im = concat_with_mask(im, i, path_mask, pref)
-                    data_detec_0.append(im / 255)
-                    label_detec_0.append(0)
-                except Exception:
-                    utils.print_red(
-                        "Image "
-                        + pref
-                        + "{} not found for label 0".format(int(tab[i, 0]))
-                    )
-        else:
-            for pref in prefix:
-                try:
-                    # im = io.imread(
-                    #     path_img + pref + str(int(tab[i, 0])) + '.tif',
-                    # plugin='tifffile')  # .tif if not generated
-                    # im = concat_with_mask(im, i, path_mask, pref)
-                    im = apply_mask(
-                        pref + str(int(tab[i, 0])) + ".png", path_img, path_mask
-                    )
-                    data_detec_1.append(im / 255)
-                    label_detec_1.append(1)
-                except Exception:
-                    utils.print_red(
-                        "Image "
-                        + pref
-                        + "{} not found for label 1".format(int(tab[i, 0]))
-                    )
-    list_size = len(data_detec_1)
-    data_detec_0 = data_detec_0[0:list_size]
-    label_detec_0 = label_detec_0[0:list_size]
-    data_detec = data_detec_0 + data_detec_1
-    label_detec = label_detec_0 + label_detec_1
-    data_detec, label_detec = shuffle_lists(data_detec, label_detec, seed=42)
-    data_detec = np.array(data_detec)
-    label_detec = np.array(label_detec)
-    no = range(len(data_detec))
-    no_sample = random.sample(list(no), len(no))
-    data_detec = data_detec.reshape(-1, size, size, 1)[no_sample].astype(
-        "float32"
-    )  # ici le deux est un 1 si on ne concat pas)
-    label_detec = keras.utils.to_categorical(label_detec[no_sample])
-    utils.print_gre("Created !")
-    return data_detec, label_detec
+# def create_dataset_detect_meta(path_img, path_mask, tab, size):  # todo : refactor
+#     utils.print_gre("Creating dataset...")
+#     prefix = ["", "90_", "180_", "270_", "t_", "t_90_", "t_180_", "t_270_"]
+#     data_detec_0 = []
+#     label_detec_0 = []
+#     data_detec_1 = []
+#     label_detec_1 = []
+#     for i in range(len(tab)):
+#         # if tab[i, 5] == 1: # since we use an optimized tab for metas
+#         if tab[i, 3] == 0:
+#             # sampled_prefix = random.sample(prefix, 4)
+#             for pref in prefix:
+#                 try:
+#                     # im = io.imread(
+#                     #     path_img + pref + str(int(tab[i, 0])) + ".tif",
+#                     # plugin='tifffile')
+#                     # .tif if not generated
+#                     im = apply_mask(
+#                         pref + str(int(tab[i, 0])) + ".png", path_img, path_mask
+#                     )
+#                     # im = concat_with_mask(im, i, path_mask, pref)
+#                     data_detec_0.append(im / 255)
+#                     label_detec_0.append(0)
+#                 except Exception:
+#                     utils.print_red(
+#                         "Image "
+#                         + pref
+#                         + "{} not found for label 0".format(int(tab[i, 0]))
+#                     )
+#         else:
+#             for pref in prefix:
+#                 try:
+#                     # im = io.imread(
+#                     #     path_img + pref + str(int(tab[i, 0])) + '.tif',
+#                     # plugin='tifffile')  # .tif if not generated
+#                     # im = concat_with_mask(im, i, path_mask, pref)
+#                     im = apply_mask(
+#                         pref + str(int(tab[i, 0])) + ".png", path_img, path_mask
+#                     )
+#                     data_detec_1.append(im / 255)
+#                     label_detec_1.append(1)
+#                 except Exception:
+#                     utils.print_red(
+#                         "Image "
+#                         + pref
+#                         + "{} not found for label 1".format(int(tab[i, 0]))
+#                     )
+#     list_size = len(data_detec_1)
+#     data_detec_0 = data_detec_0[0:list_size]
+#     label_detec_0 = label_detec_0[0:list_size]
+#     data_detec = data_detec_0 + data_detec_1
+#     label_detec = label_detec_0 + label_detec_1
+#     data_detec, label_detec = shuffle_lists(data_detec, label_detec, seed=42)
+#     data_detec = np.array(data_detec)
+#     label_detec = np.array(label_detec)
+#     no = range(len(data_detec))
+#     no_sample = random.sample(list(no), len(no))
+#     data_detec = data_detec.reshape(-1, size, size, 1)[no_sample].astype(
+#         "float32"
+#     )  # ici le deux est un 1 si on ne concat pas)
+#     label_detec = keras.utils.to_categorical(label_detec[no_sample])
+#     utils.print_gre("Created !")
+#     return data_detec, label_detec
 
 
 def create_dataset(path_img, path_label, size):
