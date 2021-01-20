@@ -80,10 +80,12 @@ def concat_and_normalize(l0, l1):
     utils.print_red("l1 : {}".format(len(l1)))
     inv = False
     if len(l1) < len(l0):
+        x = l1[0]
         tmp = l1
         l1 = l0
         l0 = tmp
         inv = True
+        assert x != l1[0]
     list_size = len(l0)
     # random.shuffle(l1)
     l1 = l1[0:list_size]
