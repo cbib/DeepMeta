@@ -76,6 +76,8 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 
 
 def concat_and_normalize(l0, l1):
+    utils.print_red("l0 : {}".format(len(l0)))
+    utils.print_red("l1 : {}".format(len(l1)))
     inv = False
     if len(l1) < len(l0):
         tmp = l1
