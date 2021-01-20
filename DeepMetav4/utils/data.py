@@ -75,7 +75,7 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
     return map_coordinates(image, indices, order=1).reshape(shape)
 
 
-def create_dataset_detect(path_img, tab, numSouris, size):
+def create_dataset_detect(path_img, tab, size):
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
     :param tab: tableau résumant les identifiants et annotations pour les souris.

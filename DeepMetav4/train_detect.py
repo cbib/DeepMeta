@@ -21,13 +21,13 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 def train_detect(args, model_name="detection", hp_search=True):
     utils.print_red("Training Detect : ")
     if args["meta"]:
-        dataset, label = data.create_dataset_detect_meta(
-            gv.path_img, gv.meta_path_lab, gv.tab_meta, args["size"]
+        dataset, label = data.create_dataset_detect(
+            gv.path_img, gv.tab_meta, args["size"]
         )
         save_name = "Metastases/model_"
     else:
         dataset, label = data.create_dataset_detect(
-            gv.path_img_classif, gv.tab, gv.numSouris, args["size"]
+            gv.path_img_classif, gv.tab, args["size"]
         )
         save_name = "Poumons/model_"
     input_shape = (
