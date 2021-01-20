@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # WANDB
     # adding wandb keys
     config["wandb"] = {
-        "project": "seg-lungs",
+        "project": "seg_lungs",
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
@@ -68,6 +68,7 @@ if __name__ == "__main__":
         search_alg=search_alg,
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
+        stop=CustomStopper(),
     )
     print(
         "Best hyperparameters found were: ",
