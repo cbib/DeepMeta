@@ -48,7 +48,7 @@ if __name__ == "__main__":
     config["lr"] = tune.uniform(0.00001, 0.1)
     config["batch_size"] = tune.uniform(16, 256)
     config["model_name"] = "small++"
-    config["meta"] = False
+    config["meta"] = True
 
     utils.print_gre(config)
     # scheduler = AsyncHyperBandScheduler(
