@@ -110,6 +110,8 @@ def concat_and_normalize(l0, l1):
                 ),
             )
         )
+    assert len(sm_l) == len(bg_l)
+    assert len(data_detec) == len(label_detec)
     return shuffle_lists(data_detec, label_detec)
 
 
@@ -147,14 +149,6 @@ def create_dataset_detect(path_img, tab, size):
         except Exception as e:
             utils.print_red("IMG {} not found".format(i))
             utils.print_red("\t" + str(e))
-    # list_size = len(data_detec_0)
-    # random.shuffle(data_detec_1)
-    # data_detec_1 = data_detec_1[0:list_size]
-    # data_detec = data_detec_0 + data_detec_1
-    # label_detec = np.concatenate(
-    #     (np.zeros((len(data_detec_0),)), np.ones((len(data_detec_1),)))
-    # )
-    # data_detec, label_detec = shuffle_lists(data_detec, label_detec)
     data_detec, label_detec = concat_and_normalize(data_detec_0, data_detec_1)
     data_detec = np.array(data_detec)
     no = range(len(data_detec))
@@ -162,8 +156,7 @@ def create_dataset_detect(path_img, tab, size):
     data_detec = data_detec.reshape(-1, size, size, 1)[no_sample].astype("float32")
     label_detec = keras.utils.to_categorical(label_detec[no_sample])
     utils.print_gre("Created !")
-    utils.print_gre("label 0 : {}".format(len(data_detec_0)))
-    utils.print_gre("label 1 : {}".format(len(data_detec_1)))
+    utils.print_gre("Nb of images : {}".format(len(data_detec)))
     return data_detec, label_detec
 
 
