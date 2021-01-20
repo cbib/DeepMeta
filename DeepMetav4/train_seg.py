@@ -52,6 +52,6 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
 if __name__ == "__main__":
     opt = vars(utils.get_args())
     if opt["meta"]:
-        train(path_images=gv.meta_path_img, path_labels=gv.meta_path_lab)
+        train(opt, path_images=gv.meta_path_img, path_labels=gv.meta_path_lab)
     else:
-        train()
+        train(opt)
