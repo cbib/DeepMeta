@@ -78,12 +78,12 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 def concat_and_normalize(l0, l1):
     inv = False
     if len(l1) < len(l0):
-        sm_l = l1
-        bg_l = l0
+        sm_l = l1.copy()
+        bg_l = l0.copy()
         inv = True
     else:
-        sm_l = l0
-        bg_l = l1
+        sm_l = l0.copy()
+        bg_l = l1.copy()
     list_size = len(sm_l)
     # random.shuffle(l1)
     bg_l = bg_l[0:list_size]
