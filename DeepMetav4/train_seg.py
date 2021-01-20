@@ -22,18 +22,18 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
-    file_path = data.save_model_name(opt, gv.PATH_SAVE)
+def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
+    file_path = data.save_model_name(args, gv.PATH_SAVE)
     dataset, label, model_seg, checkpoint, metric = data.prepare_for_training(
-        path_images, path_labels, file_path, opt
+        path_images, path_labels, file_path, args
     )
     earlystopper = keras.callbacks.EarlyStopping(
-        patience=opt["patience"],
+        patience=args["patience"],
         verbose=1,
         min_delta=0.00001,
         restore_best_weights=True,
     )
-    cb_list = [earlystopper, checkpoint, utils.CosLRDecay(opt["n_epochs"], opt["lr"])]
+    cb_list = [earlystopper, checkpoint, utils.CosLRDecay(args["n_epochs"], args["lr"])]
     if hp_search:
         cb_list.append(
             tune_rep.TuneReporter("val_loss")
@@ -42,11 +42,11 @@ def train(path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
         dataset,
         label,
         validation_split=0.2,
-        batch_size=opt["batch_size"],
-        epochs=opt["n_epochs"],
+        batch_size=args["batch_size"],
+        epochs=args["n_epochs"],
         callbacks=cb_list,
     )
-    utils.plot_learning_curves(history, "segmentation_" + opt["model_name"], metric)
+    utils.plot_learning_curves(history, "segmentation_" + args["model_name"], metric)
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # WANDB
     # adding wandb keys
     config["wandb"] = {
-        "project": "deepmeta-seg-lungs",
+        "project": "seg-lungs",
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
