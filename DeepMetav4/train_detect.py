@@ -22,7 +22,7 @@ def train_detect(args, model_name="detection", hp_search=True):
     utils.print_red("Training Detect : ")
     if args["meta"]:
         dataset, label = data.create_dataset_detect(
-            gv.path_img, gv.tab_meta, args["size"]
+            gv.path_img_classif, gv.tab_meta, args["size"]
         )
         save_name = "Metastases/model_"
     else:
