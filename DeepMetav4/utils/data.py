@@ -76,20 +76,18 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 
 
 def concat_and_normalize(l0, l1):
-    utils.print_red("l0 : {}".format(len(l0)))
-    utils.print_red("l1 : {}".format(len(l1)))
     inv = False
     if len(l1) < len(l0):
-        x = l1[0]
-        tmp = l1
-        l1 = l0
-        l0 = tmp
+        sm_l = l1
+        bg_l = l0
         inv = True
-        assert x != l1[0]
-    list_size = len(l0)
+    else:
+        sm_l = l0
+        bg_l = l1
+    list_size = len(sm_l)
     # random.shuffle(l1)
-    l1 = l1[0:list_size]
-    data_detec = l0 + l1
+    bg_l = bg_l[0:list_size]
+    data_detec = sm_l + bg_l
     if inv:
         label_detec = np.concatenate(
             (
