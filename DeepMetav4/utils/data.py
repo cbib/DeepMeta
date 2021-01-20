@@ -79,7 +79,7 @@ def concat_and_normalize(l0, l1):
     utils.print_red("l0 : {}".format(len(l0)))
     utils.print_red("l1 : {}".format(len(l1)))
     inv = False
-    if len(l1) < len(l0):
+    if len(l0) < len(l1):
         tmp = l1
         l1 = l0
         l0 = tmp
