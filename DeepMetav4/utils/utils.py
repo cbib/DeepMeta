@@ -148,6 +148,7 @@ class LRDecay(tf.keras.callbacks.Callback):
 class CosLRDecay(tf.keras.callbacks.Callback):
     def __init__(self, nb_epochs, lr):
         super().__init__()
+        # self.f_lr = self.model.optimizer.lr
         self.nb_epochs = nb_epochs
 
     def on_epoch_begin(self, epoch, logs=None):

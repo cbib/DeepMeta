@@ -16,7 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = -1  # -1 -> infinite, need stop condition
-experiment_name = "seg_lungs"
+experiment_name = "seg_lungs_iou"
 checkpoint_dir = "ray_logs"
 
 
@@ -25,7 +25,7 @@ class CustomStopper(tune.Stopper):
         self.should_stop = False
 
     def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_loss"] < 1:  # todo: use IOU
+        if not self.should_stop and result["val_accuracy"] < 0.1:
             self.should_stop = True
         return self.should_stop
 
@@ -41,24 +41,33 @@ if __name__ == "__main__":
     # WANDB
     # adding wandb keys
     config["wandb"] = {
-        "project": "seg_lungs",
+        "project": "seg_lungs_iou",
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
     config["lr"] = tune.uniform(0.00001, 0.1)
     config["batch_size"] = tune.randint(16, 256)
     config["model_name"] = "small++"
+    config["w1"] = tune.randint(1, 20)
+    config["w2"] = tune.randint(1, 20)
     config["meta"] = True
     config["weighted"] = True
 
     utils.print_gre(config)
     # scheduler = AsyncHyperBandScheduler(
     scheduler = HyperBandForBOHB(
-        time_attr="training_iteration", metric="val_loss", mode="min"
+        time_attr="training_iteration",
+        metric="val_accuracy",
+        mode="min",
+        reduction_factor=1.5,
     )
 
     # Use bayesian optimisation with TPE implemented by hyperopt
-    search_alg = TuneBOHB(metric="val_loss", mode="min")
+    search_alg = TuneBOHB(
+        metric="val_accuracy",
+        mode="min",
+        max_concurrent=5,
+    )
 
     analysis = tune.run(
         t_seg.train,
@@ -74,6 +83,6 @@ if __name__ == "__main__":
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_loss", mode="min"),
+        analysis.get_best_config(metric="val_weighted_mean_io_u", mode="min"),
     )
     ray.shutdown()

@@ -1,7 +1,9 @@
+import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
 import tensorflow.keras.layers as layers
 import tensorflow.keras.regularizers as regularizers
+from tensorflow.python.framework import dtypes
 
 
 def block_down(inputs, filters, drop, w_decay=0.0001, kernel_size=3, name=""):
@@ -112,6 +114,75 @@ def weighted_cross_entropy(y_true, y_pred):
     )
 
     return K.mean(tf.multiply(weight, entropy), axis=-1)
+
+
+class WeightedMeanIoU(tf.keras.metrics.Metric):
+    def __init__(self, num_classes, name=None, dtype=None):
+        super(WeightedMeanIoU, self).__init__(name=name, dtype=dtype)
+        self.num_classes = num_classes
+        self.total_cm = self.add_weight(
+            "total_confusion_matrix",
+            shape=(num_classes, num_classes),
+            initializer=tf.zeros_initializer,
+            dtype=dtypes.float64,
+        )
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        try:
+            [seg, weight] = tf.unstack(y_true, 2, axis=3)
+
+            y_true = tf.expand_dims(seg, -1)
+            sample_weight = tf.expand_dims(weight, -1)
+        except Exception:
+            pass
+        y_true = tf.cast(y_true, self._dtype)
+        y_pred = tf.cast((y_pred > tf.constant(0.5)), self._dtype)
+
+        # Flatten the input if its rank > 1.
+        if y_pred.shape.ndims > 1:
+            y_pred = tf.reshape(y_pred, [-1])
+
+        if y_true.shape.ndims > 1:
+            y_true = tf.reshape(y_true, [-1])
+
+        if sample_weight is not None:
+            sample_weight = tf.cast(sample_weight, self._dtype)
+            if sample_weight.shape.ndims > 1:
+                sample_weight = tf.reshape(sample_weight, [-1])
+
+        # Accumulate the prediction to current confusion matrix.
+        current_cm = tf.math.confusion_matrix(
+            y_true,
+            y_pred,
+            self.num_classes,
+            weights=sample_weight,
+            dtype=dtypes.float64,
+        )
+        return self.total_cm.assign_add(current_cm)
+
+    def result(self):
+        """Compute the mean intersection-over-union via the confusion matrix."""
+        sum_over_row = tf.cast(tf.reduce_sum(self.total_cm, axis=0), dtype=self._dtype)
+        sum_over_col = tf.cast(tf.reduce_sum(self.total_cm, axis=1), dtype=self._dtype)
+        true_positives = tf.cast(
+            tf.linalg.tensor_diag_part(self.total_cm), dtype=self._dtype
+        )
+        denominator = sum_over_row + sum_over_col - true_positives
+        num_valid_entries = tf.reduce_sum(
+            tf.cast(tf.not_equal(denominator, 0), dtype=self._dtype)
+        )
+        iou = tf.math.divide_no_nan(true_positives, denominator)
+        return 1 - tf.math.divide_no_nan(
+            tf.reduce_sum(iou, name="mean_iou"), num_valid_entries
+        )
+
+    def reset_states(self):
+        K.set_value(self.total_cm, np.zeros((self.num_classes, self.num_classes)))
+
+    def get_config(self):
+        config = {"num_classes": self.num_classes}
+        base_config = super(WeightedMeanIoU, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
 
 
 def mean_iou(y_true, y_pred):

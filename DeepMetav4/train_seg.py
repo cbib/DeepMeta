@@ -35,9 +35,7 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
     )
     cb_list = [earlystopper, utils.CosLRDecay(args["n_epochs"], args["lr"])]
     if hp_search:
-        cb_list.append(
-            tune_rep.TuneReporter("val_loss")
-        )  # todo: use iou or dice (for lungs at least)
+        cb_list.append(tune_rep.TuneReporter(metric="val_weighted_mean_io_u"))
     else:
         cb_list.append(checkpoint)
     history = model_seg.fit(
@@ -48,12 +46,20 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
         epochs=args["n_epochs"],
         callbacks=cb_list,
     )
-    utils.plot_learning_curves(history, "segmentation_" + args["model_name"], metric)
+    if not hp_search:
+        utils.plot_learning_curves(
+            history, "segmentation_" + args["model_name"], metric
+        )
 
 
 if __name__ == "__main__":
     opt = vars(utils.get_args())
     if opt["meta"]:
-        train(opt, path_images=gv.meta_path_img, path_labels=gv.meta_path_lab)
+        train(
+            opt,
+            path_images=gv.meta_path_img,
+            path_labels=gv.meta_path_lab,
+            hp_search=False,
+        )
     else:
-        train(opt)
+        train(opt, hp_search=False)

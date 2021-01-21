@@ -244,7 +244,7 @@ def create_dataset(path_img, path_label, size):
     dataset = []
     label_list = []
     file_list = utils.list_files(path_img)
-    for file in file_list:
+    for file in file_list[:5000]:
         try:
             img = io.imread(path_img + file, plugin="tifffile")
             label = io.imread(path_label + file, plugin="tifffile")
@@ -254,6 +254,7 @@ def create_dataset(path_img, path_label, size):
             utils.print_red("Image {} not found.".format(file))
     utils.print_gre("Created !")
     utils.print_gre("Nb of images: {}".format(len(dataset)))
+    utils.print_red("Reduction du nombre d'img à la main (data.py:247)")
     return np.array(dataset), np.array(label_list, dtype=np.bool)
 
 
@@ -345,41 +346,32 @@ def prepare_for_training(path_data, path_label, file_path, opt):
     input_shape = (opt["size"], opt["size"], 1)
     utils.print_gre("Getting model...")
     strategy = tf.distribute.MirroredStrategy()
-    if opt["weighted"]:
-        with strategy.scope():
+    with strategy.scope():
+        model_seg = gv.model_list[opt["model_name"]](input_shape)
+        metric = "weighted_mean_io_u"
+        metric_fn = utils_model.WeightedMeanIoU(num_classes=2)
+        optim = tf.keras.optimizers.Adam(lr=opt["lr"])
+        checkpoint = callbacks.ModelCheckpoint(
+            file_path,
+            monitor="val_" + metric,
+            verbose=1,
+            save_best_only=True,
+            mode="min",
+        )
+        if opt["weighted"]:
             dataset, label = get_label_weights(
                 dataset, label, n_sample, opt["w1"], opt["w2"], size=opt["size"]
             )
-            model_seg = gv.model_list[opt["model_name"]](input_shape)
-            checkpoint = callbacks.ModelCheckpoint(
-                file_path,
-                monitor="val_loss",
-                verbose=1,
-                save_best_only=True,
-                mode="min",
-            )
-            metric = "loss"
             model_seg.compile(
                 loss=utils_model.weighted_cross_entropy,
-                optimizer=tf.keras.optimizers.Adam(lr=opt["lr"]),
+                optimizer=optim,
+                metrics=[metric_fn],  # todo: use iou custom here
             )
-    else:
-        with strategy.scope():
+        else:
             dataset = dataset.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
             label = label.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
-            model_seg = gv.model_list[opt["model_name"]](input_shape)
-            checkpoint = callbacks.ModelCheckpoint(
-                file_path,
-                monitor="val_accuracy",
-                verbose=1,
-                save_best_only=True,
-                mode="max",
-            )
-            metric = "accuracy"
             model_seg.compile(
-                optimizer=tf.keras.optimizers.Adam(lr=opt["lr"]),
-                loss="binary_crossentropy",
-                metrics=["accuracy"],
+                optimizer=optim, loss="binary_crossentropy", metrics=[metric_fn]
             )  # todo : fix mean iou
     utils.print_gre("Done!")
     utils.print_gre("Prepared !")
