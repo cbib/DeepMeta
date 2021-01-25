@@ -46,7 +46,7 @@ if __name__ == "__main__":
     }
 
     config["lr"] = tune.uniform(0.00001, 0.1)
-    config["batch_size"] = tune.randint(16, 256)
+    config["batch_size"] = tune.randint(16, 64)
     config["model_name"] = "small++"
     config["w1"] = tune.randint(1, 20)
     config["w2"] = tune.randint(1, 20)

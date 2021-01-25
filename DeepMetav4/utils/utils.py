@@ -15,6 +15,10 @@ def list_files(path):
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 
+def list_files_path(path):
+    return [path + f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+
 def plot_learning_curves(history, name, metric, path="plots/"):
     loss = history.history["loss"]
     val_loss = history.history["val_loss"]

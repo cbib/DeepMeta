@@ -117,7 +117,7 @@ def weighted_cross_entropy(y_true, y_pred):
 
 
 class WeightedMeanIoU(tf.keras.metrics.Metric):
-    def __init__(self, num_classes, name=None, dtype=None):
+    def __init__(self, num_classes, name=None, dtype=None, weighted=False):
         super(WeightedMeanIoU, self).__init__(name=name, dtype=dtype)
         self.num_classes = num_classes
         self.total_cm = self.add_weight(
@@ -126,18 +126,15 @@ class WeightedMeanIoU(tf.keras.metrics.Metric):
             initializer=tf.zeros_initializer,
             dtype=dtypes.float64,
         )
+        self.weighted = weighted
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        try:
+        if self.weighted:
             [seg, weight] = tf.unstack(y_true, 2, axis=3)
-
             y_true = tf.expand_dims(seg, -1)
             sample_weight = tf.expand_dims(weight, -1)
-        except Exception:
-            pass
         y_true = tf.cast(y_true, self._dtype)
         y_pred = tf.cast((y_pred > tf.constant(0.5)), self._dtype)
-
         # Flatten the input if its rank > 1.
         if y_pred.shape.ndims > 1:
             y_pred = tf.reshape(y_pred, [-1])
