@@ -50,6 +50,8 @@ if __name__ == "__main__":
     config["model_name"] = "small++"
     config["w1"] = tune.randint(1, 20)
     config["w2"] = tune.randint(1, 20)
+    config["drop_r"] = tune.uniform(0.1, 0.8)
+    config["filters"] = tune.choice([4, 8, 16, 32, 64])
     config["meta"] = True
     config["weighted"] = True
 

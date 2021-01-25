@@ -41,8 +41,8 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
     history = model_seg.fit(
         dataset,
         label,
-        # validation_split=0.2,
-        # batch_size=args["batch_size"],
+        validation_split=0.2,
+        batch_size=args["batch_size"],
         epochs=args["n_epochs"],
         callbacks=cb_list,
     )
@@ -54,7 +54,7 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
 
 def new_train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
     file_path = data.save_model_name(args, gv.PATH_SAVE)
-    dataset, model_seg, checkpoint, metric = data.new_prepare_for_training(
+    dataset, dataset_val, model_seg, checkpoint, metric = data.new_prepare_for_training(
         path_images, path_labels, file_path, args
     )
     earlystopper = keras.callbacks.EarlyStopping(
@@ -70,6 +70,9 @@ def new_train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=
         cb_list.append(checkpoint)
     history = model_seg.fit(
         dataset,
+        validation_data=dataset_val,
+        # use_multiprocessing=True,
+        # workers=8,
         epochs=args["n_epochs"],
         callbacks=cb_list,
     )

@@ -284,7 +284,9 @@ def prepare_for_training(path_data, path_label, file_path, opt):
     utils.print_gre("Getting model...")
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
-        model_seg = gv.model_list[opt["model_name"]](input_shape)
+        model_seg = gv.model_list[opt["model_name"]](
+            input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
+        )
         metric = "weighted_mean_io_u"
         metric_fn = utils_model.WeightedMeanIoU(num_classes=2)
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
@@ -316,11 +318,23 @@ def prepare_for_training(path_data, path_label, file_path, opt):
 
 
 def new_prepare_for_training(path_data, path_label, file_path, opt):
+    data_files = utils.list_files_path(path_data)
+    label_files = utils.list_files_path(path_label)
+    n_val = int(0.8 * len(data_files))
     dataset = Dataset(
         opt["batch_size"],
         opt["size"],
-        utils.list_files_path(path_data),
-        utils.list_files_path(path_label),
+        data_files[:n_val],
+        label_files[:n_val],
+        opt["weighted"],
+        opt["w1"],
+        opt["w2"],
+    )
+    dataset_val = Dataset(
+        opt["batch_size"],
+        opt["size"],
+        data_files[n_val:],
+        label_files[n_val:],
         opt["weighted"],
         opt["w1"],
         opt["w2"],
@@ -353,7 +367,7 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
             )
     utils.print_gre("Done!")
     utils.print_gre("Prepared !")
-    return dataset, model_seg, checkpoint, metric
+    return dataset, dataset_val, model_seg, checkpoint, metric
 
 
 def contraste_and_reshape(souris, size=128):
@@ -398,6 +412,7 @@ class Dataset(keras.utils.Sequence):
         self.weighted = weighted
         self.w1 = w1
         self.w2 = w2
+        assert len(input_img_paths) == len(target_img_paths)
 
     def __len__(self):
         return len(self.target_img_paths) // self.batch_size
