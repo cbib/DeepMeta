@@ -15,7 +15,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = -1  # -1 -> infinite, need stop condition
+num_samples = 50  # -1 -> infinite, need stop condition
 experiment_name = "seg_lungs_iou"
 checkpoint_dir = "ray_logs"
 
