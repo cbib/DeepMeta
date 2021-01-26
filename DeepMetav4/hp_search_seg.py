@@ -61,7 +61,7 @@ if __name__ == "__main__":
         time_attr="training_iteration",
         metric="val_accuracy",
         mode="min",
-        reduction_factor=1.5,
+        reduction_factor=3,
     )
 
     # Use bayesian optimisation with TPE implemented by hyperopt
