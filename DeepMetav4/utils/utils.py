@@ -54,7 +54,7 @@ def print_gre(skk):
     print("\033[92m{}\033[00m".format(skk))
 
 
-def sorted_aphanumeric(data):
+def sorted_alphanumeric(data):
     """
     :param data: list d'element alphanumerique.
     :return: list triee dans l'ordre croissant alphanumerique.
@@ -62,18 +62,6 @@ def sorted_aphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()  # noqa
     alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]  # noqa
     return sorted(data, key=alphanum_key)
-
-
-def calcul_numSouris(path_souris):
-    """
-    :param path_souris: path vers le dossier contenant des images de souris .tif
-    :return: une liste contenant le numéro de chaque souris
-    """
-    list_souris = sorted_aphanumeric(os.listdir(path_souris))
-    num_souris = []
-    for k in range(len(list_souris)):
-        num_souris.append(int(re.findall(r"\d+", list_souris[k])[0]))
-    return num_souris
 
 
 def border_detected(dataset, k, seg, path_result, name_folder, prefix="/p_"):
@@ -120,9 +108,6 @@ def get_args():
     parser.add_argument(
         "--patience", type=int, default=10, help="Set patience value for early stopper"
     )
-    # parser.add_argument("--load", type=str, default=gv.PATH_SAVE
-    #                     \ + "Poumons/test_small++_weighted24.h5",
-    #                     help="path for a model if you want to load weights")
     args = parser.parse_args()
     print_red(args)
     return args

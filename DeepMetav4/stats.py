@@ -102,7 +102,7 @@ def qualite_model(num, path_model_seg):
     if num == 56:
         n -= 1
     # Segmentation label
-    list_msk = utils.sorted_aphanumeric(os.listdir(path_souris_annotee))
+    list_msk = utils.sorted_alphanumeric(os.listdir(path_souris_annotee))
     y = [
         io.imread(path_souris_annotee + list_msk[i], plugin="tifffile")
         for i in range(len(list_msk))
@@ -128,7 +128,7 @@ def qualite_model_meta(num, path_seg, path_detect, detect_l, seg_l, size=128):
     path_msk = os.path.join(
         gv.PATH_DATA + "Souris_Test/", "Masque_Metas/Meta_" + str(num) + "/"
     )
-    list_msk = utils.sorted_aphanumeric(os.listdir(path_msk))
+    list_msk = utils.sorted_alphanumeric(os.listdir(path_msk))
     seg_true = np.zeros((128, size, size))
     for i in np.arange(len(list_msk)):
         seg_true[i] = io.imread(path_msk + list_msk[i], plugin="tifffile")

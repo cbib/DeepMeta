@@ -15,7 +15,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = 50  # -1 -> infinite, need stop condition
+num_samples = 100  # -1 -> infinite, need stop condition
 experiment_name = "seg_lungs_iou"
 checkpoint_dir = "ray_logs"
 
@@ -25,7 +25,7 @@ class CustomStopper(tune.Stopper):
         self.should_stop = False
 
     def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_accuracy"] < 0.1:
+        if not self.should_stop and result["val_accuracy"] < 0.15:
             self.should_stop = True
         return self.should_stop
 
@@ -45,12 +45,12 @@ if __name__ == "__main__":
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
-    config["lr"] = tune.uniform(0.00001, 0.1)
+    config["lr"] = tune.uniform(0.0001, 0.1)
     config["batch_size"] = tune.randint(16, 64)
     config["model_name"] = "small++"
     config["w1"] = tune.randint(1, 20)
-    config["w2"] = tune.randint(1, 20)
-    config["drop_r"] = tune.uniform(0.1, 0.8)
+    config["w2"] = tune.randint(2, 20)
+    config["drop_r"] = tune.uniform(0.2, 0.6)
     config["filters"] = tune.choice([4, 8, 16, 32, 64])
     config["meta"] = True
     config["weighted"] = True
@@ -61,14 +61,14 @@ if __name__ == "__main__":
         time_attr="training_iteration",
         metric="val_accuracy",
         mode="min",
-        reduction_factor=3,
+        reduction_factor=2,
     )
 
     # Use bayesian optimisation with TPE implemented by hyperopt
     search_alg = TuneBOHB(
         metric="val_accuracy",
         mode="min",
-        max_concurrent=5,
+        max_concurrent=10,
     )
 
     analysis = tune.run(

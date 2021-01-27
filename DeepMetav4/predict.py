@@ -25,7 +25,7 @@ def get_seg_dataset(full_souris, path_souris):
         mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
         mouse = np.array(mouse) / np.amax(mouse)
     else:
-        slices_list = utils.sorted_aphanumeric(os.listdir(path_souris))
+        slices_list = utils.sorted_alphanumeric(os.listdir(path_souris))
         s = np.zeros((len(slices_list), 128, 128))
         for i in range(len(slices_list)):
             s[i] = io.imread(path_souris + slices_list[i])

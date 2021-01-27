@@ -46,8 +46,6 @@ path_masked_img = os.path.join(PATH_DATA, "Metastases/masked_imgs/")
 meta_path_img = os.path.join(PATH_META, "Images/")
 meta_path_lab = os.path.join(PATH_META, "Labels/")
 
-numSouris = DeepMetav4.utils.utils.calcul_numSouris(path_souris)
-
 
 model_list = {
     "detection": DeepMetav4.models.model_detection.model_detection,
