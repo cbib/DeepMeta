@@ -19,7 +19,7 @@ num_samples = 100
 experiment_name = "detect_metas"
 
 if __name__ == "__main__":
-    ray.init(num_cpus=20, num_gpus=2)
+    ray.init(num_cpus=10, num_gpus=1)
 
     config = vars(utils.get_args())
 
