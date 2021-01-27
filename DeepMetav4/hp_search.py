@@ -4,8 +4,8 @@ import ray
 from ray import tune
 from ray.tune.integration.wandb import WandbLogger
 from ray.tune.logger import DEFAULT_LOGGERS
-from ray.tune.schedulers import AsyncHyperBandScheduler
-from ray.tune.suggest.hyperopt import HyperOptSearch
+from ray.tune.schedulers import HyperBandForBOHB
+from ray.tune.suggest.bohb import TuneBOHB
 
 import DeepMetav4.train_detect as t_detect
 import DeepMetav4.utils.utils as utils
@@ -15,7 +15,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = 12  # mandatory ?
+num_samples = 100  # mandatory ?
 experiment_name = "detect_metas"
 checkpoint_dir = "ray_logs"
 
@@ -27,23 +27,28 @@ if __name__ == "__main__":
     # WANDB
     # adding wandb keys
     config["wandb"] = {
-        "project": "deepmeta-detect-lungs",
+        "project": experiment_name,
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
-    config["lr"] = tune.choice([0.001, 0.002, 0.0001, 0.0002])
-    config["batch_size"] = tune.choice([64, 128, 256])
+    config["lr"] = tune.uniform(0.0001, 0.1)
+    config["batch_size"] = tune.randint(32, 256)
+    config["drop_r"] = tune.uniform(0.2, 0.6)
+    config["filters"] = tune.choice([4, 8, 16, 32, 64])
     config["model_name"] = "detection"
     config["meta"] = True
 
-    scheduler = AsyncHyperBandScheduler(
-        time_attr="training_iteration", metric="val_accuracy", mode="max"
-    )
-
-    # Use bayesian optimisation with TPE implemented by hyperopt
-    search_alg = HyperOptSearch(
+    scheduler = HyperBandForBOHB(
+        time_attr="training_iteration",
         metric="val_accuracy",
         mode="max",
+        reduction_factor=2,
+    )
+
+    search_alg = TuneBOHB(
+        metric="val_accuracy",
+        mode="max",
+        max_concurrent=10,
     )
 
     analysis = tune.run(
@@ -54,7 +59,7 @@ if __name__ == "__main__":
         name=experiment_name,
         num_samples=num_samples,
         search_alg=search_alg,
-        # scheduler=scheduler,
+        scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
     )
     print(

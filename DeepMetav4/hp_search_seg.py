@@ -56,7 +56,6 @@ if __name__ == "__main__":
     config["weighted"] = True
 
     utils.print_gre(config)
-    # scheduler = AsyncHyperBandScheduler(
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
         metric="val_accuracy",
@@ -64,7 +63,6 @@ if __name__ == "__main__":
         reduction_factor=2,
     )
 
-    # Use bayesian optimisation with TPE implemented by hyperopt
     search_alg = TuneBOHB(
         metric="val_accuracy",
         mode="min",

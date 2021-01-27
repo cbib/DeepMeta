@@ -103,6 +103,12 @@ def get_args():
     parser.add_argument(
         "--size", type=int, default=128, help="Size of the image, one number"
     )
+    parser.add_argument(
+        "--drop_r", type=float, default=0.2, help="Size of the image, one number"
+    )
+    parser.add_argument(
+        "--filters", type=int, default=16, help="Size of the image, one number"
+    )
     parser.add_argument("--w1", type=int, default=2, help="weight inside")
     parser.add_argument("--w2", type=int, default=4, help="Weight border")
     parser.add_argument(

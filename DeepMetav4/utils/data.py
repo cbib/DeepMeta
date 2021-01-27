@@ -86,7 +86,6 @@ def concat_and_normalize(l0, l1):
         sm_l = l0
         bg_l = l1
     list_size = len(sm_l)
-    # random.shuffle(l1)
     bg_l = bg_l[0:list_size]
     data_detec = sm_l + bg_l
     if inv:
@@ -344,7 +343,9 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
     utils.print_gre("Getting model...")
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
-        model_seg = gv.model_list[opt["model_name"]](input_shape)
+        model_seg = gv.model_list[opt["model_name"]](
+            input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
+        )
         metric = "weighted_mean_io_u"
         metric_fn = utils_model.WeightedMeanIoU(num_classes=2, weighted=opt["weighted"])
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])

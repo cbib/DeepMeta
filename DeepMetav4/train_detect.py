@@ -37,7 +37,9 @@ def train_detect(args, model_name="detection", hp_search=True):
     )
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
-        model_detect = gv.model_list[model_name](input_shape, args["lr"])
+        model_detect = gv.model_list[model_name](
+            input_shape, args["lr"], args["filters"]
+        )
         es = keras.callbacks.EarlyStopping(
             monitor="val_accuracy",
             mode="max",
