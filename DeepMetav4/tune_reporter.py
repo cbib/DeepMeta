@@ -10,6 +10,7 @@ class TuneReporter(keras.callbacks.Callback):
         self.metric = metric
 
     def on_epoch_end(self, epoch, logs=None):
+        print(logs)
         tune.report(
             keras_info=logs,
             val_loss=logs["val_loss"],

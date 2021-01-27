@@ -15,9 +15,8 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = 100  # mandatory ?
+num_samples = 100
 experiment_name = "detect_metas"
-checkpoint_dir = "ray_logs"
 
 if __name__ == "__main__":
     ray.init(num_cpus=20, num_gpus=2)
