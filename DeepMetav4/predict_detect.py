@@ -3,8 +3,6 @@
 
 import os
 
-import numpy as np
-import skimage.io as io
 import tensorflow.keras as keras
 
 import DeepMetav4.utils.data as data
@@ -15,13 +13,6 @@ import DeepMetav4.utils.utils as utils
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
-
-def get_images_from_mouse(path_mouse):
-    mouse = io.imread(path_mouse, plugin="tifffile").astype(np.uint8)
-    mouse = np.array(mouse) / np.amax(mouse)
-    return data.contraste_and_reshape(mouse)  # todo: don't run this on new batch images
-    # return mouse.reshape(-1, 128, 128, 1)
 
 
 def predict_detect(dataset, path_model_detect):
@@ -43,7 +34,12 @@ if __name__ == "__main__":
     # Modèle de détection meta #
     path_model_detect_meta = os.path.join(gv.PATH_SAVE, "Metastases/model_detection.h5")
 
-    slist = [souris_8, souris_28, souris_56, souris_new]
+    slist = [
+        (souris_8, True),
+        (souris_28, True),
+        (souris_56, True),
+        (souris_new, False),
+    ]
     # slist = [souris_new]
     nlist = [
         "souris_8",
@@ -54,7 +50,7 @@ if __name__ == "__main__":
     merged_list = zip(slist, nlist)
     for (souris, name) in merged_list:
         utils.print_red(name)
-        dataset = get_images_from_mouse(souris)
+        dataset = data.get_predict_dataset(souris[0], souris[1])
         res = predict_detect(dataset, path_model_detect)
         res_meta = predict_detect(dataset, path_model_detect_meta)
         utils.print_gre("\tRes detect lungs : {}".format(res))

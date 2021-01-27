@@ -19,13 +19,6 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-def get_seg_dataset(path_souris):
-    mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
-    mouse = np.array(mouse) / np.amax(mouse)
-    return data.contraste_and_reshape(mouse)
-    # return np.array(mouse).reshape(-1, 128, 128, 1)
-
-
 def predict_seg(dataset, path_model_seg):
     if "weighted" not in path_model_seg:
         model_seg = keras.models.load_model(
@@ -80,7 +73,12 @@ if __name__ == "__main__":
         gv.PATH_SAVE, "Metastases/128model_small++_weighted24.h5"
     )
 
-    slist = [souris_8, souris_28, souris_56, souris_new]
+    slist = [
+        (souris_8, True),
+        (souris_28, True),
+        (souris_56, True),
+        (souris_new, False),
+    ]
     # slist = [souris_new]
     nlist = [
         "souris_8",
@@ -91,7 +89,7 @@ if __name__ == "__main__":
     merged_list = zip(slist, nlist)
     for (souris, name) in merged_list:
         utils.print_red(name)
-        dataset = get_seg_dataset(souris)
+        dataset = data.get_predict_dataset(souris[0], souris[1])
         res_lungs = predict_seg(dataset, path_model_seg)
         res_meta = predict_seg(dataset, path_model_seg_meta)
         # res_lungs = postprocess_loop(res_lungs)

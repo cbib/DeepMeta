@@ -393,6 +393,16 @@ def contraste_and_reshape(souris, size=128):
         return img
 
 
+def get_predict_dataset(path_souris, contrast=True):
+    mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
+    mouse = np.array(mouse) / np.amax(mouse)
+    if contrast:
+        mouse = contraste_and_reshape(mouse)
+    else:
+        mouse = np.array(mouse).reshape(-1, 128, 128, 1)
+    return mouse
+
+
 class Dataset(keras.utils.Sequence):
     """Helper to iterate over the data (as Numpy arrays)."""
 

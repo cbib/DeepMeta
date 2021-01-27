@@ -18,6 +18,20 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 num_samples = 100
 experiment_name = "detect_metas"
 
+
+class CustomStopper(tune.Stopper):
+    def __init__(self):
+        self.should_stop = False
+
+    def __call__(self, trial_id, result):
+        if not self.should_stop and result["val_accuracy"] > 0.95:
+            self.should_stop = True
+        return self.should_stop
+
+    def stop_all(self):
+        return self.should_stop
+
+
 if __name__ == "__main__":
     ray.init(num_cpus=20, num_gpus=2)
 
@@ -37,6 +51,7 @@ if __name__ == "__main__":
     config["model_name"] = "detection"
     config["meta"] = True
 
+    utils.print_gre(config)
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
         metric="val_accuracy",
@@ -60,6 +75,7 @@ if __name__ == "__main__":
         search_alg=search_alg,
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
+        stop=CustomStopper(),
     )
     print(
         "Best hyperparameters found were: ",

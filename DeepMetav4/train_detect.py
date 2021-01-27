@@ -41,7 +41,7 @@ def train_detect(args, model_name="detection", hp_search=True):
             input_shape, args["lr"], drop_r=args["drop_r"], filters=args["filters"]
         )
         es = keras.callbacks.EarlyStopping(
-            monitor="val_accuracy",
+            monitor="accuracy",
             mode="max",
             verbose=1,
             patience=args["patience"],
