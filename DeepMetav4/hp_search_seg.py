@@ -16,7 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 100  # -1 -> infinite, need stop condition
-experiment_name = "seg_lungs_iou"
+experiment_name = "seg_metas_iou"
 
 
 class CustomStopper(tune.Stopper):
