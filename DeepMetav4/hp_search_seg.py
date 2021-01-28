@@ -17,7 +17,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 100  # -1 -> infinite, need stop condition
 experiment_name = "seg_lungs_iou"
-checkpoint_dir = "ray_logs"
 
 
 class CustomStopper(tune.Stopper):
@@ -41,7 +40,7 @@ if __name__ == "__main__":
     # WANDB
     # adding wandb keys
     config["wandb"] = {
-        "project": "seg_lungs_iou",
+        "project": experiment_name,
         "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
@@ -78,7 +77,7 @@ if __name__ == "__main__":
         num_samples=num_samples,
         search_alg=search_alg,
         scheduler=scheduler,
-        resources_per_trial={"cpu": 20, "gpu": 2},
+        resources_per_trial={"cpu": 10, "gpu": 1},
         stop=CustomStopper(),
     )
     print(
