@@ -19,7 +19,7 @@ conda env create -f environment.yml
 ## Usage
 
 ### Set up gpus
-The file `train.py` is used to train the networks, at the beginning of the file we can find Gpus ids, if you want to specify wich Gpu(s) to use just add or remove your ids in this line :
+At the beginning of the scripts you can find Gpus ids, if you want to specify wich Gpu(s) to use just add or remove your ids in this line :
 ```python
 os.environ["CUDA_VISIBLE_DEVICES"] = "id0, id1, ...."
 ```
@@ -32,19 +32,18 @@ In the file `utils/global_vars.py` you will find all the paths to the dataset an
 
 By calling train scripts you can pass some arguments that will define the setup of the training :
 ```shell script
-  --n_epochs N_EPOCHS   number of epochs of training
-  --batch_size BATCH_SIZE
-                        size of the batches
-  --lr LR               adam: learning rate
-  --model_name MODEL_NAME
-                        Name of the model you want to train (detection,
-                        small++)
-  --meta META           True if we want to segment metastasis
-  --weighted WEIGHTED   Use weighted model (default False)
-  --size SIZE           Size of the image, one number
-  --w1 W1               weight inside
-  --w2 W2               Weight border
-  --patience PATIENCE   Set patience value for early stopper
+  --n_epochs N_EPOCHS      number of epochs of training
+  --batch_size BATCH_SIZE  size of the batches
+  --lr LR                  adam: learning rate
+  --model_name MODEL_NAME  Name of the model you want to train (detection, small++)
+  --meta META              True if we want to segment metastasis
+  --weighted WEIGHTED      Use weighted model (default False)
+  --size SIZE              Size of the image, one number
+  --w1 W1                  weight inside
+  --w2 W2                  Weight border
+  --patience PATIENCE      Set patience value for early stopper
+  --filters FILTERS        Number of filters in the first conv block
+  --drop_r RATE            Dropout rate
 ```
 
 #### Run training
@@ -68,45 +67,49 @@ python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=
 
 ### Prediction
 
-All the parameters you need to set are in the main section of the `predict.py` file.
-
-
-## Lungs
-### Detection
-todo : here stats + img of segmented lungs
-### Segmentation
-## Metastasis
-### Detection
-### Segmentation
-todo : here stats + img of segmented metas
-
-## Issue
-
-There is an issue with tensorflow 2.2, the graph construction takes around 10 min to be done. This is quiet
-disturbing. We can't do anything against that, except waiting for the next tensorflow release.
-
---------------------------------------------
---------------------------------------------
---------------------------------------------
-
-# Souvenir de ce merveilleux code
-
-## Train seg
+If you want to predict detection :
 ```shell script
-python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.0002 --patience=100 --meta=True --weighted=True --w1=10 --w2=20
+python -m DeepMetav4.predict_detect
 ```
 
-## Train classify
+If you want to segment images :
 ```shell script
- python -m DeepMetav4.train_detect --batch_size=32 --model_name=resnetv2 --n_epochs=200 --lr=0.01 --patience=1000 --meta=True
+python -m DeepMetav4.predict_seg
 ```
 
 
-On avait plus ou moins fixer le model pour classifier les metas (pas de très bons res, on attend les nouvelles souris + sanity checker permettrait de ne pas louper de slice)
+[comment]: <> (## Lungs)
 
-model resnet 50 pour classify meta -> mettre les poids dans netron pour voir le model
+[comment]: <> (### Detection)
 
-Rien de concluant sur la segmentation des métas, juste ça ne seg pas quand on applique le masque sur l'image.
+[comment]: <> (todo : here stats + img of segmented lungs)
+
+[comment]: <> (### Segmentation)
+
+[comment]: <> (## Metastasis)
+
+[comment]: <> (### Detection)
+
+[comment]: <> (### Segmentation)
+
+[comment]: <> (todo : here stats + img of segmented metas)
+
+## Hyper-parameter search
+
+To find the optimal solution to our tasks, we use a combination of `Ray Tune` and `WandB`
+to implement hyper parameter search. Basically, we use the BOHB scheduler and search algorithm.
+The parameters we search for are :
+- batch_size
+- learning rate
+- dropout rate
+- number of filters
+- cross entropy weights
+
+To run HP search :
+```shell
+python -m DeepMetav4.hp_search  # search for detection tasks
+python -m DeepMetav4.hp_search_seg  # search for segmentation tasks
+```
 
 # Sanity checker ideas
 
