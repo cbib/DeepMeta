@@ -169,7 +169,7 @@ class WeightedMeanIoU(tf.keras.metrics.Metric):
             tf.cast(tf.not_equal(denominator, 0), dtype=self._dtype)
         )
         iou = tf.math.divide_no_nan(true_positives, denominator)
-        return 1 - tf.math.divide_no_nan(
+        return tf.math.divide_no_nan(
             tf.reduce_sum(iou, name="mean_iou"), num_valid_entries
         )
 

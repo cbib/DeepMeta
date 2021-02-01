@@ -58,13 +58,13 @@ if __name__ == "__main__":
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
         metric="val_accuracy",
-        mode="min",
+        mode="max",
         reduction_factor=2,
     )
 
     search_alg = TuneBOHB(
         metric="val_accuracy",
-        mode="min",
+        mode="max",
         max_concurrent=5,
     )
 

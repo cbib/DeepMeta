@@ -354,7 +354,7 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
             monitor="val_" + metric,
             verbose=1,
             save_best_only=True,
-            mode="min",
+            mode="max",
         )
         if opt["weighted"]:
             model_seg.compile(
