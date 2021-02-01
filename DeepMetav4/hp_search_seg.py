@@ -16,7 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 100  # -1 -> infinite, need stop condition
-experiment_name = "seg_metas_iou"
+experiment_name = "seg_lungs_iou"
 
 
 class CustomStopper(tune.Stopper):
@@ -24,7 +24,7 @@ class CustomStopper(tune.Stopper):
         self.should_stop = False
 
     def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_accuracy"] < 0.15:
+        if not self.should_stop and result["val_accuracy"] < 0.1:
             self.should_stop = True
         return self.should_stop
 
@@ -47,11 +47,11 @@ if __name__ == "__main__":
     config["lr"] = tune.uniform(0.0001, 0.1)
     config["batch_size"] = tune.randint(16, 64)
     config["model_name"] = "small++"
-    config["w1"] = tune.randint(1, 20)
+    config["w1"] = tune.randint(1, 10)
     config["w2"] = tune.randint(2, 20)
-    config["drop_r"] = tune.uniform(0.2, 0.6)
+    config["drop_r"] = tune.uniform(0.2, 0.5)
     config["filters"] = tune.choice([4, 8, 16, 32, 64])
-    config["meta"] = True
+    config["meta"] = False
     config["weighted"] = True
 
     utils.print_gre(config)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     search_alg = TuneBOHB(
         metric="val_accuracy",
         mode="min",
-        max_concurrent=10,
+        max_concurrent=5,
     )
 
     analysis = tune.run(

@@ -170,7 +170,7 @@ def concat_with_mask(im, i, path_mask, pref, png=True):
 
 def apply_mask(img, path_img, path_mask):
     im = io.imread(path_img + img)
-    im_mask = io.imread(path_mask + img) / 255  # -> donne img normales
+    im_mask = io.imread(path_mask + img) / 255
     return im * im_mask
 
 
