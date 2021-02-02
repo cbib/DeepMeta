@@ -82,6 +82,6 @@ if __name__ == "__main__":
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_weighted_mean_io_u", mode="min"),
+        analysis.get_best_config(metric="val_weighted_mean_io_u", mode="max"),
     )
     ray.shutdown()

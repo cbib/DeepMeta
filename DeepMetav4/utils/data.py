@@ -316,7 +316,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
     return dataset, label, model_seg, checkpoint, metric
 
 
-def new_prepare_for_training(path_data, path_label, file_path, opt):
+def get_dataset(path_data, path_label, opt):
     data_files = utils.list_files_path(path_data)
     label_files = utils.list_files_path(path_label)
     n_val = int(0.8 * len(data_files))
@@ -338,6 +338,11 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
         opt["w1"],
         opt["w2"],
     )
+    return dataset, dataset_val
+
+
+def new_prepare_for_training(path_data, path_label, file_path, opt):
+    dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
     input_shape = (opt["size"], opt["size"], 1)
     utils.print_gre("Getting model...")
@@ -346,8 +351,8 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
         model_seg = gv.model_list[opt["model_name"]](
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
-        metric = "weighted_mean_io_u"
-        metric_fn = utils_model.WeightedMeanIoU(num_classes=2, weighted=opt["weighted"])
+        metric = "binary_accuracy"
+        metric_fn = tf.keras.metrics.BinaryAccuracy()
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
@@ -357,15 +362,14 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
             mode="max",
         )
         if opt["weighted"]:
-            model_seg.compile(
-                loss=utils_model.weighted_cross_entropy,
-                optimizer=optim,
-                metrics=[metric_fn],
-            )
+            loss_fn = utils_model.weighted_cross_entropy
         else:
-            model_seg.compile(
-                optimizer=optim, loss="binary_crossentropy", metrics=[metric_fn]
-            )
+            loss_fn = "binary_crossentropy"
+        model_seg.compile(
+            loss=loss_fn,
+            optimizer=optim,
+            metrics=[metric_fn],
+        )
     utils.print_gre("Done!")
     utils.print_gre("Prepared !")
     return dataset, dataset_val, model_seg, checkpoint, metric
