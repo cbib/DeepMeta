@@ -41,16 +41,16 @@ if __name__ == "__main__":
     # adding wandb keys
     config["wandb"] = {
         "project": experiment_name,
-        "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
+        "api_file": ".wandb_key",
     }
 
-    config["lr"] = tune.uniform(0.0001, 0.1)
-    config["batch_size"] = tune.randint(16, 64)
+    config["lr"] = tune.uniform(0.0001, 0.1)  # qunifrom -> give a step ?
+    config["batch_size"] = tune.randint(32, 128)
     config["model_name"] = "small++"
     config["w1"] = tune.randint(1, 10)
     config["w2"] = tune.randint(2, 20)
     config["drop_r"] = tune.uniform(0.2, 0.5)
-    config["filters"] = tune.choice([4, 8, 16, 32, 64])
+    config["filters"] = tune.choice([4, 8, 16, 32])  # remove 32??
     config["meta"] = False
     config["weighted"] = True
 
