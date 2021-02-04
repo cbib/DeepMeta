@@ -5,7 +5,9 @@ import os
 import random
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import skimage.exposure as exposure
 import skimage.io as io
 import skimage.measure as measure
@@ -450,3 +452,41 @@ class Dataset(keras.utils.Sequence):
             n_sample = random.sample(list(n), len(n))
             x, y = get_label_weights(x, y, n_sample, self.w1, self.w2)
         return x, y
+
+
+def plot_iou(result, label, title, save=False):
+    fig = plt.figure(1, figsize=(12, 12))
+    for i in range(len(label)):
+        plt.plot(np.arange(len(result)) + 29, result.values[:, i], label=label[i])
+    plt.ylim(0.2, 1)
+    plt.xlabel("Slices", fontsize=18)
+    plt.ylabel("IoU", fontsize=18)
+    plt.legend()
+    plt.title(title)
+    if save:
+        fig.savefig(gv.PATH_RES + "stats/plot_iou_" + title + ".png")
+    plt.close("all")
+
+
+def box_plot(result, label, title, save=False):
+    fig = plt.figure(1, figsize=(15, 15))
+    plt.boxplot([result.values[:, i] for i in range(len(label))])
+    plt.ylim(0, 1)
+    plt.xlabel("Model", fontsize=18)
+    plt.ylabel("IoU", fontsize=18)
+    plt.gca().xaxis.set_ticklabels(label)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.title(title, fontsize=18)
+    if save:
+        fig.savefig(gv.PATH_RES + "stats/boxplot_" + title + ".png")
+    plt.close("all")
+
+
+def heat_map(result, title, slice_begin=30, slice_end=106, save=False):
+    fig = plt.figure(1, figsize=(12, 12))
+    sns.heatmap(result[slice_begin:slice_end])
+    plt.title(title)
+    if save:
+        fig.savefig(gv.PATH_RES + "stats/heat_map_" + title + ".png")
+    plt.close("all")
