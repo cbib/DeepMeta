@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # adding wandb keys
     config["wandb"] = {
         "project": experiment_name,
-        "api_file": ".wandb_key",
+        "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
     config["lr"] = tune.choice([0.01, 0.001, 0.0001])
