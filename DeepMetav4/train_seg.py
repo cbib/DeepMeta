@@ -65,7 +65,7 @@ def new_train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=
     )
     cb_list = [earlystopper, utils.CosLRDecay(args["n_epochs"], args["lr"])]
     if hp_search:
-        cb_list.append(tune_rep.TuneReporter(metric="val_binary_accuracy"))
+        cb_list.append(tune_rep.TuneReporter(metric="val_weighted_bin_acc"))
     else:
         cb_list.append(checkpoint)
     history = model_seg.fit(
