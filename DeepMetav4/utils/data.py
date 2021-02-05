@@ -342,7 +342,7 @@ def get_dataset(path_data, path_label, opt):
 
 
 def weighted_bin_acc(y_true, y_pred):
-    return tf.keras.metrics.binary_accuracy(y_true[:, :, :, 0], y_pred)
+    return tf.keras.metrics.binary_accuracy(tf.reshape(y_true[:, :, :, 0], (-1, 128, 128, 1)), y_pred)
 
 
 def new_prepare_for_training(path_data, path_label, file_path, opt):
