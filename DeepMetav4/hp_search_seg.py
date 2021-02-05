@@ -57,13 +57,13 @@ if __name__ == "__main__":
     utils.print_gre(config)
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
-        metric="val_binary_accuracy",
+        metric="val_weighted_bin_acc",
         mode="max",
         reduction_factor=2,
     )
 
     search_alg = TuneBOHB(
-        metric="val_binary_accuracy",
+        metric="val_weighted_bin_acc",
         mode="max",
         max_concurrent=5,
     )
@@ -82,6 +82,6 @@ if __name__ == "__main__":
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_binary_accuracy", mode="max"),
+        analysis.get_best_config(metric="val_weighted_bin_acc", mode="max"),
     )
     ray.shutdown()
