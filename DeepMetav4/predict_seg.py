@@ -21,9 +21,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 def predict_seg(dataset, path_model_seg):
     if "weighted" not in path_model_seg:
-        model_seg = keras.models.load_model(
-            path_model_seg
-        )  # todo: si explosion -> load wei iou
+        model_seg = keras.models.load_model(path_model_seg)
     else:
         model_seg = keras.models.load_model(
             path_model_seg,

@@ -132,17 +132,15 @@ def create_dataset_detect(path_img, tab, size):
     for i in range(len(tab)):
         try:
             im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
+            im = im / np.amax(im)
+            im90, im180, im270 = rotate_img(im)
             if tab[i, 3] == 1:
-                im = im / np.amax(im)
-                im90, im180, im270 = rotate_img(im)
                 data_detec_1.append(im)
                 data_detec_1.append(im90)
                 data_detec_1.append(im180)
                 data_detec_1.append(im270)
                 # data_detec_1.append(elastic_transform(im))
             else:
-                im = im / np.amax(im)
-                im90, im180, im270 = rotate_img(im)
                 data_detec_0.append(im)
                 data_detec_0.append(im90)
                 data_detec_0.append(im180)
@@ -181,7 +179,7 @@ def create_dataset(path_img, path_label, size):
     dataset = []
     label_list = []
     file_list = utils.list_files(path_img)
-    for file in file_list[:5000]:
+    for file in file_list:
         try:
             img = io.imread(path_img + file, plugin="tifffile")
             label = io.imread(path_label + file, plugin="tifffile")

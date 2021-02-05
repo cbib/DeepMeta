@@ -60,6 +60,23 @@ model_list = {
     "resnetv2": DeepMetav4.models.model_resnet.resnetv2,
 }
 
+# Souris Test #
+souris_8 = os.path.join(PATH_DATA, "Souris_Test/souris_8.tif")
+souris_28 = os.path.join(PATH_DATA, "Souris_Test/souris_28.tif")
+souris_56 = os.path.join(PATH_DATA, "Souris_Test/souris_56.tif")
+souris_new = os.path.join(PATH_DATA, "Souris_Test/m2Pc_c1_10Corr_1.tif")
+slist = [
+    (souris_8, True),
+    (souris_28, True),
+    (souris_56, True),
+    (souris_new, False),
+]
+nlist = [
+    "souris_8",
+    "souris_28",
+    "souris_56",
+    "m2Pc_c1_10Corr_1",
+]  # 28 saine, 8 petites meta, 56 grosses meta
 
 # TEST LABELS
 label_list = [
@@ -433,7 +450,7 @@ label_list = [
         1,
         1,
         1,
-        1,
+        0,
         0,
         0,
         0,
@@ -470,7 +487,7 @@ label_list = [
         0,
         0,
         0,
-        0,
+        1,
         1,
         1,
         1,
