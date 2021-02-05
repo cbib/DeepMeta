@@ -16,7 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 100  # -1 -> infinite, need stop condition
-experiment_name = "seg_lungs_iou"
+experiment_name = "seg_meta_bin_acc"
 
 
 class CustomStopper(tune.Stopper):
@@ -24,7 +24,7 @@ class CustomStopper(tune.Stopper):
         self.should_stop = False
 
     def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_accuracy"] < 0.1:
+        if not self.should_stop and result["val_accuracy"] < 0.1:  # always val acc
             self.should_stop = True
         return self.should_stop
 
@@ -44,26 +44,26 @@ if __name__ == "__main__":
         "api_file": ".wandb_key",
     }
 
-    config["lr"] = tune.uniform(0.0001, 0.1)  # qunifrom -> give a step ?
-    config["batch_size"] = tune.randint(32, 128)
+    config["lr"] = tune.choice([0.01, 0.001, 0.0001])
+    config["batch_size"] = tune.qrandint(32, 256, 32)
     config["model_name"] = "small++"
     config["w1"] = tune.randint(1, 10)
-    config["w2"] = tune.randint(2, 20)
-    config["drop_r"] = tune.uniform(0.2, 0.5)
-    config["filters"] = tune.choice([4, 8, 16, 32])  # remove 32??
-    config["meta"] = False
+    config["w2"] = tune.randint(2, 10)
+    config["drop_r"] = tune.quniform(0.2, 0.5, 0.1)
+    config["filters"] = tune.choice([4, 8, 16])
+    config["meta"] = True
     config["weighted"] = True
 
     utils.print_gre(config)
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
-        metric="val_accuracy",
+        metric="val_binary_accuracy",
         mode="max",
         reduction_factor=2,
     )
 
     search_alg = TuneBOHB(
-        metric="val_accuracy",
+        metric="val_binary_accuracy",
         mode="max",
         max_concurrent=5,
     )
@@ -82,6 +82,6 @@ if __name__ == "__main__":
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_weighted_mean_io_u", mode="max"),
+        analysis.get_best_config(metric="val_binary_accuracy", mode="max"),
     )
     ray.shutdown()

@@ -60,16 +60,16 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 
     shape = image.shape
     dx = (
-        gaussian_filter(
-            (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
-        )
-        * alpha
+            gaussian_filter(
+                (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+            )
+            * alpha
     )
     dy = (
-        gaussian_filter(
-            (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
-        )
-        * alpha
+            gaussian_filter(
+                (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+            )
+            * alpha
     )
 
     x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]))
@@ -341,6 +341,10 @@ def get_dataset(path_data, path_label, opt):
     return dataset, dataset_val
 
 
+def weighted_bin_acc(y_true, y_pred):
+    return tf.keras.metrics.binary_accuracy(y_true[:, :, :, 0], y_pred)
+
+
 def new_prepare_for_training(path_data, path_label, file_path, opt):
     dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
@@ -351,8 +355,8 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
         model_seg = gv.model_list[opt["model_name"]](
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
-        metric = "binary_accuracy"
-        metric_fn = tf.keras.metrics.BinaryAccuracy()
+        metric = "weighted_bin_acc"
+        metric_fn = weighted_bin_acc
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
@@ -411,14 +415,14 @@ class Dataset(keras.utils.Sequence):
     """Helper to iterate over the data (as Numpy arrays)."""
 
     def __init__(
-        self,
-        batch_size,
-        img_size,
-        input_img_paths,
-        target_img_paths,
-        weighted=False,
-        w1=None,
-        w2=None,
+            self,
+            batch_size,
+            img_size,
+            input_img_paths,
+            target_img_paths,
+            weighted=False,
+            w1=None,
+            w2=None,
     ):
         self.batch_size = batch_size
         self.img_size = img_size
@@ -435,8 +439,8 @@ class Dataset(keras.utils.Sequence):
     def __getitem__(self, idx):
         """Returns tuple (input, target) correspond to batch #idx."""
         i = idx * self.batch_size
-        batch_input_img_paths = self.input_img_paths[i : i + self.batch_size]
-        batch_target_img_paths = self.target_img_paths[i : i + self.batch_size]
+        batch_input_img_paths = self.input_img_paths[i: i + self.batch_size]
+        batch_target_img_paths = self.target_img_paths[i: i + self.batch_size]
         x = np.zeros((self.batch_size, self.img_size, self.img_size, 1), dtype="uint8")
         for j, path in enumerate(batch_input_img_paths):
             img = np.array(load_img(path, color_mode="grayscale")) / 255
