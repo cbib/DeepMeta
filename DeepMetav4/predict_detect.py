@@ -53,5 +53,5 @@ if __name__ == "__main__":
         dataset = data.get_predict_dataset(souris[0], souris[1])
         res = predict_detect(dataset, path_model_detect)
         res_meta = predict_detect(dataset, path_model_detect_meta)
-        utils.print_gre("\tRes detect lungs : {}".format(res))
+        utils.print_gre("\tRes detect lungs : {}\n".format(res))
         utils.print_gre("\tRes detect meta : {}\n\n".format(res_meta))
