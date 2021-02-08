@@ -115,13 +115,14 @@ if __name__ == "__main__":
         gv.PATH_SAVE, "Poumons/best_small++_weighted_24.h5"
     )
     path_model_seg_metas = os.path.join(
-        gv.PATH_SAVE, "Metastases/128model_unet_weighted1015.h5"
+        gv.PATH_SAVE, "Metastases/128model_small++_weighted24.h5"
     )
 
-    merged_list = zip(gv.slist, gv.nlist, gv.label_list)
-    for (souris, name, label) in merged_list:
+    merged_list = zip(gv.slist, gv.nlist, gv.label_list, gv.meta_label_list)
+    for (souris, name, label, label_meta) in merged_list:
         utils.print_red(name)
         dataset = data.get_predict_dataset(souris[0], souris[1])
+        # LUNGS
         slices = select_slices(dataset, label)
         res = p_seg.predict_seg(slices, path_model_seg_lungs)
         res = res.reshape(len(res), 128, 128)
@@ -130,4 +131,17 @@ if __name__ == "__main__":
             len(res), len(label_masks)
         )
         acc = process_acc(res, label_masks)
-        utils.print_gre(np.mean(acc))
+        utils.print_gre("acc lungs : {}".format(np.mean(acc)))
+        # METAS
+        slices_metas = select_slices(dataset, label_meta)
+        if len(slices_metas) > 0:
+            res_metas = p_seg.predict_seg(slices_metas, path_model_seg_metas)
+            res_metas = res_metas.reshape(len(res_metas), 128, 128)
+            label_masks_metas = get_label_masks(souris[0], name, folder="metas")
+            assert len(res) == len(label_masks), "Meta : len res : {}; len labels : {}".format(
+                len(res), len(label_masks)
+            )
+            acc = process_acc(res_metas, label_masks_metas)
+            utils.print_gre("acc metas : {}".format(np.mean(acc)))
+        else:
+            utils.print_gre("no metas")
