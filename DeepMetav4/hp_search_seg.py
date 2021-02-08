@@ -69,7 +69,7 @@ if __name__ == "__main__":
     )
 
     analysis = tune.run(
-        t_seg.new_train,
+        t_seg.train,
         loggers=DEFAULT_LOGGERS + (WandbLogger,),
         config=config,
         local_dir="ray_results",

@@ -5,9 +5,7 @@ import os
 import random
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import skimage.exposure as exposure
 import skimage.io as io
 import skimage.measure as measure
@@ -60,16 +58,16 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 
     shape = image.shape
     dx = (
-            gaussian_filter(
-                (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
-            )
-            * alpha
+        gaussian_filter(
+            (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+        )
+        * alpha
     )
     dy = (
-            gaussian_filter(
-                (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
-            )
-            * alpha
+        gaussian_filter(
+            (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+        )
+        * alpha
     )
 
     x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]))
@@ -79,6 +77,10 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 
 
 def concat_and_normalize(l0, l1):
+    random.shuffle(
+        l0
+    )  # todo: trouver meilleure sol pour avoir autant d'img des 2 batchs
+    random.shuffle(l1)
     inv = False
     if len(l1) < len(l0):
         sm_l = l1
@@ -160,57 +162,57 @@ def create_dataset_detect(path_img, tab, size):
     return data_detec, label_detec
 
 
-def concat_with_mask(im, i, path_mask, pref, png=True):
-    if png:
-        im_mask = io.imread(path_mask + pref + str(i) + ".png")  # , plugin='tifffile')
-    else:
-        im_mask = io.imread(path_mask + pref + str(i), plugin="tifffile")
-    return np.concatenate([im[:, :, np.newaxis], im_mask[:, :, np.newaxis]], 2)
+# def concat_with_mask(im, i, path_mask, pref, png=True):
+#     if png:
+#         im_mask = io.imread(path_mask + pref + str(i) + ".png")
+#     else:
+#         im_mask = io.imread(path_mask + pref + str(i), plugin="tifffile")
+#     return np.concatenate([im[:, :, np.newaxis], im_mask[:, :, np.newaxis]], 2)
 
 
-def apply_mask(img, path_img, path_mask):
-    im = io.imread(path_img + img)
-    im_mask = io.imread(path_mask + img) / 255
-    return im * im_mask
+# def apply_mask(img, path_img, path_mask):
+#     im = io.imread(path_img + img)
+#     im_mask = io.imread(path_mask + img) / 255
+#     return im * im_mask
 
 
-def create_dataset(path_img, path_label, size):
-    utils.print_gre("Creating dataset...")
-    dataset = []
-    label_list = []
-    file_list = utils.list_files(path_img)
-    for file in file_list:
-        try:
-            img = io.imread(path_img + file, plugin="tifffile")
-            label = io.imread(path_label + file, plugin="tifffile")
-            dataset.append((np.array(img) / 255).reshape(-1, size, size, 1))
-            label_list.append(label)
-        except Exception:
-            utils.print_red("Image {} not found.".format(file))
-    utils.print_gre("Created !")
-    utils.print_gre("Nb of images: {}".format(len(dataset)))
-    utils.print_red("Reduction du nombre d'img à la main (data.py:247)")
-    return np.array(dataset), np.array(label_list, dtype=np.bool)
+# def create_dataset(path_img, path_label, size):
+#     utils.print_gre("Creating dataset...")
+#     dataset = []
+#     label_list = []
+#     file_list = utils.list_files(path_img)
+#     for file in file_list:
+#         try:
+#             img = io.imread(path_img + file, plugin="tifffile")
+#             label = io.imread(path_label + file, plugin="tifffile")
+#             dataset.append((np.array(img) / 255).reshape(-1, size, size, 1))
+#             label_list.append(label)
+#         except Exception:
+#             utils.print_red("Image {} not found.".format(file))
+#     utils.print_gre("Created !")
+#     utils.print_gre("Nb of images: {}".format(len(dataset)))
+#     utils.print_red("Reduction du nombre d'img à la main (data.py:247)")
+#     return np.array(dataset), np.array(label_list, dtype=np.bool)
 
 
-def create_dataset_concat(path_img, path_label, path_mask, opt):
-    utils.print_gre("Creating dataset...")
-    dataset = []
-    label_list = []
-    file_list = utils.list_files(path_img)
-    for file in file_list:
-        try:
-            img = io.imread(path_img + file, plugin="tifffile")
-            label = io.imread(path_label + file, plugin="tifffile")
-            img_mask = concat_with_mask(img, "", path_mask + file, "", png=False)
-            dataset.append(
-                (np.array(img_mask) / 255).reshape(-1, opt.size, opt.size, 2)
-            )
-            label_list.append(label)
-        except Exception:
-            print(file)
-    utils.print_gre("Created !")
-    return np.array(dataset), np.array(label_list, dtype=np.bool)
+# def create_dataset_concat(path_img, path_label, path_mask, opt):
+#     utils.print_gre("Creating dataset...")
+#     dataset = []
+#     label_list = []
+#     file_list = utils.list_files(path_img)
+#     for file in file_list:
+#         try:
+#             img = io.imread(path_img + file, plugin="tifffile")
+#             label = io.imread(path_label + file, plugin="tifffile")
+#             img_mask = concat_with_mask(img, "", path_mask + file, "", png=False)
+#             dataset.append(
+#                 (np.array(img_mask) / 255).reshape(-1, opt.size, opt.size, 2)
+#             )
+#             label_list.append(label)
+#         except Exception:
+#             print(file)
+#     utils.print_gre("Created !")
+#     return np.array(dataset), np.array(label_list, dtype=np.bool)
 
 
 def save_model_name(opt, path_save):
@@ -271,49 +273,49 @@ def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
     return dataset, y
 
 
-# function used to get data and model ready for training | todo: refactor
-def prepare_for_training(path_data, path_label, file_path, opt):
-    dataset, label = create_dataset(
-        path_img=path_data, path_label=path_label, size=opt["size"]
-    )
-    utils.print_gre("Prepare for Training...")
-    n = range(np.shape(dataset)[0])
-    n_sample = random.sample(list(n), len(n))
-    input_shape = (opt["size"], opt["size"], 1)
-    utils.print_gre("Getting model...")
-    strategy = tf.distribute.MirroredStrategy()
-    with strategy.scope():
-        model_seg = gv.model_list[opt["model_name"]](
-            input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
-        )
-        metric = "weighted_mean_io_u"
-        metric_fn = utils_model.WeightedMeanIoU(num_classes=2)
-        optim = tf.keras.optimizers.Adam(lr=opt["lr"])
-        checkpoint = callbacks.ModelCheckpoint(
-            file_path,
-            monitor="val_" + metric,
-            verbose=1,
-            save_best_only=True,
-            mode="min",
-        )
-        if opt["weighted"]:
-            dataset, label = get_label_weights(
-                dataset, label, n_sample, opt["w1"], opt["w2"], size=opt["size"]
-            )
-            model_seg.compile(
-                loss=utils_model.weighted_cross_entropy,
-                optimizer=optim,
-                metrics=[metric_fn],
-            )
-        else:
-            dataset = dataset.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
-            label = label.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
-            model_seg.compile(
-                optimizer=optim, loss="binary_crossentropy", metrics=[metric_fn]
-            )
-    utils.print_gre("Done!")
-    utils.print_gre("Prepared !")
-    return dataset, label, model_seg, checkpoint, metric
+# # function used to get data and model ready for training | todo: refactor
+# def prepare_for_training(path_data, path_label, file_path, opt):
+#     dataset, label = create_dataset(
+#         path_img=path_data, path_label=path_label, size=opt["size"]
+#     )
+#     utils.print_gre("Prepare for Training...")
+#     n = range(np.shape(dataset)[0])
+#     n_sample = random.sample(list(n), len(n))
+#     input_shape = (opt["size"], opt["size"], 1)
+#     utils.print_gre("Getting model...")
+#     strategy = tf.distribute.MirroredStrategy()
+#     with strategy.scope():
+#         model_seg = gv.model_list[opt["model_name"]](
+#             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
+#         )
+#         metric = "weighted_mean_io_u"
+#         metric_fn = utils_model.WeightedMeanIoU(num_classes=2)
+#         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
+#         checkpoint = callbacks.ModelCheckpoint(
+#             file_path,
+#             monitor="val_" + metric,
+#             verbose=1,
+#             save_best_only=True,
+#             mode="min",
+#         )
+#         if opt["weighted"]:
+#             dataset, label = get_label_weights(
+#                 dataset, label, n_sample, opt["w1"], opt["w2"], size=opt["size"]
+#             )
+#             model_seg.compile(
+#                 loss=utils_model.weighted_cross_entropy,
+#                 optimizer=optim,
+#                 metrics=[metric_fn],
+#             )
+#         else:
+#             dataset = dataset.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
+#             label = label.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
+#             model_seg.compile(
+#                 optimizer=optim, loss="binary_crossentropy", metrics=[metric_fn]
+#             )
+#     utils.print_gre("Done!")
+#     utils.print_gre("Prepared !")
+#     return dataset, label, model_seg, checkpoint, metric
 
 
 def get_dataset(path_data, path_label, opt):
@@ -342,7 +344,9 @@ def get_dataset(path_data, path_label, opt):
 
 
 def weighted_bin_acc(y_true, y_pred):
-    return tf.keras.metrics.binary_accuracy(tf.reshape(y_true[:, :, :, 0], (-1, 128, 128, 1)), y_pred)
+    return tf.keras.metrics.binary_accuracy(
+        tf.reshape(y_true[:, :, :, 0], (-1, 128, 128, 1)), y_pred
+    )
 
 
 def new_prepare_for_training(path_data, path_label, file_path, opt):
@@ -415,14 +419,14 @@ class Dataset(keras.utils.Sequence):
     """Helper to iterate over the data (as Numpy arrays)."""
 
     def __init__(
-            self,
-            batch_size,
-            img_size,
-            input_img_paths,
-            target_img_paths,
-            weighted=False,
-            w1=None,
-            w2=None,
+        self,
+        batch_size,
+        img_size,
+        input_img_paths,
+        target_img_paths,
+        weighted=False,
+        w1=None,
+        w2=None,
     ):
         self.batch_size = batch_size
         self.img_size = img_size
@@ -439,8 +443,8 @@ class Dataset(keras.utils.Sequence):
     def __getitem__(self, idx):
         """Returns tuple (input, target) correspond to batch #idx."""
         i = idx * self.batch_size
-        batch_input_img_paths = self.input_img_paths[i: i + self.batch_size]
-        batch_target_img_paths = self.target_img_paths[i: i + self.batch_size]
+        batch_input_img_paths = self.input_img_paths[i : i + self.batch_size]
+        batch_target_img_paths = self.target_img_paths[i : i + self.batch_size]
         x = np.zeros((self.batch_size, self.img_size, self.img_size, 1), dtype="uint8")
         for j, path in enumerate(batch_input_img_paths):
             img = np.array(load_img(path, color_mode="grayscale")) / 255
@@ -456,39 +460,40 @@ class Dataset(keras.utils.Sequence):
         return x, y
 
 
-def plot_iou(result, label, title, save=False):
-    fig = plt.figure(1, figsize=(12, 12))
-    for i in range(len(label)):
-        plt.plot(np.arange(len(result)) + 29, result.values[:, i], label=label[i])
-    plt.ylim(0.2, 1)
-    plt.xlabel("Slices", fontsize=18)
-    plt.ylabel("IoU", fontsize=18)
-    plt.legend()
-    plt.title(title)
-    if save:
-        fig.savefig(gv.PATH_RES + "stats/plot_iou_" + title + ".png")
-    plt.close("all")
-
-
-def box_plot(result, label, title, save=False):
-    fig = plt.figure(1, figsize=(15, 15))
-    plt.boxplot([result.values[:, i] for i in range(len(label))])
-    plt.ylim(0, 1)
-    plt.xlabel("Model", fontsize=18)
-    plt.ylabel("IoU", fontsize=18)
-    plt.gca().xaxis.set_ticklabels(label)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.title(title, fontsize=18)
-    if save:
-        fig.savefig(gv.PATH_RES + "stats/boxplot_" + title + ".png")
-    plt.close("all")
-
-
-def heat_map(result, title, slice_begin=30, slice_end=106, save=False):
-    fig = plt.figure(1, figsize=(12, 12))
-    sns.heatmap(result[slice_begin:slice_end])
-    plt.title(title)
-    if save:
-        fig.savefig(gv.PATH_RES + "stats/heat_map_" + title + ".png")
-    plt.close("all")
+#
+# def plot_iou(result, label, title, save=False):
+#     fig = plt.figure(1, figsize=(12, 12))
+#     for i in range(len(label)):
+#         plt.plot(np.arange(len(result)) + 29, result.values[:, i], label=label[i])
+#     plt.ylim(0.2, 1)
+#     plt.xlabel("Slices", fontsize=18)
+#     plt.ylabel("IoU", fontsize=18)
+#     plt.legend()
+#     plt.title(title)
+#     if save:
+#         fig.savefig(gv.PATH_RES + "stats/plot_iou_" + title + ".png")
+#     plt.close("all")
+#
+#
+# def box_plot(result, label, title, save=False):
+#     fig = plt.figure(1, figsize=(15, 15))
+#     plt.boxplot([result.values[:, i] for i in range(len(label))])
+#     plt.ylim(0, 1)
+#     plt.xlabel("Model", fontsize=18)
+#     plt.ylabel("IoU", fontsize=18)
+#     plt.gca().xaxis.set_ticklabels(label)
+#     plt.xticks(fontsize=12)
+#     plt.yticks(fontsize=12)
+#     plt.title(title, fontsize=18)
+#     if save:
+#         fig.savefig(gv.PATH_RES + "stats/boxplot_" + title + ".png")
+#     plt.close("all")
+#
+#
+# def heat_map(result, title, slice_begin=30, slice_end=106, save=False):
+#     fig = plt.figure(1, figsize=(12, 12))
+#     sns.heatmap(result[slice_begin:slice_end])
+#     plt.title(title)
+#     if save:
+#         fig.savefig(gv.PATH_RES + "stats/heat_map_" + title + ".png")
+#     plt.close("all")
