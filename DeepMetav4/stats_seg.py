@@ -6,9 +6,7 @@ import os
 import numpy as np
 import skimage.io as io
 import tensorflow as tf
-from sklearn.metrics import jaccard_score
 
-import DeepMetav4.models.utils_model as utils_model
 import DeepMetav4.predict_seg as p_seg
 import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
