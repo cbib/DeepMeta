@@ -27,7 +27,7 @@ def predict_seg(dataset, path_model_seg):
             path_model_seg,
             custom_objects={
                 "weighted_cross_entropy": utils_model.weighted_cross_entropy,
-                "weighted_bin_acc": data.weighted_bin_acc
+                "weighted_bin_acc": data.weighted_bin_acc,
             },
         )
     return (

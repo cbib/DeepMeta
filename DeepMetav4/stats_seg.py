@@ -138,9 +138,9 @@ if __name__ == "__main__":
             res_metas = p_seg.predict_seg(slices_metas, path_model_seg_metas)
             res_metas = res_metas.reshape(len(res_metas), 128, 128)
             label_masks_metas = get_label_masks(souris[0], name, folder="metas")
-            assert len(res) == len(label_masks), "Meta : len res : {}; len labels : {}".format(
-                len(res), len(label_masks)
-            )
+            assert len(res) == len(
+                label_masks
+            ), "Meta : len res : {}; len labels : {}".format(len(res), len(label_masks))
             acc = process_acc(res_metas, label_masks_metas)
             utils.print_gre("acc metas : {}".format(np.mean(acc)))
         else:
