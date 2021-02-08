@@ -41,13 +41,13 @@ if __name__ == "__main__":
     # adding wandb keys
     config["wandb"] = {
         "project": experiment_name,
-        "api_file": ".wandb_key",
+        "api_key": "2087297064263382243a621b1bcdd37fcf1c6bb4",
     }
 
-    config["lr"] = tune.uniform(0.0001, 0.1)
-    config["batch_size"] = tune.randint(32, 256)
-    config["drop_r"] = tune.uniform(0.2, 0.6)
-    config["filters"] = tune.choice([4, 8, 16, 32, 64])
+    config["lr"] = tune.choice([0.01, 0.001, 0.0001])
+    config["batch_size"] = tune.qrandint(32, 256, 32)
+    config["drop_r"] = tune.quniform(0.2, 0.5, 0.1)
+    config["filters"] = tune.choice([4, 8, 16])
     config["model_name"] = "detection"
     config["meta"] = True
 
