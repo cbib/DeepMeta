@@ -41,8 +41,8 @@ if __name__ == "__main__":
 
         # METAS
         res_meta = p_detect.predict_detect(dataset, path_model_detect_metas)
-        acc_meta = process_acc(res_meta, label_meta)
-        # print("res : " + str(res_meta))
+        acc_meta = process_acc(res_meta * label, label_meta)
+        # print("res : " + str(res_meta * label))
         # print("label : " + str(np.array(label_meta)))
         utils.print_gre("acc meta = {}%".format(acc_meta * 100))
 
