@@ -144,21 +144,22 @@ def get_images_detect_meta(tab, path_img, split=11136):
     old = []
     new = []
     for i in range(len(tab)):
-        try:
-            im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
-            im = im / np.amax(im)
-            im90, im180, im270 = rotate_img(im)
-            elastic = elastic_transform(im)
-            if tab[i, 3] == 1:
-                data_detec_1 += [im, im90, im180, im270, elastic]
-            else:
-                if i > split:
-                    new += [im, im90, im180, im270, elastic]
+        if tab[i, 4] == 1:
+            try:
+                im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
+                im = im / np.amax(im)
+                im90, im180, im270 = rotate_img(im)
+                elastic = elastic_transform(im)
+                if tab[i, 3] == 1:
+                    data_detec_1 += [im, im90, im180, im270, elastic]
                 else:
-                    old += [im, im90, im180, im270, elastic]
-        except Exception as e:
-            utils.print_red("IMG {} not found".format(i))
-            utils.print_red("\t" + str(e))
+                    if i > split:
+                        new += [im, im90, im180, im270, elastic]
+                    else:
+                        old += [im, im90, im180, im270, elastic]
+            except Exception as e:
+                utils.print_red("IMG {} not found".format(i))
+                utils.print_red("\t" + str(e))
     data_detec_0, _ = concat_and_normalize(old, new)
     return data_detec_0, data_detec_1
 
