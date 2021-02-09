@@ -5,7 +5,7 @@ from tensorflow import keras
 class TuneReporter(keras.callbacks.Callback):
     """Tune Callback for Keras."""
 
-    def __init__(self, metric="val_accuracy"):
+    def __init__(self, metric="val_binary_accuracy"):
         super().__init__()
         self.metric = metric
 
