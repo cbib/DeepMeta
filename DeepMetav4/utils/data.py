@@ -5,7 +5,9 @@ import os
 import random
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import skimage.exposure as exposure
 import skimage.io as io
 import skimage.measure as measure
@@ -77,12 +79,11 @@ def elastic_transform(image, alpha=60, sigma=4, random_state=None):
 
 
 def concat_and_normalize(l0, l1):
-    random.shuffle(
-        l0
-    )  # todo: trouver meilleure sol pour avoir autant d'img des 2 batchs
+    random.shuffle(l0)
     random.shuffle(l1)
     inv = False
     if len(l1) < len(l0):
+        # better -> concat_and_normalize(l1, l0, inv=True) -> tried but no working
         sm_l = l1
         bg_l = l0
         inv = True
@@ -119,7 +120,50 @@ def concat_and_normalize(l0, l1):
     return shuffle_lists(data_detec, label_detec)
 
 
-def create_dataset_detect(path_img, tab, size):
+def get_images_detect(tab, path_img):
+    data_detec_0 = []
+    data_detec_1 = []
+    for i in range(len(tab)):
+        try:
+            im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
+            im = im / np.amax(im)
+            im90, im180, im270 = rotate_img(im)
+            # elastic = elastic_transform(im)
+            if tab[i, 3] == 1:
+                data_detec_1 += [im, im90, im180, im270]
+            else:
+                data_detec_0 += [im, im90, im180, im270]
+        except Exception as e:
+            utils.print_red("IMG {} not found".format(i))
+            utils.print_red("\t" + str(e))
+    return data_detec_0, data_detec_1
+
+
+def get_images_detect_meta(tab, path_img, split=11136):
+    data_detec_1 = []
+    old = []
+    new = []
+    for i in range(len(tab)):
+        try:
+            im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
+            im = im / np.amax(im)
+            im90, im180, im270 = rotate_img(im)
+            elastic = elastic_transform(im)
+            if tab[i, 3] == 1:
+                data_detec_1 += [im, im90, im180, im270, elastic]
+            else:
+                if i > split:
+                    new += [im, im90, im180, im270, elastic]
+                else:
+                    old += [im, im90, im180, im270, elastic]
+        except Exception as e:
+            utils.print_red("IMG {} not found".format(i))
+            utils.print_red("\t" + str(e))
+    data_detec_0, _ = concat_and_normalize(old, new)
+    return data_detec_0, data_detec_1
+
+
+def create_dataset_detect(path_img, tab, size, meta=False):
     """
     :param path_img: ensemble des images de souris où les poumons ont été annotés.
     :param tab: tableau résumant les identifiants et annotations pour les souris.
@@ -129,28 +173,10 @@ def create_dataset_detect(path_img, tab, size):
         - label_detec : label de chaque slices 1 présentant des poumons, 0 sinon.
     """
     utils.print_gre("Creating dataset...")
-    data_detec_0 = []
-    data_detec_1 = []
-    for i in range(len(tab)):
-        try:
-            im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
-            im = im / np.amax(im)
-            im90, im180, im270 = rotate_img(im)
-            if tab[i, 3] == 1:
-                data_detec_1.append(im)
-                data_detec_1.append(im90)
-                data_detec_1.append(im180)
-                data_detec_1.append(im270)
-                # data_detec_1.append(elastic_transform(im))
-            else:
-                data_detec_0.append(im)
-                data_detec_0.append(im90)
-                data_detec_0.append(im180)
-                data_detec_0.append(im270)
-                # data_detec_0.append(elastic_transform(im))
-        except Exception as e:
-            utils.print_red("IMG {} not found".format(i))
-            utils.print_red("\t" + str(e))
+    if meta:
+        data_detec_0, data_detec_1 = get_images_detect_meta(tab, path_img)
+    else:
+        data_detec_0, data_detec_1 = get_images_detect(tab, path_img)
     data_detec, label_detec = concat_and_normalize(data_detec_0, data_detec_1)
     data_detec = np.array(data_detec)
     no = range(len(data_detec))
@@ -160,59 +186,6 @@ def create_dataset_detect(path_img, tab, size):
     utils.print_gre("Created !")
     utils.print_gre("Nb of images : {}".format(len(data_detec)))
     return data_detec, label_detec
-
-
-# def concat_with_mask(im, i, path_mask, pref, png=True):
-#     if png:
-#         im_mask = io.imread(path_mask + pref + str(i) + ".png")
-#     else:
-#         im_mask = io.imread(path_mask + pref + str(i), plugin="tifffile")
-#     return np.concatenate([im[:, :, np.newaxis], im_mask[:, :, np.newaxis]], 2)
-
-
-# def apply_mask(img, path_img, path_mask):
-#     im = io.imread(path_img + img)
-#     im_mask = io.imread(path_mask + img) / 255
-#     return im * im_mask
-
-
-# def create_dataset(path_img, path_label, size):
-#     utils.print_gre("Creating dataset...")
-#     dataset = []
-#     label_list = []
-#     file_list = utils.list_files(path_img)
-#     for file in file_list:
-#         try:
-#             img = io.imread(path_img + file, plugin="tifffile")
-#             label = io.imread(path_label + file, plugin="tifffile")
-#             dataset.append((np.array(img) / 255).reshape(-1, size, size, 1))
-#             label_list.append(label)
-#         except Exception:
-#             utils.print_red("Image {} not found.".format(file))
-#     utils.print_gre("Created !")
-#     utils.print_gre("Nb of images: {}".format(len(dataset)))
-#     utils.print_red("Reduction du nombre d'img à la main (data.py:247)")
-#     return np.array(dataset), np.array(label_list, dtype=np.bool)
-
-
-# def create_dataset_concat(path_img, path_label, path_mask, opt):
-#     utils.print_gre("Creating dataset...")
-#     dataset = []
-#     label_list = []
-#     file_list = utils.list_files(path_img)
-#     for file in file_list:
-#         try:
-#             img = io.imread(path_img + file, plugin="tifffile")
-#             label = io.imread(path_label + file, plugin="tifffile")
-#             img_mask = concat_with_mask(img, "", path_mask + file, "", png=False)
-#             dataset.append(
-#                 (np.array(img_mask) / 255).reshape(-1, opt.size, opt.size, 2)
-#             )
-#             label_list.append(label)
-#         except Exception:
-#             print(file)
-#     utils.print_gre("Created !")
-#     return np.array(dataset), np.array(label_list, dtype=np.bool)
 
 
 def save_model_name(opt, path_save):
@@ -271,51 +244,6 @@ def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
     y[:, :, :, 0] = label[:, :, :, 0]
     y[:, :, :, 1] = weight_2D[:, :, :, 0]
     return dataset, y
-
-
-# # function used to get data and model ready for training | todo: refactor
-# def prepare_for_training(path_data, path_label, file_path, opt):
-#     dataset, label = create_dataset(
-#         path_img=path_data, path_label=path_label, size=opt["size"]
-#     )
-#     utils.print_gre("Prepare for Training...")
-#     n = range(np.shape(dataset)[0])
-#     n_sample = random.sample(list(n), len(n))
-#     input_shape = (opt["size"], opt["size"], 1)
-#     utils.print_gre("Getting model...")
-#     strategy = tf.distribute.MirroredStrategy()
-#     with strategy.scope():
-#         model_seg = gv.model_list[opt["model_name"]](
-#             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
-#         )
-#         metric = "weighted_mean_io_u"
-#         metric_fn = utils_model.WeightedMeanIoU(num_classes=2)
-#         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
-#         checkpoint = callbacks.ModelCheckpoint(
-#             file_path,
-#             monitor="val_" + metric,
-#             verbose=1,
-#             save_best_only=True,
-#             mode="min",
-#         )
-#         if opt["weighted"]:
-#             dataset, label = get_label_weights(
-#                 dataset, label, n_sample, opt["w1"], opt["w2"], size=opt["size"]
-#             )
-#             model_seg.compile(
-#                 loss=utils_model.weighted_cross_entropy,
-#                 optimizer=optim,
-#                 metrics=[metric_fn],
-#             )
-#         else:
-#             dataset = dataset.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
-#             label = label.reshape(-1, opt["size"], opt["size"], 1)[n_sample]
-#             model_seg.compile(
-#                 optimizer=optim, loss="binary_crossentropy", metrics=[metric_fn]
-#             )
-#     utils.print_gre("Done!")
-#     utils.print_gre("Prepared !")
-#     return dataset, label, model_seg, checkpoint, metric
 
 
 def get_dataset(path_data, path_label, opt):
@@ -460,40 +388,39 @@ class Dataset(keras.utils.Sequence):
         return x, y
 
 
-#
-# def plot_iou(result, label, title, save=False):
-#     fig = plt.figure(1, figsize=(12, 12))
-#     for i in range(len(label)):
-#         plt.plot(np.arange(len(result)) + 29, result.values[:, i], label=label[i])
-#     plt.ylim(0.2, 1)
-#     plt.xlabel("Slices", fontsize=18)
-#     plt.ylabel("IoU", fontsize=18)
-#     plt.legend()
-#     plt.title(title)
-#     if save:
-#         fig.savefig(gv.PATH_RES + "stats/plot_iou_" + title + ".png")
-#     plt.close("all")
-#
-#
-# def box_plot(result, label, title, save=False):
-#     fig = plt.figure(1, figsize=(15, 15))
-#     plt.boxplot([result.values[:, i] for i in range(len(label))])
-#     plt.ylim(0, 1)
-#     plt.xlabel("Model", fontsize=18)
-#     plt.ylabel("IoU", fontsize=18)
-#     plt.gca().xaxis.set_ticklabels(label)
-#     plt.xticks(fontsize=12)
-#     plt.yticks(fontsize=12)
-#     plt.title(title, fontsize=18)
-#     if save:
-#         fig.savefig(gv.PATH_RES + "stats/boxplot_" + title + ".png")
-#     plt.close("all")
-#
-#
-# def heat_map(result, title, slice_begin=30, slice_end=106, save=False):
-#     fig = plt.figure(1, figsize=(12, 12))
-#     sns.heatmap(result[slice_begin:slice_end])
-#     plt.title(title)
-#     if save:
-#         fig.savefig(gv.PATH_RES + "stats/heat_map_" + title + ".png")
-#     plt.close("all")
+def plot_iou(result, label, title, save=False):
+    fig = plt.figure(1, figsize=(12, 12))
+    for i in range(len(label)):
+        plt.plot(np.arange(len(result)) + 29, result.values[:, i], label=label[i])
+    plt.ylim(0.2, 1)
+    plt.xlabel("Slices", fontsize=18)
+    plt.ylabel("IoU", fontsize=18)
+    plt.legend()
+    plt.title(title)
+    if save:
+        fig.savefig(gv.PATH_RES + "stats/plot_iou_" + title + ".png")
+    plt.close("all")
+
+
+def box_plot(result, label, title, save=False):
+    fig = plt.figure(1, figsize=(15, 15))
+    plt.boxplot([result.values[:, i] for i in range(len(label))])
+    plt.ylim(0, 1)
+    plt.xlabel("Model", fontsize=18)
+    plt.ylabel("IoU", fontsize=18)
+    plt.gca().xaxis.set_ticklabels(label)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.title(title, fontsize=18)
+    if save:
+        fig.savefig(gv.PATH_RES + "stats/boxplot_" + title + ".png")
+    plt.close("all")
+
+
+def heat_map(result, title, slice_begin=30, slice_end=106, save=False):
+    fig = plt.figure(1, figsize=(12, 12))
+    sns.heatmap(result[slice_begin:slice_end])
+    plt.title(title)
+    if save:
+        fig.savefig(gv.PATH_RES + "stats/heat_map_" + title + ".png")
+    plt.close("all")

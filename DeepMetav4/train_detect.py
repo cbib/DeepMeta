@@ -31,7 +31,9 @@ def train_detect(args, model_name="detection", hp_search=True):
         args["size"],
         1,
     )
-    dataset, label = data.create_dataset_detect(gv.path_img_classif, tab, args["size"])
+    dataset, label = data.create_dataset_detect(
+        gv.path_img_classif, tab, args["size"], meta=args["meta"]
+    )
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
         model_detect = gv.model_list[model_name](
