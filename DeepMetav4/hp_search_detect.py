@@ -15,7 +15,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-num_samples = 100
+num_samples = 300
 experiment_name = "detect_metas"
 
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     config["batch_size"] = tune.qrandint(32, 256, 32)
     config["drop_r"] = tune.quniform(0.2, 0.5, 0.1)
     config["filters"] = tune.choice([4, 8, 16])
-    config["model_name"] = "detection"
+    config["model_name"] = tune.choice(["detection", "resnet50", "resnetv2"])
     config["meta"] = True
 
     utils.print_gre(config)

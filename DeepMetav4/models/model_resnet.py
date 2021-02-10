@@ -100,11 +100,11 @@ def resnet_bottleneck_block(
     return x
 
 
-def resnet34(input_shape, lr, nb_classes=2, base_filter=16):
+def resnet34(input_shape, lr, nb_classes=2, filters=16, drop_r=0.5):
     inputs = layers.Input(input_shape)
 
     b1_c1 = layers.Conv2D(
-        filters=base_filter,
+        filters=filters,
         kernel_size=7,
         strides=2,
         padding="same",
@@ -114,9 +114,9 @@ def resnet34(input_shape, lr, nb_classes=2, base_filter=16):
     b1_relu = layers.ReLU()(b1_bn)
     b1_mp = layers.MaxPooling2D(pool_size=3, strides=2)(b1_relu)
 
-    b2_c1 = resnet_block(base_filter, b1_mp, block_name="block2_1")
-    b2_c2 = resnet_block(base_filter, b2_c1, block_name="block2_2")
-    b2_c3 = resnet_block(base_filter, b2_c2, block_name="block2_3")
+    b2_c1 = resnet_block(filters, b1_mp, block_name="block2_1")
+    b2_c2 = resnet_block(filters, b2_c1, block_name="block2_2")
+    b2_c3 = resnet_block(filters, b2_c2, block_name="block2_3")
 
     # b3_c1 = resnet_block(base_filter * 2, b2_c3, strides=2, block_name="block3_1")
     # b3_c2 = resnet_block(base_filter * 2, b3_c1, block_name="block3_2")
@@ -135,8 +135,8 @@ def resnet34(input_shape, lr, nb_classes=2, base_filter=16):
     # b5_c3 = resnet_block(base_filter * 8, b5_c2, block_name="block5_3")
 
     pool = layers.GlobalAveragePooling2D()(b2_c3)
-    fc1 = layers.Dense(base_filter * 2, activation="relu")(pool)
-    dp1 = layers.Dropout(0.5)(fc1)
+    fc1 = layers.Dense(filters * 2, activation="relu")(pool)
+    dp1 = layers.Dropout(drop_r)(fc1)
     # fc2 = layers.Dense(base_filter, activation='relu')(dp1)
     # dp2 = layers.Dropout(0.5)(fc2)
     fc3 = layers.Dense(nb_classes, activation="softmax")(dp1)
@@ -145,36 +145,36 @@ def resnet34(input_shape, lr, nb_classes=2, base_filter=16):
     model.compile(
         loss=keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(lr=lr),
-        metrics=["accuracy"],
+        metrics=["binary_accuracy"],
     )
     return model
 
 
-def resnet18(input_shape, lr, nb_classes=2, base_filter=16):
+def resnet18(input_shape, lr, nb_classes=2, filters=16, drop_r=0.5):
     inputs = layers.Input(input_shape)
 
-    b1_c1 = layers.Conv2D(
-        filters=base_filter, kernel_size=7, strides=2, padding="same"
-    )(inputs)
+    b1_c1 = layers.Conv2D(filters=filters, kernel_size=7, strides=2, padding="same")(
+        inputs
+    )
     b1_bn = layers.BatchNormalization()(b1_c1)
     b1_relu = layers.ReLU()(b1_bn)
     b1_mp = layers.MaxPooling2D(pool_size=3, strides=2)(b1_relu)
 
-    b2_c1 = resnet_block(base_filter, b1_mp)
-    b2_c2 = resnet_block(base_filter, b2_c1)
+    b2_c1 = resnet_block(filters, b1_mp)
+    b2_c2 = resnet_block(filters, b2_c1)
 
-    b3_c1 = resnet_block(base_filter * 2, b2_c2, strides=2)
-    b3_c2 = resnet_block(base_filter * 2, b3_c1)
+    b3_c1 = resnet_block(filters * 2, b2_c2, strides=2)
+    b3_c2 = resnet_block(filters * 2, b3_c1)
 
-    b4_c1 = resnet_block(base_filter * 4, b3_c2, strides=2)
-    b4_c2 = resnet_block(base_filter * 4, b4_c1)
+    b4_c1 = resnet_block(filters * 4, b3_c2, strides=2)
+    b4_c2 = resnet_block(filters * 4, b4_c1)
 
-    b5_c1 = resnet_block(base_filter * 8, b4_c2, strides=2)
-    b5_c2 = resnet_block(base_filter * 8, b5_c1)
+    b5_c1 = resnet_block(filters * 8, b4_c2, strides=2)
+    b5_c2 = resnet_block(filters * 8, b5_c1)
 
     pool = layers.GlobalAveragePooling2D()(b5_c2)
-    fc1 = layers.Dense(base_filter * 8, activation="relu")(pool)
-    dp1 = layers.Dropout(0.5)(fc1)
+    fc1 = layers.Dense(filters * 8, activation="relu")(pool)
+    dp1 = layers.Dropout(drop_r)(fc1)
     # fc2 = layers.Dense(base_filter * 8, activation='relu')(dp1)
     # dp2 = layers.Dropout(0.5)(fc2)
     fc3 = layers.Dense(nb_classes, activation="softmax")(dp1)
@@ -183,16 +183,16 @@ def resnet18(input_shape, lr, nb_classes=2, base_filter=16):
     model.compile(
         loss=keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(lr=lr),
-        metrics=["accuracy"],
+        metrics=["binary_accuracy"],
     )
     return model
 
 
-def resnet50(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
+def resnet50(input_shape, lr, nb_classes=2, filters=8, drop_r=0.5, w_decay=0.0001):
     inputs = layers.Input(input_shape)
 
     b1_c1 = layers.Conv2D(
-        filters=base_filter,
+        filters=filters,
         kernel_size=7,
         strides=2,
         padding="same",
@@ -205,11 +205,11 @@ def resnet50(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
     b1_relu = layers.ReLU()(b1_bn)
     b1_mp = layers.MaxPooling2D(pool_size=3, strides=2)(b1_relu)
 
-    base_filter = base_filter * 4
+    filters = filters * 4
 
-    b2_c1 = resnet_bottleneck_block(base_filter, b1_mp, "block2_1")
-    b2_c2 = resnet_bottleneck_block(base_filter, b2_c1, "block2_2")
-    b2_c3 = resnet_bottleneck_block(base_filter, b2_c2, "block2_3")
+    b2_c1 = resnet_bottleneck_block(filters, b1_mp, "block2_1")
+    b2_c2 = resnet_bottleneck_block(filters, b2_c1, "block2_2")
+    b2_c3 = resnet_bottleneck_block(filters, b2_c2, "block2_3")
     #
     # b3_c1 = resnet_bottleneck_block(base_filter * 2, b2_c3, "block3_1", strides=2)
     # b3_c2 = resnet_bottleneck_block(base_filter * 2, b3_c1, "block3_2")
@@ -229,11 +229,11 @@ def resnet50(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
 
     pool = layers.GlobalAveragePooling2D(name="avg_pool")(b2_c3)
     fc1 = layers.Dense(
-        base_filter,
+        filters,
         activation="relu",
         kernel_constraint=tf.keras.constraints.min_max_norm(),
     )(pool)
-    dp1 = layers.Dropout(0.5)(fc1)
+    dp1 = layers.Dropout(drop_r)(fc1)
     # fc2 = layers.Dense(base_filter * 2, activation='relu',
     # kernel_constraint=tf.keras.constraints.min_max_norm())(dp1)
     # dp2 = layers.Dropout(0.5)(fc2)
@@ -243,15 +243,15 @@ def resnet50(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
 
     bce = keras.losses.BinaryCrossentropy(label_smoothing=0.1)
     model.compile(
-        loss=bce, optimizer=keras.optimizers.Adam(lr=lr), metrics=["accuracy"]
+        loss=bce, optimizer=keras.optimizers.Adam(lr=lr), metrics=["binary_accuracy"]
     )
     return model
 
 
-def resnetv2(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
+def resnetv2(input_shape, lr, nb_classes=2, filters=8, drop_r=0.5, w_decay=0.0001):
     inputs = layers.Input(input_shape)
     b1_c1 = layers.Conv2D(
-        filters=base_filter,
+        filters=filters,
         kernel_size=3,
         padding="same",
         kernel_initializer=tf.keras.initializers.he_normal(),
@@ -261,7 +261,7 @@ def resnetv2(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
     b1_c1 = layers.BatchNormalization()(b1_c1)
     b1_c1 = layers.ReLU()(b1_c1)
     b1_c2 = layers.Conv2D(
-        filters=base_filter,
+        filters=filters,
         kernel_size=3,
         padding="same",
         kernel_initializer=tf.keras.initializers.he_normal(),
@@ -271,7 +271,7 @@ def resnetv2(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
     b1_c2 = layers.BatchNormalization()(b1_c2)
     b1_c2 = layers.ReLU()(b1_c2)
     b1_c3 = layers.Conv2D(
-        filters=base_filter,
+        filters=filters,
         kernel_size=3,
         strides=2,
         padding="same",
@@ -283,11 +283,11 @@ def resnetv2(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
     b1_relu = layers.ReLU()(b1_bn)
     b1_mp = layers.MaxPooling2D(pool_size=3, strides=2)(b1_relu)
 
-    base_filter = base_filter * 4
+    filters = filters * 4
 
-    b2_c1 = resnet_bottleneck_block(base_filter, b1_mp, "block2_1")
-    b2_c2 = resnet_bottleneck_block(base_filter, b2_c1, "block2_2")
-    b2_c3 = resnet_bottleneck_block(base_filter, b2_c2, "block2_3")
+    b2_c1 = resnet_bottleneck_block(filters, b1_mp, "block2_1")
+    b2_c2 = resnet_bottleneck_block(filters, b2_c1, "block2_2")
+    b2_c3 = resnet_bottleneck_block(filters, b2_c2, "block2_3")
 
     # b3_c1 = resnet_bottleneck_block(base_filter * 2, b2_c3, "block3_1", strides=2)
     # b3_c2 = resnet_bottleneck_block(base_filter * 2, b3_c1, "block3_2")
@@ -296,11 +296,11 @@ def resnetv2(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
 
     pool = layers.GlobalAveragePooling2D(name="avg_pool")(b2_c3)
     fc1 = layers.Dense(
-        base_filter,
+        filters,
         activation="relu",
         kernel_constraint=tf.keras.constraints.min_max_norm(),
     )(pool)
-    dp1 = layers.Dropout(0.5)(fc1)
+    dp1 = layers.Dropout(drop_r)(fc1)
     # fc2 = layers.Dense(base_filter * 2, activation='relu',
     # kernel_constraint=tf.keras.constraints.min_max_norm())(dp1)
     # dp2 = layers.Dropout(0.5)(fc2)
@@ -310,6 +310,6 @@ def resnetv2(input_shape, lr, nb_classes=2, base_filter=8, w_decay=0.0001):
 
     bce = keras.losses.BinaryCrossentropy(label_smoothing=0.1)
     model.compile(
-        loss=bce, optimizer=keras.optimizers.Adam(lr=lr), metrics=["accuracy"]
+        loss=bce, optimizer=keras.optimizers.Adam(lr=lr), metrics=["binary_accuracy"]
     )
     return model
