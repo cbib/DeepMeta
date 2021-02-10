@@ -140,9 +140,10 @@ def get_images_detect(tab, path_img):
 
 
 def get_images_detect_meta(tab, path_img, split=11136):
-    data_detec_1 = []
-    old = []
-    new = []
+    old0 = []
+    new0 = []
+    old1 = []
+    new1 = []
     for i in range(len(tab)):
         if tab[i, 4] == 1:
             try:
@@ -151,16 +152,22 @@ def get_images_detect_meta(tab, path_img, split=11136):
                 im90, im180, im270 = rotate_img(im)
                 elastic = elastic_transform(im)
                 if tab[i, 3] == 1:
-                    data_detec_1 += [im, im90, im180, im270, elastic]
+                    if i > split:
+                        new1 += [im, im90, im180, im270, elastic]
+                    else:
+                        old1 += [im, im90, im180, im270, elastic]
                 else:
                     if i > split:
-                        new += [im, im90, im180, im270, elastic]
+                        new0 += [im, im90, im180, im270, elastic]
                     else:
-                        old += [im, im90, im180, im270, elastic]
+                        old0 += [im, im90, im180, im270, elastic]
             except Exception as e:
                 utils.print_red("IMG {} not found".format(i))
                 utils.print_red("\t" + str(e))
-    data_detec_0, _ = concat_and_normalize(old, new)
+    data_detec_0, _ = concat_and_normalize(old0, new0)
+    data_detec_1, _ = concat_and_normalize(old1, new1)
+    utils.print_gre("Images 0 : {}".format(len(data_detec_0)))
+    utils.print_gre("Images 1 : {}".format(len(data_detec_1)))
     return data_detec_0, data_detec_1
 
 
