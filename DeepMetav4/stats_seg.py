@@ -131,7 +131,7 @@ if __name__ == "__main__":
             len(res), len(label_masks)
         )
         acc = process_acc(res, label_masks)
-        utils.print_gre("acc lungs : {}".format(np.mean(acc)))
+        utils.print_gre("acc lungs : {}%".format(np.mean(acc) * 100))
         # METAS
         slices_metas = select_slices(dataset, label_meta)
         if len(slices_metas) > 0:
@@ -140,8 +140,10 @@ if __name__ == "__main__":
             label_masks_metas = get_label_masks(souris[0], name, folder="metas")
             assert len(res_metas) == len(
                 label_masks_metas
-            ), "Meta : len res : {}; len labels : {}".format(len(res), len(label_masks))
+            ), "Meta : len res : {}; len labels : {}".format(
+                len(res_metas), len(label_masks_metas)
+            )
             acc = process_acc(res_metas, label_masks_metas)
-            utils.print_gre("acc metas : {}".format(np.mean(acc)))
+            utils.print_gre("acc metas : {}%".format(np.mean(acc) * 100))
         else:
             utils.print_gre("no metas")

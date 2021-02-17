@@ -149,18 +149,20 @@ def get_images_detect_meta(tab, path_img, split=11136):
             try:
                 im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
                 im = im / np.amax(im)
+                fliped = cv2.flip(im, 1)
                 im90, im180, im270 = rotate_img(im)
                 elastic = elastic_transform(im)
+                l_im = [im, im90, im180, im270, elastic, fliped]
                 if tab[i, 3] == 1:
                     if i > split:
-                        new1 += [im, im90, im180, im270, elastic]
+                        new1 += l_im
                     else:
-                        old1 += [im, im90, im180, im270, elastic]
+                        old1 += l_im
                 else:
                     if i > split:
-                        new0 += [im, im90, im180, im270, elastic]
+                        new0 += l_im
                     else:
-                        old0 += [im, im90, im180, im270, elastic]
+                        old0 += l_im
             except Exception as e:
                 utils.print_red("IMG {} not found".format(i))
                 utils.print_red("\t" + str(e))
