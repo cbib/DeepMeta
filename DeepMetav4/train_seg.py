@@ -51,10 +51,38 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
         )
 
 
+def train_meta(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
+    file_path = data.save_model_name(args, gv.PATH_SAVE)
+    dataset, dataset_val, model_seg, checkpoint = data.meta_for_training(
+        path_images, path_labels, file_path, args
+    )
+    earlystopper = keras.callbacks.EarlyStopping(
+        patience=args["patience"],
+        verbose=1,
+        min_delta=0.001,
+        restore_best_weights=True,
+    )
+    cb_list = [earlystopper, utils.CosLRDecay(args["n_epochs"], args["lr"])]
+    if hp_search:
+        cb_list.append(tune_rep.TuneReporter(metric="loss"))
+    else:
+        cb_list.append(checkpoint)
+    history = model_seg.fit(
+        dataset,
+        validation_data=dataset_val,
+        epochs=args["n_epochs"],
+        callbacks=cb_list,
+    )
+    if not hp_search:
+        utils.plot_learning_curves(
+            history, "segmentation_" + args["model_name"], "loss"
+        )
+
+
 if __name__ == "__main__":
     opt = vars(utils.get_args())
     if opt["meta"]:
-        train(
+        train_meta(
             opt,
             path_images=gv.meta_path_img,
             path_labels=gv.meta_path_lab,

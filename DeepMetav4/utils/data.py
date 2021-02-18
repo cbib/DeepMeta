@@ -321,6 +321,37 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
     return dataset, dataset_val, model_seg, checkpoint, metric
 
 
+def meta_for_training(path_data, path_label, file_path, opt):
+    dataset, dataset_val = get_dataset(path_data, path_label, opt)
+    utils.print_gre("Prepare for Training...")
+    input_shape = (opt["size"], opt["size"], 1)
+    utils.print_gre("Getting model...")
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        model_seg = gv.model_list[opt["model_name"]](
+            input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
+        )
+        optim = tf.keras.optimizers.Adam(lr=opt["lr"])
+        checkpoint = callbacks.ModelCheckpoint(
+            file_path,
+            monitor="val_loss",
+            verbose=1,
+            save_best_only=True,
+            mode="max",
+        )
+        if opt["weighted"]:
+            loss_fn = utils_model.weighted_cross_entropy
+        else:
+            loss_fn = "binary_crossentropy"
+        model_seg.compile(
+            loss=loss_fn,
+            optimizer=optim,
+        )
+    utils.print_gre("Done!")
+    utils.print_gre("Prepared !")
+    return dataset, dataset_val, model_seg, checkpoint
+
+
 def contraste_and_reshape(souris, size=128):
     """
     :param souris: Ensemble d'image, verification si ensemble ou image
