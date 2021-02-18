@@ -91,6 +91,7 @@ if __name__ == "__main__":
         dataset = data.get_predict_dataset(souris[0], souris[1])
         res_lungs = predict_seg(dataset, path_model_seg)
         res_meta = predict_seg(dataset, path_model_seg_meta)
+        print(np.amax(res_meta))
         # res_lungs = postprocess_loop(res_lungs)
         save_res(dataset, res_lungs, name + "_lungs")
         save_res(dataset, res_meta, name + "_meta")
