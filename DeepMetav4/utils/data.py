@@ -337,7 +337,7 @@ def meta_for_training(path_data, path_label, file_path, opt):
             monitor="val_loss",
             verbose=1,
             save_best_only=True,
-            mode="max",
+            mode="min",
         )
         if opt["weighted"]:
             loss_fn = utils_model.weighted_cross_entropy
