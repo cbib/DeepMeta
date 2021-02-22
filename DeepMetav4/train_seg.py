@@ -11,9 +11,9 @@ import os
 
 import tensorflow.keras as keras
 
-import DeepMetav4.tune_reporter as tune_rep
 import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
+import DeepMetav4.utils.tune_reporter as tune_rep
 import DeepMetav4.utils.utils as utils
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
