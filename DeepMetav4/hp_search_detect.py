@@ -41,14 +41,14 @@ if __name__ == "__main__":
     # adding wandb keys
     config["wandb"] = {
         "project": experiment_name,
-        "api_key_file": "/home/edgar/Documents/Projects/DeepMetav4/.wandb_key",
+        "api_key_file": "/scratch/elefevre/Projects/DeepMetav4/.wandb_key",
     }
 
     config["lr"] = tune.choice([0.01, 0.001, 0.0001])
     config["batch_size"] = tune.qrandint(32, 256, 32)
     config["drop_r"] = tune.quniform(0.2, 0.5, 0.1)
     config["filters"] = tune.choice([4, 8, 16])
-    config["model_name"] = tune.choice(["detection", "resnet50", "resnetv2"])
+    config["model_name"] = "detection"
     config["meta"] = True
 
     utils.print_gre(config)
