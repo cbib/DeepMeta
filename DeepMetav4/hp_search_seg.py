@@ -45,12 +45,12 @@ if __name__ == "__main__":
     }
 
     config["lr"] = tune.choice([0.01, 0.001, 0.0001])
-    config["batch_size"] = tune.qrandint(32, 256, 32)
+    config["batch_size"] = tune.qrandint(64, 256, 64)
     config["model_name"] = "small++"
-    config["w1"] = tune.randint(1, 10)
-    config["w2"] = tune.randint(2, 10)
-    config["drop_r"] = tune.quniform(0.2, 0.5, 0.1)
-    config["filters"] = tune.choice([4, 8, 16])
+    config["w1"] = tune.randint(2, 10)
+    config["w2"] = tune.randint(4, 20)
+    config["drop_r"] = tune.quniform(0.2, 0.5, 0.005)
+    config["filters"] = tune.choice([16, 32])
     config["meta"] = True
     config["weighted"] = True
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     )
 
     analysis = tune.run(
-        t_seg.train,
+        t_seg.train_meta,
         loggers=DEFAULT_LOGGERS + (WandbLogger,),
         config=config,
         local_dir="ray_results",
