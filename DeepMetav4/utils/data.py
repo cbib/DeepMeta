@@ -14,6 +14,7 @@ import skimage.measure as measure
 import tensorflow as tf
 import tensorflow.keras as keras
 import tensorflow.keras.callbacks as callbacks
+from focal_loss import BinaryFocalLoss
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
 from tensorflow.keras.preprocessing.image import load_img
@@ -342,7 +343,7 @@ def meta_for_training(path_data, path_label, file_path, opt):
         if opt["weighted"]:
             loss_fn = utils_model.weighted_cross_entropy
         else:
-            loss_fn = "binary_crossentropy"
+            loss_fn = BinaryFocalLoss(gamma=2)
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,
