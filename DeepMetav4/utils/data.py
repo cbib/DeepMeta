@@ -155,10 +155,11 @@ def get_images_detect_meta(tab, path_img, split=11136):
                 elastic = elastic_transform(im)
                 l_im = [im, im90, im180, im270, elastic, flipped]
                 if tab[i, 3] == 1:
-                    if i > split:
-                        new1 += l_im
-                    else:
-                        old1 += l_im
+                    if os.path.isfile(gv.new_meta_path_img + str(i) + ".tif"):
+                        if i > split:
+                            new1 += l_im
+                        else:
+                            old1 += l_im
                 else:
                     if i > split:
                         new0 += l_im

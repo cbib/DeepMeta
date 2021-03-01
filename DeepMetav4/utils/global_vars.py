@@ -26,6 +26,7 @@ PATH_FILTERS_FEATURES = os.path.join(PATH_RES, "Filters_and_features/")
 PATH_CLASSIF = os.path.join(PATH_DATA, "Classif/")
 PATH_LUNGS = os.path.join(PATH_DATA, "Poumons/")
 PATH_META = os.path.join(PATH_DATA, "Metastases/")
+NEW_PATH_META = os.path.join(PATH_DATA, "Metastases_new/")
 
 
 path_souris = os.path.join(PATH_CLASSIF, "Souris/")
@@ -45,6 +46,8 @@ path_masked_img = os.path.join(PATH_DATA, "Metastases/masked_imgs/")
 # meta_path_mask = os.path.join(PATH_META, "Masques/")
 meta_path_img = os.path.join(PATH_META, "Images/")
 meta_path_lab = os.path.join(PATH_META, "Labels/")
+new_meta_path_img = os.path.join(NEW_PATH_META, "Images/")
+new_meta_path_lab = os.path.join(NEW_PATH_META, "Labels/")
 
 
 model_list = {

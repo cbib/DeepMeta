@@ -85,8 +85,8 @@ if __name__ == "__main__":
     if opt["meta"]:
         train_meta(
             opt,
-            path_images=gv.meta_path_img,
-            path_labels=gv.meta_path_lab,
+            path_images=gv.new_meta_path_img,
+            path_labels=gv.new_meta_path_lab,
             hp_search=False,
         )
     else:
