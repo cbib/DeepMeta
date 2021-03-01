@@ -61,6 +61,7 @@ def train_meta(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search
         verbose=1,
         min_delta=0.001,
         restore_best_weights=True,
+        monitor="val_loss",
     )
     cb_list = [earlystopper, utils.CosLRDecay(args["n_epochs"], args["lr"])]
     if hp_search:
