@@ -126,7 +126,9 @@ def get_images_detect(tab, path_img):
     data_detec_1 = []
     for i in range(len(tab)):
         try:
-            im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
+            im = io.imread(
+                path_img + "img_" + str(tab[i, 0]) + ".tif", plugin="tifffile"
+            )
             im = im / np.amax(im)
             im90, im180, im270 = rotate_img(im)
             # elastic = elastic_transform(im)
@@ -135,7 +137,7 @@ def get_images_detect(tab, path_img):
             else:
                 data_detec_0 += [im, im90, im180, im270]
         except Exception as e:
-            utils.print_red("IMG {} not found".format(i))
+            utils.print_red("IMG {} not found".format(tab[i, 0]))
             utils.print_red("\t" + str(e))
     return data_detec_0, data_detec_1
 
@@ -148,14 +150,16 @@ def get_images_detect_meta(tab, path_img, split=11136):
     for i in range(len(tab)):
         if tab[i, 4] == 1:
             try:
-                im = io.imread(path_img + "img_" + str(i) + ".tif", plugin="tifffile")
+                im = io.imread(
+                    path_img + "img_" + str(tab[i, 0]) + ".tif", plugin="tifffile"
+                )
                 im = im / np.amax(im)
                 flipped = cv2.flip(im, 1)
                 im90, im180, im270 = rotate_img(im)
                 elastic = elastic_transform(im)
                 l_im = [im, im90, im180, im270, elastic, flipped]
                 if tab[i, 3] == 1:
-                    if os.path.isfile(gv.new_meta_path_img + str(i) + ".tif"):
+                    if os.path.isfile(gv.new_meta_path_img + str(tab[i, 0]) + ".tif"):
                         if i > split:
                             new1 += l_im
                         else:
@@ -166,10 +170,13 @@ def get_images_detect_meta(tab, path_img, split=11136):
                     else:
                         old0 += l_im
             except Exception as e:
-                utils.print_red("IMG {} not found".format(i))
+                utils.print_red("IMG {} not found".format(tab[i, 0]))
                 utils.print_red("\t" + str(e))
-    data_detec_0, _ = concat_and_normalize(old0, new0)
-    data_detec_1, _ = concat_and_normalize(old1, new1)
+    # uncomment if we want the same number of img per batch
+    # data_detec_0, _ = concat_and_normalize(old0, new0)
+    # data_detec_1, _ = concat_and_normalize(old1, new1)
+    data_detec_0 = old0 + new0
+    data_detec_1 = old1 + new1
     utils.print_gre("Images 0 : {}".format(len(data_detec_0)))
     utils.print_gre("Images 1 : {}".format(len(data_detec_1)))
     return data_detec_0, data_detec_1
