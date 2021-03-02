@@ -16,7 +16,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 100  # -1 -> infinite, need stop condition
-experiment_name = "seg_meta_bin_acc"
+experiment_name = "seg_meta_new_data"
 
 
 class CustomStopper(tune.Stopper):
@@ -24,7 +24,7 @@ class CustomStopper(tune.Stopper):
         self.should_stop = False
 
     def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_accuracy"] < 0.1:  # always val acc
+        if not self.should_stop and result["val_loss"] < 0.1:  # always val acc
             self.should_stop = True
         return self.should_stop
 
@@ -52,19 +52,19 @@ if __name__ == "__main__":
     config["drop_r"] = tune.quniform(0.2, 0.5, 0.005)
     config["filters"] = tune.choice([16, 32])
     config["meta"] = True
-    config["weighted"] = True
+    config["weighted"] = False
 
     utils.print_gre(config)
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
-        metric="val_accuracy",
-        mode="max",
+        metric="val_loss",
+        mode="min",
         reduction_factor=2,
     )
 
     search_alg = TuneBOHB(
-        metric="val_accuracy",
-        mode="max",
+        metric="val_loss",
+        mode="min",
         max_concurrent=5,
     )
 
@@ -78,10 +78,10 @@ if __name__ == "__main__":
         search_alg=search_alg,
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
-        stop=CustomStopper(),
+        # stop=CustomStopper(),
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_accuracy", mode="max"),
+        analysis.get_best_config(metric="val_loss", mode="min"),
     )
     ray.shutdown()
