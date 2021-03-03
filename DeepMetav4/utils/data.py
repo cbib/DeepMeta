@@ -142,6 +142,18 @@ def get_images_detect(tab, path_img):
     return data_detec_0, data_detec_1
 
 
+def process_da(im):
+    l_im = [im]
+    flipped = cv2.flip(im, 1)
+    l_im.append(flipped)
+    l_im.append(rotate_img(im))
+    l_im.append(rotate_img(flipped))
+    l_el = []
+    for img in l_im:
+        l_el.append(elastic_transform(img))
+    return l_im + l_el
+
+
 def get_images_detect_meta(tab, path_img, split=11136):
     old0 = []
     new0 = []
@@ -154,10 +166,7 @@ def get_images_detect_meta(tab, path_img, split=11136):
                     path_img + "img_" + str(tab[i, 0]) + ".tif", plugin="tifffile"
                 )
                 im = im / np.amax(im)
-                flipped = cv2.flip(im, 1)
-                im90, im180, im270 = rotate_img(im)
-                elastic = elastic_transform(im)
-                l_im = [im, im90, im180, im270, elastic, flipped]
+                l_im = process_da(im)
                 if tab[i, 3] == 1:
                     # if os.path.isfile(gv.new_meta_path_img + str(tab[i, 0]) + ".tif"):
                     if i > split:
