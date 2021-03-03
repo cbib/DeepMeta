@@ -146,8 +146,10 @@ def process_da(im):
     l_im = [im]
     flipped = cv2.flip(im, 1)
     l_im.append(flipped)
-    l_im.append(rotate_img(im))
-    l_im.append(rotate_img(flipped))
+    im90, im180, im270 = rotate_img(im)
+    l_im += [im90, im180, im270]
+    fim90, fim180, fim270 = rotate_img(flipped)
+    l_im += [fim90, fim180, fim270]
     l_el = []
     for img in l_im:
         l_el.append(elastic_transform(img))
