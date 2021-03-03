@@ -44,7 +44,6 @@ def train_detect(args, model_name="detection", hp_search=True):
             mode="max",
             verbose=1,
             patience=args["patience"],
-            min_delta=0.001,
             restore_best_weights=True,
         )
         cb_list = [es, utils.CosLRDecay(args["n_epochs"], args["lr"])]
