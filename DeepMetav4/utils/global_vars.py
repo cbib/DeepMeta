@@ -13,8 +13,8 @@ import DeepMetav4.models.small_plus_plus
 import DeepMetav4.utils.utils
 
 # THE ONLY VAR YOU NEED TO MODIFY
-PATH_DATA = "/scratch/elefevre/Datasets/deepmeta/Data/"
-# PATH_DATA = "/home/edgar/Documents/Datasets/deepmeta/Data/"
+# PATH_DATA = "/scratch/elefevre/Datasets/deepmeta/Data/"
+PATH_DATA = "/home/edgar/Documents/Datasets/deepmeta/Data/"
 
 MAX_GPU_NUMBER = 6
 
@@ -27,6 +27,7 @@ PATH_CLASSIF = os.path.join(PATH_DATA, "Classif/")
 PATH_LUNGS = os.path.join(PATH_DATA, "Poumons/")
 PATH_META = os.path.join(PATH_DATA, "Metastases/")
 NEW_PATH_META = os.path.join(PATH_DATA, "Metastases_new/")
+OLD_META_PATH = os.path.join(PATH_DATA, "Metastases_old/")
 
 
 path_souris = os.path.join(PATH_CLASSIF, "Souris/")
@@ -41,13 +42,16 @@ path_lab = os.path.join(PATH_LUNGS, "Labels/")
 path_gen_img = os.path.join(PATH_DATA, "Dataset_generated/Images/")
 path_gen_lab = os.path.join(PATH_DATA, "Dataset_generated/Labels/")
 
-path_masked_img = os.path.join(PATH_DATA, "Metastases/masked_imgs/")
+path_masked_img = os.path.join(PATH_DATA, "masked/Images/")
+path_masked_lab = os.path.join(PATH_DATA, "masked/Labels/")
 
 # meta_path_mask = os.path.join(PATH_META, "Masques/")
 meta_path_img = os.path.join(PATH_META, "Images/")
 meta_path_lab = os.path.join(PATH_META, "Labels/")
 new_meta_path_img = os.path.join(NEW_PATH_META, "Images/")
 new_meta_path_lab = os.path.join(NEW_PATH_META, "Labels/")
+old_meta_path_img = os.path.join(OLD_META_PATH, "Images/")
+old_meta_path_lab = os.path.join(OLD_META_PATH, "Labels/")
 
 
 model_list = {

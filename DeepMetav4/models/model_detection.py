@@ -43,7 +43,7 @@ def model_detection(input_shape, lr, n_classes=2, filters=32, drop_r=0.2):
     model.compile(
         loss=keras.losses.binary_crossentropy,
         optimizer=keras.optimizers.Adam(lr=lr),
-        metrics=["binary_accuracy"],
+        metrics=["accuracy"],
     )
 
     return model

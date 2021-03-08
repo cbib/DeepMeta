@@ -4,7 +4,7 @@
 """
 Train seg
 ==========
-This files is used to train networks to segment images.
+This file is used to train networks to segment images.
 """
 
 import os
@@ -19,7 +19,7 @@ import DeepMetav4.utils.utils as utils
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 
 
 def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):

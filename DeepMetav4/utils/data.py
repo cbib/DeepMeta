@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pathlib
 import random
 
 import cv2
@@ -218,6 +219,59 @@ def create_dataset_detect(path_img, tab, size, meta=False):
     return data_detec, label_detec
 
 
+def get_label(file_path):
+    data_dir = pathlib.Path(
+        "/home/edgar/Documents/Datasets/deepmeta/Data/Classif_lungs/"
+    )
+    class_names = np.array(sorted([item.name for item in data_dir.glob("*")]))
+    parts = tf.strings.split(file_path, os.path.sep)
+    one_hot = tf.cast(parts[-2] == class_names, dtype=tf.uint8)
+    # one_hot = tf.argmax(one_hot)
+    return one_hot
+
+
+def decode_img(img):
+    img = tf.image.decode_jpeg(img, channels=1) / 255
+    return tf.image.resize(img, [128, 128])
+
+
+def process_path(file_path):
+    label = get_label(file_path)
+    img = tf.io.read_file(file_path)
+    img = decode_img(img)
+    return img, label
+
+
+def configure_for_performance(ds, batch_size):
+    ds = ds.shuffle(buffer_size=50000)
+    ds = ds.batch(batch_size)
+    ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+    ds = ds.cache()
+    return ds
+
+
+def new_dataset_detect(data_path, opt):
+    data_dir = pathlib.Path(data_path)
+    image_count = len(list(data_dir.glob("*/*.jpg")))
+    list_ds = tf.data.Dataset.list_files(str(data_dir / "*/*"), shuffle=False)
+    list_ds = list_ds.shuffle(image_count, reshuffle_each_iteration=True)
+    val_size = int(image_count * 0.2)
+    train_ds = list_ds.skip(val_size)
+    val_ds = list_ds.take(val_size)
+    train_ds = train_ds.map(
+        process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE
+    )
+    val_ds = val_ds.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    # for image, label in train_ds.take(10):
+    #     print("Image min: ", np.amin(image.numpy()))
+    #     print("Image max: ", np.amax(image.numpy()))
+    #     print("Label :", label.numpy())
+    train_ds = configure_for_performance(train_ds, opt["batch_size"])
+    val_ds = configure_for_performance(val_ds, opt["batch_size"])
+    utils.print_gre("NB of images : {}".format(image_count))
+    return train_ds, val_ds
+
+
 def save_model_name(opt, path_save):
     if opt["meta"]:
         res = "Metastases/" + str(opt["size"]) + "model_" + opt["model_name"]
@@ -362,7 +416,7 @@ def meta_for_training(path_data, path_label, file_path, opt):
         if opt["weighted"]:
             loss_fn = utils_model.weighted_cross_entropy
         else:
-            loss_fn = BinaryFocalLoss(gamma=2)
+            loss_fn = BinaryFocalLoss(gamma=0.5, pos_weight=2)
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,
@@ -434,13 +488,19 @@ class Dataset(keras.utils.Sequence):
         i = idx * self.batch_size
         batch_input_img_paths = self.input_img_paths[i : i + self.batch_size]
         batch_target_img_paths = self.target_img_paths[i : i + self.batch_size]
-        x = np.zeros((self.batch_size, self.img_size, self.img_size, 1), dtype="uint8")
+        x = np.zeros(
+            (self.batch_size, self.img_size, self.img_size, 1), dtype="float32"
+        )
         for j, path in enumerate(batch_input_img_paths):
             img = np.array(load_img(path, color_mode="grayscale")) / 255
             x[j] = np.expand_dims(img, 2)
-        y = np.zeros((self.batch_size, self.img_size, self.img_size, 1), dtype="uint8")
+        y = np.zeros(
+            (self.batch_size, self.img_size, self.img_size, 1), dtype=np.float32
+        )
         for j, path in enumerate(batch_target_img_paths):
-            label = np.array(load_img(path, color_mode="grayscale")) / 255
+            label = (
+                np.array(load_img(path, color_mode="grayscale"), dtype=np.float32) / 255
+            )
             y[j] = np.expand_dims(label, 2)
         if self.weighted:
             n = range(self.batch_size)

@@ -6,6 +6,7 @@ import os
 import numpy as np
 import skimage.io as io
 import tensorflow.keras as keras
+from focal_loss import BinaryFocalLoss
 
 import DeepMetav4.models.utils_model as utils_model
 import DeepMetav4.postprocessing.post_process_and_count as postprocess
@@ -19,9 +20,12 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-def predict_seg(dataset, path_model_seg):
+def predict_seg(dataset, path_model_seg, tresh=0.5):
     if "weighted" not in path_model_seg:
-        model_seg = keras.models.load_model(path_model_seg)
+        model_seg = keras.models.load_model(
+            path_model_seg,
+            custom_objects={"binary_focal_loss": BinaryFocalLoss(gamma=2)},
+        )
     else:
         model_seg = keras.models.load_model(
             path_model_seg,
@@ -30,11 +34,9 @@ def predict_seg(dataset, path_model_seg):
                 "weighted_bin_acc": data.weighted_bin_acc,
             },
         )
-    return (
-        (model_seg.predict(dataset) > 0.5)
-        .astype(np.uint8)
-        .reshape(len(dataset), 128, 128, 1)
-    )
+    res = model_seg.predict(dataset)
+    print(np.amax(res))
+    return (res > tresh).astype(np.uint8).reshape(len(dataset), 128, 128, 1)
 
 
 def save_res(dataset, seg, name_folder, mask=False, mask_path=None):
@@ -69,7 +71,7 @@ if __name__ == "__main__":
 
     # Modèle de détection meta #
     path_model_seg_meta = os.path.join(
-        gv.PATH_SAVE, "Metastases/128model_small++_weighted24.h5"
+        gv.PATH_SAVE, "Metastases/128model_small++_weighted1020.h5"
     )
 
     slist = [
@@ -90,8 +92,10 @@ if __name__ == "__main__":
         utils.print_red(name)
         dataset = data.get_predict_dataset(souris[0], souris[1])
         res_lungs = predict_seg(dataset, path_model_seg)
-        res_meta = predict_seg(dataset, path_model_seg_meta)
-        print(np.amax(res_meta))
+        res_meta = predict_seg(
+            dataset, path_model_seg_meta
+        )  # dataset * reslung if masked data
+        # print(np.amax(res_meta))
         # res_lungs = postprocess_loop(res_lungs)
         save_res(dataset, res_lungs, name + "_lungs")
         save_res(dataset, res_meta, name + "_meta")
