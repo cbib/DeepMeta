@@ -15,7 +15,6 @@ import skimage.measure as measure
 import tensorflow as tf
 import tensorflow.keras as keras
 import tensorflow.keras.callbacks as callbacks
-from focal_loss import BinaryFocalLoss
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
 from tensorflow.keras.preprocessing.image import load_img
@@ -162,7 +161,7 @@ def get_images_detect_meta(tab, path_img, split=11136):
     new0 = []
     old1 = []
     new1 = []
-    for i in range(len(tab)):
+    for i in range(len(tab))[:100]:
         if tab[i, 4] == 1:
             try:
                 im = io.imread(
@@ -231,7 +230,7 @@ def get_label(file_path):
 
 
 def decode_img(img):
-    img = tf.image.decode_jpeg(img, channels=1) / 255
+    img = tf.cast(tf.image.decode_jpeg(img, channels=1), dtype=tf.float32) / 255
     return tf.image.resize(img, [128, 128])
 
 
@@ -361,7 +360,7 @@ def weighted_bin_acc(y_true, y_pred):
     )
 
 
-def new_prepare_for_training(path_data, path_label, file_path, opt):
+def prepare_for_training(path_data, path_label, file_path, opt):
     dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
     input_shape = (opt["size"], opt["size"], 1)
@@ -371,15 +370,15 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
         model_seg = gv.model_list[opt["model_name"]](
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
-        metric = "weighted_bin_acc"
-        metric_fn = weighted_bin_acc
+        metric = "loss"
+        # metric_fn = weighted_bin_acc
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
             monitor="val_" + metric,
             verbose=1,
             save_best_only=True,
-            mode="max",
+            mode="min",
         )
         if opt["weighted"]:
             loss_fn = utils_model.weighted_cross_entropy
@@ -388,45 +387,14 @@ def new_prepare_for_training(path_data, path_label, file_path, opt):
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,
-            metrics=[metric_fn],
+            # metrics=[metric_fn],
         )
     utils.print_gre("Done!")
     utils.print_gre("Prepared !")
     return dataset, dataset_val, model_seg, checkpoint, metric
 
 
-def meta_for_training(path_data, path_label, file_path, opt):
-    dataset, dataset_val = get_dataset(path_data, path_label, opt)
-    utils.print_gre("Prepare for Training...")
-    input_shape = (opt["size"], opt["size"], 1)
-    utils.print_gre("Getting model...")
-    strategy = tf.distribute.MirroredStrategy()
-    with strategy.scope():
-        model_seg = gv.model_list[opt["model_name"]](
-            input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
-        )
-        optim = tf.keras.optimizers.Adam(lr=opt["lr"])
-        checkpoint = callbacks.ModelCheckpoint(
-            file_path,
-            monitor="val_loss",
-            verbose=1,
-            save_best_only=True,
-            mode="min",
-        )
-        if opt["weighted"]:
-            loss_fn = utils_model.weighted_cross_entropy
-        else:
-            loss_fn = BinaryFocalLoss(gamma=0.5, pos_weight=2)
-        model_seg.compile(
-            loss=loss_fn,
-            optimizer=optim,
-        )
-    utils.print_gre("Done!")
-    utils.print_gre("Prepared !")
-    return dataset, dataset_val, model_seg, checkpoint
-
-
-def contraste_and_reshape(souris, size=128):
+def contrast_and_reshape(souris, size=128):
     """
     :param souris: Ensemble d'image, verification si ensemble ou image
     unique avec la condition if.
@@ -452,7 +420,7 @@ def get_predict_dataset(path_souris, contrast=True):
     mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
     mouse = np.array(mouse) / np.amax(mouse)
     if contrast:
-        mouse = contraste_and_reshape(mouse)
+        mouse = contrast_and_reshape(mouse)
     else:
         mouse = np.array(mouse).reshape(-1, 128, 128, 1)
     return mouse

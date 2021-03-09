@@ -26,30 +26,44 @@ def get_save_name(args):
     return save_name
 
 
+@tf.function
+def train_step(model, x, y, loss_fn, optimizer, train_metric):
+    with tf.GradientTape() as tape:
+        pred = model(x, training=True)
+        loss_value = loss_fn(y, pred)
+    grads = tape.gradient(loss_value, model.trainable_weights)
+    optimizer.apply_gradients(zip(grads, model.trainable_weights))
+    train_metric.update_state(y, pred)
+
+
+@tf.function
+def test_step(model, x, y, test_metric):
+    val_logits = model(x, training=False)
+    test_metric.update_state(y, val_logits)
+
+
 def train_model(model, epochs, train_dataset, val_dataset, lr):
     train_acc_metric = keras.metrics.BinaryAccuracy()
     val_acc_metric = keras.metrics.BinaryAccuracy()
-    loss_fn = keras.losses.BinaryCrossentropy(from_logits=True)
+    loss_fn = keras.losses.BinaryCrossentropy()
     optimizer = keras.optimizers.Adam(lr=lr)
     for epoch in range(epochs):
         print("\nStart of epoch %d" % (epoch,))
         start_time = time.time()
         for step, (x_batch_train, y_batch_train) in enumerate(train_dataset):
-            with tf.GradientTape() as tape:
-                pred = model(x_batch_train, training=True)
-                # print(y_batch_train)
-                # print(100*'-')
-                # print(pred)
-                loss_value = loss_fn(y_batch_train, pred)
-            grads = tape.gradient(loss_value, model.trainable_weights)
-            optimizer.apply_gradients(zip(grads, model.trainable_weights))
-            train_acc_metric.update_state(y_batch_train, pred)
+            train_step(
+                model,
+                x_batch_train,
+                y_batch_train,
+                loss_fn,
+                optimizer,
+                train_acc_metric,
+            )
         train_acc = train_acc_metric.result()
         print("Training acc over epoch: %.4f" % (float(train_acc),))
         train_acc_metric.reset_states()
         for x_batch_val, y_batch_val in val_dataset:
-            val_logits = model(x_batch_val, training=False)
-            val_acc_metric.update_state(y_batch_val, val_logits)
+            test_step(model, x_batch_val, y_batch_val, val_acc_metric)
         val_acc = val_acc_metric.result()
         val_acc_metric.reset_states()
         print("Validation acc: %.4f" % (float(val_acc),))
@@ -72,7 +86,7 @@ def train_detect(args, model_name="detection", hp_search=True):
     # dataset, label = data.create_dataset_detect(
     #     gv.path_img_classif, tab, args["size"], meta=args["meta"]
     # )
-
+    # print(label)
     # strategy = tf.distribute.MirroredStrategy()
     # with strategy.scope():
     model_detect = gv.model_list[model_name](
@@ -107,15 +121,15 @@ def train_detect(args, model_name="detection", hp_search=True):
         #     callbacks=cb_list,
         # )
 
-    # history = model_detect.fit(
-    #     train_ds,
-    #     validation_data=val_ds,
-    #     epochs=args["n_epochs"],
-    #     callbacks=cb_list,
-    # )
-    # if not hp_search:
-    #     utils.plot_learning_curves(history, name="detect", metric="binary_accuracy")
-    train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
+    history = model_detect.fit(
+        train_ds,
+        validation_data=val_ds,
+        epochs=args["n_epochs"],
+        callbacks=cb_list,
+    )
+    if not hp_search:
+        utils.plot_learning_curves(history, name="detect", metric="binary_accuracy")
+    # train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
 
 
 if __name__ == "__main__":

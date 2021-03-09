@@ -6,7 +6,6 @@ import os
 import numpy as np
 import skimage.io as io
 import tensorflow.keras as keras
-from focal_loss import BinaryFocalLoss
 
 import DeepMetav4.models.utils_model as utils_model
 import DeepMetav4.postprocessing.post_process_and_count as postprocess
@@ -24,7 +23,6 @@ def predict_seg(dataset, path_model_seg, tresh=0.5):
     if "weighted" not in path_model_seg:
         model_seg = keras.models.load_model(
             path_model_seg,
-            custom_objects={"binary_focal_loss": BinaryFocalLoss(gamma=2)},
         )
     else:
         model_seg = keras.models.load_model(
@@ -71,7 +69,7 @@ if __name__ == "__main__":
 
     # Modèle de détection meta #
     path_model_seg_meta = os.path.join(
-        gv.PATH_SAVE, "Metastases/128model_small++_weighted1020.h5"
+        gv.PATH_SAVE, "Metastases/128model_small++_weighted1015.h5"
     )
 
     slist = [
