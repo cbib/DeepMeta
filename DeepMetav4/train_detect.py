@@ -71,7 +71,9 @@ def train_model(model, epochs, train_dataset, val_dataset, lr):
 
 
 # Function used to train Lungs detection (ie is there lungs in this image)
-def train_detect(args, model_name="detection", hp_search=True):
+def train_detect(
+    args, img_path=gv.path_classif_lungs, model_name="detection", hp_search=True
+):
     utils.print_red("Training Detect : ")
     save_name = get_save_name(args)
     input_shape = (
@@ -80,9 +82,7 @@ def train_detect(args, model_name="detection", hp_search=True):
         1,
     )
     # tab = gv.tab_meta
-    train_ds, val_ds = data.new_dataset_detect(
-        "/home/edgar/Documents/Datasets/deepmeta/Data/Classif_lungs/", args
-    )
+    train_ds, val_ds = data.new_dataset_detect(img_path, args)
     # dataset, label = data.create_dataset_detect(
     #     gv.path_img_classif, tab, args["size"], meta=args["meta"]
     # )
@@ -134,4 +134,7 @@ def train_detect(args, model_name="detection", hp_search=True):
 
 if __name__ == "__main__":
     opt = vars(utils.get_args())
-    train_detect(opt, hp_search=False)
+    if opt["meta"]:
+        train_detect(opt, img_path=gv.path_classif_metas, hp_search=False)
+    else:
+        train_detect(opt, hp_search=False)
