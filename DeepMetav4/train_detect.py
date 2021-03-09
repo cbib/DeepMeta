@@ -12,7 +12,7 @@ import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.tune_reporter as tune_rep
 import DeepMetav4.utils.utils as utils
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -120,15 +120,15 @@ def train_detect(
         #     callbacks=cb_list,
         # )
 
-    history = model_detect.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=args["n_epochs"],
-        callbacks=cb_list,
-    )
-    if not hp_search:
-        utils.plot_learning_curves(history, name="detect", metric="binary_accuracy")
-    # train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
+    # history = model_detect.fit(
+    #     train_ds,
+    #     validation_data=val_ds,
+    #     epochs=args["n_epochs"],
+    #     callbacks=cb_list,
+    # )
+    # if not hp_search:
+    #     utils.plot_learning_curves(history, name="detect", metric="binary_accuracy")
+    train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
 
 
 if __name__ == "__main__":

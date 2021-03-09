@@ -220,7 +220,7 @@ def create_dataset_detect(path_img, tab, size, meta=False):
 
 def get_label(file_path):
     data_dir = pathlib.Path(
-        "/home/edgar/Documents/Datasets/deepmeta/Data/Classif_lungs/"
+        gv.path_classif_metas
     )
     class_names = np.array(sorted([item.name for item in data_dir.glob("*")]))
     parts = tf.strings.split(file_path, os.path.sep)
