@@ -121,15 +121,15 @@ def train_detect(
         #     callbacks=cb_list,
         # )
 
-    history = model_detect.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=args["n_epochs"],
-        callbacks=cb_list,
-    )
-    if not hp_search:
-        utils.plot_learning_curves(history, name="detect", metric="binary_accuracy")
-    # train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
+    # history = model_detect.fit(
+    #     train_ds,
+    #     validation_data=val_ds,
+    #     epochs=args["n_epochs"],
+    #     callbacks=cb_list,
+    # )
+    # if not hp_search:
+    #     utils.plot_learning_curves(history, name="detect", metric="binary_accuracy")
+    train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
 
 
 if __name__ == "__main__":
