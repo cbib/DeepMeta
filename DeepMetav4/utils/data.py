@@ -14,6 +14,7 @@ import skimage.io as io
 import skimage.measure as measure
 import tensorflow as tf
 import tensorflow.keras as keras
+import tensorflow.keras.backend as K
 import tensorflow.keras.callbacks as callbacks
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
@@ -219,9 +220,7 @@ def create_dataset_detect(path_img, tab, size, meta=False):
 
 
 def get_label(file_path):
-    data_dir = pathlib.Path(
-        gv.path_classif_metas
-    )
+    data_dir = pathlib.Path(gv.path_classif_metas)
     class_names = np.array(sorted([item.name for item in data_dir.glob("*")]))
     parts = tf.strings.split(file_path, os.path.sep)
     one_hot = tf.cast(parts[-2] == class_names, dtype=tf.uint8)
@@ -360,6 +359,17 @@ def weighted_bin_acc(y_true, y_pred):
     )
 
 
+def matthews_correlation_coefficient(y_true, y_pred):
+    tp = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    tn = K.sum(K.round(K.clip((1 - y_true) * (1 - y_pred), 0, 1)))
+    fp = K.sum(K.round(K.clip((1 - y_true) * y_pred, 0, 1)))
+    fn = K.sum(K.round(K.clip(y_true * (1 - y_pred), 0, 1)))
+
+    num = tp * tn - fp * fn
+    den = (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)
+    return num / K.sqrt(den + K.epsilon())
+
+
 def prepare_for_training(path_data, path_label, file_path, opt):
     dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
@@ -370,15 +380,15 @@ def prepare_for_training(path_data, path_label, file_path, opt):
         model_seg = gv.model_list[opt["model_name"]](
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
-        metric = "loss"
-        # metric_fn = weighted_bin_acc
+        metric = "MatthewsCorrelationCoefficient"
+        metric_fn = matthews_correlation_coefficient
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
             monitor="val_" + metric,
             verbose=1,
             save_best_only=True,
-            mode="min",
+            mode="max",
         )
         if opt["weighted"]:
             loss_fn = utils_model.weighted_cross_entropy
@@ -387,7 +397,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,
-            # metrics=[metric_fn],
+            metrics=[metric_fn],
         )
     utils.print_gre("Done!")
     utils.print_gre("Prepared !")
