@@ -85,47 +85,46 @@ def train_detect(
     # dataset, label = data.create_dataset_detect(
     #     gv.path_img_classif, tab, args["size"], meta=args["meta"]
     # )
-    # print(label)
-    # strategy = tf.distribute.MirroredStrategy()
-    # with strategy.scope():
-    model_detect = gv.model_list[model_name](
-        input_shape, args["lr"], drop_r=args["drop_r"], filters=args["filters"]
-    )
-    es = keras.callbacks.EarlyStopping(
-        monitor="val_accuracy",
-        mode="max",
-        verbose=1,
-        patience=args["patience"],
-        restore_best_weights=True,
-    )
-    cb_list = [es, utils.CosLRDecay(args["n_epochs"], args["lr"])]
-    if hp_search:
-        cb_list.append(tune_rep.TuneReporter())
-    else:
-        file_path = os.path.join(gv.PATH_SAVE, save_name + model_name + ".h5")
-        checkpoint = keras.callbacks.ModelCheckpoint(
-            file_path,
-            monitor="val_accuracy",
-            verbose=1,
-            save_best_only=True,
-            mode="max",
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        model_detect = gv.model_list[model_name](
+            input_shape, args["lr"], drop_r=args["drop_r"], filters=args["filters"]
         )
-        cb_list.append(checkpoint)
-        # history = model_detect.fit(
-        #     dataset,
-        #     label,
-        #     validation_split=0.2,
-        #     batch_size=args["batch_size"],
-        #     epochs=args["n_epochs"],
-        #     callbacks=cb_list,
-        # )
+        es = keras.callbacks.EarlyStopping(
+            monitor="val_accuracy",
+            mode="max",
+            verbose=1,
+            patience=args["patience"],
+            restore_best_weights=True,
+        )
+        cb_list = [es, utils.CosLRDecay(args["n_epochs"], args["lr"])]
+        if hp_search:
+            cb_list.append(tune_rep.TuneReporter())
+        else:
+            file_path = os.path.join(gv.PATH_SAVE, save_name + model_name + ".h5")
+            checkpoint = keras.callbacks.ModelCheckpoint(
+                file_path,
+                monitor="val_accuracy",
+                verbose=1,
+                save_best_only=True,
+                mode="max",
+            )
+            cb_list.append(checkpoint)
+            # history = model_detect.fit(
+            #     dataset,
+            #     label,
+            #     validation_split=0.2,
+            #     batch_size=args["batch_size"],
+            #     epochs=args["n_epochs"],
+            #     callbacks=cb_list,
+            # )
 
-    history = model_detect.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=args["n_epochs"],
-        callbacks=cb_list,
-    )
+        history = model_detect.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=args["n_epochs"],
+            callbacks=cb_list,
+        )
     if not hp_search:
         utils.plot_learning_curves(history, name="detect", metric="val_accuracy")
     # train_model(model_detect, args["n_epochs"], train_ds, val_ds, args["lr"])
