@@ -359,7 +359,10 @@ def weighted_bin_acc(y_true, y_pred):
     )
 
 
-def matthews_correlation_coefficient(y_true, y_pred):
+def mcc(y_true, y_pred):
+    """
+    Matthews Correlation Coefficient
+    """
     tp = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     tn = K.sum(K.round(K.clip((1 - y_true) * (1 - y_pred), 0, 1)))
     fp = K.sum(K.round(K.clip((1 - y_true) * y_pred, 0, 1)))
@@ -380,8 +383,8 @@ def prepare_for_training(path_data, path_label, file_path, opt):
         model_seg = gv.model_list[opt["model_name"]](
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
-        metric = "MatthewsCorrelationCoefficient"
-        metric_fn = matthews_correlation_coefficient
+        metric = "mcc"
+        metric_fn = mcc
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
