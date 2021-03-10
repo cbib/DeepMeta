@@ -33,6 +33,9 @@ class CustomStopper(tune.Stopper):
 
 
 if __name__ == "__main__":
+    METRIC = "val_mcc"
+    MODE = "max"
+
     ray.init(num_cpus=20, num_gpus=2)
 
     config = vars(utils.get_args())
@@ -57,19 +60,19 @@ if __name__ == "__main__":
     utils.print_gre(config)
     scheduler = HyperBandForBOHB(
         time_attr="training_iteration",
-        metric="val_loss",
-        mode="min",
+        metric=METRIC,
+        mode=MODE,
         reduction_factor=2,
     )
 
     search_alg = TuneBOHB(
-        metric="val_loss",
-        mode="min",
+        metric=METRIC,
+        mode=MODE,
         max_concurrent=5,
     )
 
     analysis = tune.run(
-        t_seg.train_meta,
+        t_seg.train,
         loggers=DEFAULT_LOGGERS + (WandbLogger,),
         config=config,
         local_dir="ray_results",
@@ -82,6 +85,9 @@ if __name__ == "__main__":
     )
     print(
         "Best hyperparameters found were: ",
-        analysis.get_best_config(metric="val_loss", mode="min"),
+        analysis.get_best_config(
+            metric=METRIC,
+            mode=MODE,
+        ),
     )
     ray.shutdown()
