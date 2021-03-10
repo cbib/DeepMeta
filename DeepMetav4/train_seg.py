@@ -16,7 +16,7 @@ import DeepMetav4.utils.global_vars as gv
 import DeepMetav4.utils.tune_reporter as tune_rep
 import DeepMetav4.utils.utils as utils
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
@@ -36,7 +36,7 @@ def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True
     )
     cb_list = [earlystopper, utils.CosLRDecay(args["n_epochs"], args["lr"])]
     if hp_search:
-        cb_list.append(tune_rep.TuneReporter(metric=metric))
+        cb_list.append(tune_rep.TuneReporter(metric="val_"+metric))
     else:
         cb_list.append(checkpoint)
     history = model_seg.fit(

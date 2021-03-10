@@ -16,7 +16,9 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 num_samples = 100  # -1 -> infinite, need stop condition
-experiment_name = "seg_meta_new_data"
+experiment_name = "seg_meta_mcc"
+METRIC = "val_accuracy"  # this is the name of the attribute in tune reporter
+MODE = "max"
 
 
 class CustomStopper(tune.Stopper):
@@ -33,9 +35,6 @@ class CustomStopper(tune.Stopper):
 
 
 if __name__ == "__main__":
-    METRIC = "val_mcc"
-    MODE = "max"
-
     ray.init(num_cpus=20, num_gpus=2)
 
     config = vars(utils.get_args())
@@ -48,14 +47,14 @@ if __name__ == "__main__":
     }
 
     config["lr"] = tune.choice([0.01, 0.001, 0.0001])
-    config["batch_size"] = tune.qrandint(64, 256, 64)
+    config["batch_size"] = tune.qrandint(32, 128, 32)
     config["model_name"] = "small++"
-    config["w1"] = tune.randint(2, 10)
-    config["w2"] = tune.randint(4, 20)
+    config["w1"] = tune.randint(5, 20)
+    config["w2"] = tune.randint(10, 20)
     config["drop_r"] = tune.quniform(0.2, 0.5, 0.005)
-    config["filters"] = tune.choice([16, 32])
+    config["filters"] = tune.choice([4, 8, 16])
     config["meta"] = True
-    config["weighted"] = False
+    config["weighted"] = True
 
     utils.print_gre(config)
     scheduler = HyperBandForBOHB(
