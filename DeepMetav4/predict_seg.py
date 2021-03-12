@@ -23,6 +23,9 @@ def predict_seg(dataset, path_model_seg, tresh=0.5):
     if "weighted" not in path_model_seg:
         model_seg = keras.models.load_model(
             path_model_seg,
+            custom_objects={
+                "loss": data.mcc_loss,
+            },
         )
     else:
         model_seg = keras.models.load_model(
@@ -68,9 +71,7 @@ if __name__ == "__main__":
     path_model_seg = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted_24.h5")
 
     # Modèle de détection meta #
-    path_model_seg_meta = os.path.join(
-        gv.PATH_SAVE, "Metastases/128model_small++_weighted1015.h5"
-    )
+    path_model_seg_meta = os.path.join(gv.PATH_SAVE, "Metastases/128model_small++.h5")
 
     slist = [
         (souris_8, True),

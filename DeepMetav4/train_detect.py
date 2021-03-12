@@ -36,7 +36,7 @@ def train_detect(
         1,
     )
     # tab = gv.tab_meta
-    train_ds, val_ds = data.new_dataset_detect(img_path, args)
+    train_ds, val_ds = data.dataset_detect(img_path, args)
     # dataset, label = data.create_dataset_detect(
     #     gv.path_img_classif, tab, args["size"], meta=args["meta"]
     # )
@@ -65,14 +65,14 @@ def train_detect(
                 mode="max",
             )
             cb_list.append(checkpoint)
-            # history = model_detect.fit(
-            #     dataset,
-            #     label,
-            #     validation_split=0.2,
-            #     batch_size=args["batch_size"],
-            #     epochs=args["n_epochs"],
-            #     callbacks=cb_list,
-            # )
+        # history = model_detect.fit(
+        #     dataset,
+        #     label,
+        #     validation_split=0.2,
+        #     batch_size=args["batch_size"],
+        #     epochs=args["n_epochs"],
+        #     callbacks=cb_list,
+        # )
 
         history = model_detect.fit(
             train_ds,

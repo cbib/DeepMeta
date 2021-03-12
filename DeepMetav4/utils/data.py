@@ -17,8 +17,6 @@ import tensorflow.keras.backend as K
 import tensorflow.keras.callbacks as callbacks
 from tensorflow.keras.preprocessing.image import load_img
 
-import DeepMetav4.models.utils_model as utils_model
-
 from . import global_vars as gv
 from . import utils
 
@@ -245,7 +243,7 @@ def configure_for_performance(ds, batch_size):
     return ds
 
 
-def new_dataset_detect(data_path, opt):
+def dataset_detect(data_path, opt):
     data_dir = pathlib.Path(data_path)
     image_count = len(list(data_dir.glob("*/*.jpg")))
     list_ds = tf.data.Dataset.list_files(str(data_dir / "*/*"), shuffle=False)
@@ -257,10 +255,6 @@ def new_dataset_detect(data_path, opt):
         process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE
     )
     val_ds = val_ds.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    # for image, label in train_ds.take(10):
-    #     print("Image min: ", np.amin(image.numpy()))
-    #     print("Image max: ", np.amax(image.numpy()))
-    #     print("Label :", label.numpy())
     train_ds = configure_for_performance(train_ds, opt["batch_size"])
     val_ds = configure_for_performance(val_ds, opt["batch_size"])
     utils.print_gre("NB of images : {}".format(image_count))
@@ -280,14 +274,14 @@ def save_model_name(opt, path_save):
 
 def weight_map(label, a, b, size=128):
     """
-    Création du carte de poids définissant une valeur d'importance pour chaque pixel
-    Les pixels n'appartenant pas au masque ont une valeur de poids
-    définit à 1 par défaut
-    :param label: ensemble de x masque label 128x128
-    :param a: valeur du poids pour pixel appartenant au masque
-    :param b: valeur du poids pour pixel appartenant au contour du masque
+    Weight map creation.
+    Outside pixels have no weight, their value is one by default.
+
+    :param label: Mask array
+    :param a: Inside pixel weight
+    :param b: Border pixel weight
     :param size: size of the image
-    :return: ensemble de y weight map 128x128
+    :return: Weight map array
     """
     weight = np.zeros((label.shape[0], size, size))
 
@@ -313,9 +307,7 @@ def weight_map(label, a, b, size=128):
 
 
 def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
-    weight_2D = weight_map(
-        label, w1, w2, size
-    )  # 2, 4 -> weight, background = 1 par default, inside 2, border 4
+    weight_2D = weight_map(label, w1, w2, size)
     dataset = dataset.reshape(-1, size, size, 1)[n_sample]  # 1 ici si pas de concat
     label = label.reshape(-1, size, size, 1)[n_sample]
     weight_2D = weight_2D.reshape(-1, size, size, 1)[n_sample]
@@ -370,6 +362,21 @@ def mcc(y_true, y_pred):
     return num / K.sqrt(den + K.epsilon())
 
 
+def mcc_loss(y_true, y_pred):
+    tp = K.sum(K.cast(y_true * y_pred, "float"), axis=0)
+    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), "float"), axis=0)
+    fp = K.sum(K.cast((1 - y_true) * y_pred, "float"), axis=0) * 1e2
+    fn = K.sum(K.cast(y_true * (1 - y_pred), "float"), axis=0) / 1e2
+
+    up = tp * tn - fp * fn
+    down = K.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+
+    mcc = up / (down + K.epsilon())
+    mcc = tf.where(tf.math.is_nan(mcc), tf.zeros_like(mcc), mcc)
+
+    return 1 - K.mean(mcc)
+
+
 def prepare_for_training(path_data, path_label, file_path, opt):
     dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
@@ -380,24 +387,24 @@ def prepare_for_training(path_data, path_label, file_path, opt):
         model_seg = gv.model_list[opt["model_name"]](
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
-        metric = "mcc"
-        metric_fn = mcc
+        metric = "loss"
+        # metric_fn = mcc
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
             monitor="val_" + metric,
             verbose=1,
             save_best_only=True,
-            mode="max",
+            mode="min",
         )
         if opt["weighted"]:
-            loss_fn = utils_model.weighted_cross_entropy
+            loss_fn = mcc_loss
         else:
             loss_fn = "binary_crossentropy"
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,
-            metrics=[metric_fn],
+            # metrics=[metric_fn],
         )
     utils.print_gre("Done!")
     utils.print_gre("Prepared !")
