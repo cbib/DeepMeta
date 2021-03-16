@@ -10,6 +10,7 @@ import tensorflow as tf
 import DeepMetav4.predict_seg as p_seg
 import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
+import DeepMetav4.utils.process_manu_stats as stats_manu
 import DeepMetav4.utils.utils as utils
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "5"
@@ -112,7 +113,7 @@ def get_label_masks(mouse_path, name, folder="lungs"):
 
 if __name__ == "__main__":
     path_model_seg_lungs = os.path.join(
-        gv.PATH_SAVE, "Poumons/best_small++_weighted_24.h5"
+        gv.PATH_SAVE, "Poumons/128model_small++_weighted24.h5"
     )
     path_model_seg_metas = os.path.join(gv.PATH_SAVE, "Metastases/128model_small++.h5")
 
@@ -128,8 +129,10 @@ if __name__ == "__main__":
         assert len(res) == len(label_masks), "len res : {}; len labels : {}".format(
             len(res), len(label_masks)
         )
-        acc = process_acc(res, label_masks)
-        utils.print_gre("acc lungs : {}%".format(np.mean(acc) * 100))
+        # acc = process_acc(res, label_masks)
+        # utils.print_gre("acc lungs : {}%".format(np.mean(acc) * 100))
+        # res = p_seg.postprocess_loop(res)
+        stats_manu.do_stats(res, label_masks, gv.PATH_RES + str(name) + "_lungs/")
         # METAS  -> if masked data, slices * label_lungs
         slices_metas = select_slices(dataset, label_meta)
         if len(slices_metas) > 0:
@@ -141,7 +144,10 @@ if __name__ == "__main__":
             ), "Meta : len res : {}; len labels : {}".format(
                 len(res_metas), len(label_masks_metas)
             )
-            acc = process_acc(res_metas, label_masks_metas)
-            utils.print_gre("acc metas : {}%".format(np.mean(acc) * 100))
+            # acc = process_acc(res_metas, label_masks_metas)
+            # utils.print_gre("acc metas : {}%".format(np.mean(acc) * 100))
+            stats_manu.do_stats(
+                res_metas, label_masks_metas, gv.PATH_RES + str(name) + "_meta/"
+            )
         else:
             utils.print_gre("no metas")

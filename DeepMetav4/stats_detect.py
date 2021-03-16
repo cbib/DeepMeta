@@ -25,9 +25,7 @@ def process_acc(pred, label):
 
 if __name__ == "__main__":
     path_model_detect_lungs = os.path.join(gv.PATH_SAVE, "Poumons/best_detection.h5")
-    path_model_detect_metas = os.path.join(
-        gv.PATH_SAVE, "Metastases/model_detection.h5"
-    )
+    path_model_detect_metas = os.path.join(gv.PATH_SAVE, "Metastases/best_detection.h5")
 
     merged_list = zip(gv.slist, gv.nlist, gv.label_list, gv.meta_label_list)
     for (souris, name, label, label_meta) in merged_list:

@@ -31,9 +31,9 @@ def remove_blobs(img):
     return img2
 
 
-def dilate_and_erode(img):
-    kernel1 = np.ones((3, 3), np.uint8)
-    kernel2 = np.ones((3, 3), np.uint8)
+def dilate_and_erode(img, k1=3, k2=3):
+    kernel1 = np.ones((k1, k1), np.uint8)
+    kernel2 = np.ones((k2, k2), np.uint8)
 
     img_dilation = cv2.dilate(img, kernel1, iterations=1)
     img_erosion2 = cv2.erode(img_dilation, kernel2, iterations=1)
@@ -49,6 +49,13 @@ def calculate_volume(path=FOLDER_PATH):
         eroded = dilate_and_erode(blob_removed)
         vol += np.count_nonzero(eroded == 255) * 0.0047
     return vol
+
+
+def post_process(mask_path):
+    mask = io.imread(mask_path)
+    blob_removed = remove_blobs(mask)
+    eroded = dilate_and_erode(blob_removed)
+    return eroded
 
 
 if __name__ == "__main__":

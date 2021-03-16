@@ -17,6 +17,8 @@ import tensorflow.keras.backend as K
 import tensorflow.keras.callbacks as callbacks
 from tensorflow.keras.preprocessing.image import load_img
 
+import DeepMetav4.models.utils_model as utils_model
+
 from . import global_vars as gv
 from . import utils
 
@@ -27,191 +29,6 @@ def shuffle_lists(lista, listb, seed=42):
     random.seed(seed)
     random.shuffle(listb)
     return lista, listb
-
-
-# def rotate_img(img):
-#     # get image height, width
-#     (h, w) = img.shape[:2]
-#     # calculate the center of the image
-#     center = (w / 2, h / 2)
-#     scale = 1.0
-#
-#     M = cv2.getRotationMatrix2D(center, 90, scale)
-#     r90 = cv2.warpAffine(img, M, (h, w))
-#     M = cv2.getRotationMatrix2D(center, 180, scale)
-#     r180 = cv2.warpAffine(img, M, (h, w))
-#     M = cv2.getRotationMatrix2D(center, 270, scale)
-#     r270 = cv2.warpAffine(img, M, (h, w))
-#     return r90, r180, r270
-#
-#
-# def elastic_transform(image, alpha=60, sigma=4, random_state=None):
-#     """Elastic deformation of images as described in [Simard2003]_.
-#     .. [Simard2003] Simard, Steinkraus and Platt, "Best Practices for
-#        Convolutional Neural Networks applied to Visual Document Analysis", in
-#        Proc. of the International Conference on Document Analysis and
-#        Recognition, 2003.
-#     """
-#     if random_state is None:
-#         random_state = np.random.RandomState(None)
-#
-#     shape = image.shape
-#     dx = (
-#         gaussian_filter(
-#             (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
-#         )
-#         * alpha
-#     )
-#     dy = (
-#         gaussian_filter(
-#             (random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
-#         )
-#         * alpha
-#     )
-#
-#     x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]))
-#     indices = np.reshape(y + dy, (-1, 1)), np.reshape(x + dx, (-1, 1))
-#
-#     return map_coordinates(image, indices, order=1).reshape(shape)
-#
-#
-# def concat_and_normalize(l0, l1):
-#     random.shuffle(l0)
-#     random.shuffle(l1)
-#     inv = False
-#     if len(l1) < len(l0):
-#         # better -> concat_and_normalize(l1, l0, inv=True) -> tried but no working
-#         sm_l = l1
-#         bg_l = l0
-#         inv = True
-#     else:
-#         sm_l = l0
-#         bg_l = l1
-#     list_size = len(sm_l)
-#     bg_l = bg_l[0:list_size]
-#     data_detec = sm_l + bg_l
-#     if inv:
-#         label_detec = np.concatenate(
-#             (
-#                 np.ones(
-#                     list_size,
-#                 ),
-#                 np.zeros(
-#                     list_size,
-#                 ),
-#             )
-#         )
-#     else:
-#         label_detec = np.concatenate(
-#             (
-#                 np.zeros(
-#                     list_size,
-#                 ),
-#                 np.ones(
-#                     list_size,
-#                 ),
-#             )
-#         )
-#     assert len(sm_l) == len(bg_l)
-#     assert len(data_detec) == len(label_detec)
-#     return shuffle_lists(data_detec, label_detec)
-#
-#
-# def get_images_detect(tab, path_img):
-#     data_detec_0 = []
-#     data_detec_1 = []
-#     for i in range(len(tab)):
-#         try:
-#             im = io.imread(
-#                 path_img + "img_" + str(tab[i, 0]) + ".tif", plugin="tifffile"
-#             )
-#             im = im / np.amax(im)
-#             im90, im180, im270 = rotate_img(im)
-#             # elastic = elastic_transform(im)
-#             if tab[i, 3] == 1:
-#                 data_detec_1 += [im, im90, im180, im270]
-#             else:
-#                 data_detec_0 += [im, im90, im180, im270]
-#         except Exception as e:
-#             utils.print_red("IMG {} not found".format(tab[i, 0]))
-#             utils.print_red("\t" + str(e))
-#     return data_detec_0, data_detec_1
-#
-#
-# def process_da(im):
-#     l_im = [im]
-#     flipped = cv2.flip(im, 1)
-#     l_im.append(flipped)
-#     im90, im180, im270 = rotate_img(im)
-#     l_im += [im90, im180, im270]
-#     fim90, fim180, fim270 = rotate_img(flipped)
-#     l_im += [fim90, fim180, fim270]
-#     l_el = []
-#     for img in l_im:
-#         l_el.append(elastic_transform(img))
-#     return l_im + l_el
-#
-#
-# def get_images_detect_meta(tab, path_img, split=11136):
-#     old0 = []
-#     new0 = []
-#     old1 = []
-#     new1 = []
-#     for i in range(len(tab))[:100]:
-#         if tab[i, 4] == 1:
-#             try:
-#                 im = io.imread(
-#                     path_img + "img_" + str(tab[i, 0]) + ".tif", plugin="tifffile"
-#                 )
-#                 im = im / np.amax(im)
-#                 l_im = process_da(im)
-#                 if tab[i, 3] == 1:
-# if os.path.isfile(gv.new_meta_path_img + str(tab[i, 0]) + ".tif"):  #noqa
-#                     if i > split:
-#                         new1 += l_im
-#                     else:
-#                         old1 += l_im
-#                 else:
-#                     if i > split:
-#                         new0 += l_im
-#                     else:
-#                         old0 += l_im
-#             except Exception as e:
-#                 utils.print_red("IMG {} not found".format(tab[i, 0]))
-#                 utils.print_red("\t" + str(e))
-#     # uncomment if we want the same number of img per batch
-#     # data_detec_0, _ = concat_and_normalize(old0, new0)
-#     # data_detec_1, _ = concat_and_normalize(old1, new1)
-#     data_detec_0 = old0 + new0
-#     data_detec_1 = old1 + new1
-#     utils.print_gre("Images 0 : {}".format(len(data_detec_0)))
-#     utils.print_gre("Images 1 : {}".format(len(data_detec_1)))
-#     return data_detec_0, data_detec_1
-#
-#
-# def create_dataset_detect(path_img, tab, size, meta=False):
-#     """
-#     :param path_img: ensemble des images de souris où les poumons ont été annotés.
-#     :param tab: tableau résumant les identifiants et annotations pour les souris.
-#
-#     :return:
-#         - data_detec : ensemble des slices de souris où les poumons ont été annotés.
-#         - label_detec : label de chaque slices 1 présentant des poumons, 0 sinon.
-#     """
-#     utils.print_gre("Creating dataset...")
-#     if meta:
-#         data_detec_0, data_detec_1 = get_images_detect_meta(tab, path_img)
-#     else:
-#         data_detec_0, data_detec_1 = get_images_detect(tab, path_img)
-#     data_detec, label_detec = concat_and_normalize(data_detec_0, data_detec_1)
-#     data_detec = np.array(data_detec)
-#     no = range(len(data_detec))
-#     no_sample = random.sample(list(no), len(no))
-#     data_detec = data_detec.reshape(-1, size, size, 1)[no_sample].astype("float32")
-#     label_detec = keras.utils.to_categorical(label_detec[no_sample])
-#     utils.print_gre("Created !")
-#     utils.print_gre("Nb of images : {}".format(len(data_detec)))
-#     return data_detec, label_detec
 
 
 def get_label(file_path):
@@ -398,9 +215,9 @@ def prepare_for_training(path_data, path_label, file_path, opt):
             mode="min",
         )
         if opt["weighted"]:
-            loss_fn = mcc_loss
+            loss_fn = utils_model.weighted_cross_entropy
         else:
-            loss_fn = "binary_crossentropy"
+            loss_fn = mcc_loss
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,

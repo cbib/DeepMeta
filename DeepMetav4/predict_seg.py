@@ -24,7 +24,7 @@ def predict_seg(dataset, path_model_seg, tresh=0.5):
         model_seg = keras.models.load_model(
             path_model_seg,
             custom_objects={
-                "loss": data.mcc_loss,
+                "mcc_loss": data.mcc_loss,
             },
         )
     else:
@@ -57,7 +57,7 @@ def postprocess_loop(seg):
         blobed = postprocess.remove_blobs(elt)
         eroded = postprocess.dilate_and_erode(blobed)
         res.append(eroded / 255)
-    return res
+    return np.array(res)
 
 
 if __name__ == "__main__":
@@ -66,9 +66,12 @@ if __name__ == "__main__":
     souris_28 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_28.tif")
     souris_56 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_56.tif")
     souris_new = os.path.join(gv.PATH_DATA, "Souris_Test/m2Pc_c1_10Corr_1.tif")
+    souris_no_label = os.path.join(gv.PATH_DATA, "Souris_Test/souris_test_contrast.tif")
 
     # Modèle de détection #
-    path_model_seg = os.path.join(gv.PATH_SAVE, "Poumons/best_small++_weighted_24.h5")
+    path_model_seg = os.path.join(
+        gv.PATH_SAVE, "Poumons/128model_small++_weighted24.h5"
+    )
 
     # Modèle de détection meta #
     path_model_seg_meta = os.path.join(gv.PATH_SAVE, "Metastases/128model_small++.h5")
@@ -78,13 +81,15 @@ if __name__ == "__main__":
         (souris_28, True),
         (souris_56, True),
         (souris_new, False),
+        (souris_no_label, False),
     ]
     # slist = [souris_new]
     nlist = [
         "souris_8",
         "souris_28",
         "souris_56",
-        "souris_new_batch",
+        "m2Pc_c1_10Corr_1",
+        "souris_no_label",
     ]  # 28 saine, 8 petites meta, 56 grosses meta
     merged_list = zip(slist, nlist)
     for (souris, name) in merged_list:
@@ -98,3 +103,4 @@ if __name__ == "__main__":
         # res_lungs = postprocess_loop(res_lungs)
         save_res(dataset, res_lungs, name + "_lungs")
         save_res(dataset, res_meta, name + "_meta")
+        save_res(dataset, postprocess_loop(res_lungs), name + "_postprocess_lungs")
