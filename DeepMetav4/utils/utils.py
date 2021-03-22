@@ -89,17 +89,13 @@ def get_args():
         "--model_name",
         type=str,
         default="small++",
-        help="Name of the model you want to train (detection, small++)",
+        help="Name of the model you want to train",
+        choices=['small++', 'unet', 'unet++'],
     )
-    parser.add_argument(
-        "--meta", type=bool, default=False, help="True if we want to segment metastasis"
-    )
-    parser.add_argument(
-        "--weighted",
-        type=bool,
-        default=False,
-        help="Use weighted model (default False)",
-    )
+    parser.add_argument("--meta", dest="meta", action="store_true", help="If flag, segment metas")
+    parser.set_defaults(meta=False)
+    parser.add_argument("--weighted", dest="weighted", action="store_true", help="If flag, use weighted crossentropy")
+    parser.set_defaults(weighted=False)
     parser.add_argument(
         "--size", type=int, default=128, help="Size of the image, one number"
     )
