@@ -5,7 +5,7 @@
 
 Deep learning techniques used to segment lungs and metastasis on mice MRI images.
 
-SPEAK ABOUT DATA ? 
+SPEAK ABOUT DATA ?
 
 ## Installation
 
@@ -112,13 +112,16 @@ python -m DeepMetav4.hp_search
 
 ### Pipeline
 
-The pipeline.py script aims to run inference on one mouse, save result and do stats 
+The pipeline.py script aims to run inference on one mouse, save result and do stats
 if possible.
 
 To do so, fill the paths in the script and then :
 ```shell
 python -m Deepmetav4.pipeline
 ```
+
+You can add flags to this script, if you do not want to save images or runs stats:
+`--no-save` and `--no-stats`.
 
 [comment]: <> (# Sanity checker ideas)
 

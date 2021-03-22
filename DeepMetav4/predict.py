@@ -36,7 +36,6 @@ def predict_seg(dataset, path_model_seg, tresh=0.5):
             },
         )
     res = model_seg.predict(dataset)
-    print(np.amax(res))
     return (res > tresh).astype(np.uint8).reshape(len(dataset), 128, 128, 1)
 
 
