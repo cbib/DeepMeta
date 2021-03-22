@@ -47,10 +47,13 @@ if __name__ == "__main__":
         gv.PATH_SAVE, "Metastases/128model_small++_weighted1015.h5"
     )
 
+    # MOUSE INFOS
+    MOUSE_PATH = os.path.join(gv.PATH_DATA, "Souris_Test/m2PR_ssiso_1.tif")
+    name = "unknown"
+
     # merged_list = zip(gv.slist, gv.nlist, gv.label_list, gv.meta_label_list)
     # for (souris, name, label, label_meta) in merged_list:
-    souris = (os.path.join(gv.PATH_DATA, "Souris_Test/m2PR_ssiso_1.tif"), False)
-    name = "unknown"
+    souris = (MOUSE_PATH, False)
 
     utils.print_red(name)
     dataset = data.get_predict_dataset(souris[0], souris[1])
