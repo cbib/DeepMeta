@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+from sklearn.metrics import roc_auc_score
 from tqdm import tqdm
 
 
@@ -51,6 +52,51 @@ def process_intersections(mask_pred_list, mask_gt_list):
     return intersection0_tab, intersection1_tab, erreur_pred0_tab, erreur_pred1_tab
 
 
+def inverse_binary_mask(msk):
+    """
+    :param msk: masque binaire 128x128
+    :return: masque avec binarisation inversée 128x128
+    """
+    new_mask = np.ones((128, 128)) - msk
+    return new_mask
+
+
+def stats_pixelbased(y_true, y_pred):
+    y_pred = y_pred.reshape(128, 128)
+    if y_pred.shape != y_true.shape:
+        raise ValueError(
+            "Shape of inputs need to match. Shape of prediction "
+            "is: {}.  Shape of y_true is: {}".format(y_pred.shape, y_true.shape)
+        )
+    pred = y_pred
+    truth = y_true
+    if truth.sum() == 0:
+        pred = inverse_binary_mask(pred)
+        truth = inverse_binary_mask(truth)
+    # Calculations for IOU
+    intersection = np.logical_and(pred, truth)
+    union = np.logical_or(pred, truth)
+    # Sum gets count of positive pixels
+    # dice = (2 * intersection.sum() / (pred.sum() + truth.sum()))
+    if union.sum() == 0:
+        jaccard = -2
+    else:
+        jaccard = intersection.sum() / union.sum()
+    # precision = intersection.sum() / pred.sum()
+    # recall = intersection.sum() / truth.sum()
+    # Fmeasure = (2 * precision * recall) / (precision + recall)
+    return jaccard
+
+
+def process_iou(mask_pred, mask_gt):
+    tmp = []
+    for i, pred in enumerate(mask_pred):
+        gt = mask_gt[i]
+        iou = stats_pixelbased(gt, pred)
+        tmp.append(iou)
+    return np.mean(tmp)
+
+
 def process_mcc(
     intersection0_tab, intersection1_tab, erreur_pred1_tab, erreur_pred0_tab
 ):
@@ -61,12 +107,26 @@ def process_mcc(
 
     numerateur = TP * TN - FP * FN
     denominateur = (TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)
-    return numerateur / math.sqrt(denominateur)
+    if math.sqrt(denominateur) == 0:
+        res = -2
+    else:
+        res = numerateur / math.sqrt(denominateur)
+    return res
+
+
+def process_auc(gt_list, pred_list):
+    res = []
+    for i, gt in enumerate(gt_list):
+        if np.amax(gt) != 0:
+            pred = pred_list[i].flatten()
+            gt = gt.flatten()
+            res.append(roc_auc_score(gt, pred))
+    return np.mean(res)
 
 
 def do_stats(mask_pred_list, mask_gt_list, save_path):
     f = open(save_path + "finestat.txt", "w")
-    f.write("STAT PREDICTION" + "\n")
+    f.write("STAT PREDICTION" + "\n\n")
 
     count0, count1_pred = count_pixels(mask_pred_list)
     f.write("PRED : \n")
@@ -77,7 +137,7 @@ def do_stats(mask_pred_list, mask_gt_list, save_path):
     count0, count1_GT = count_pixels(mask_gt_list)
     f.write("GT : \n")
     f.write("pixel count0 : " + str(count0) + "\n")
-    f.write("pixel count1 : " + str(count1_GT) + "\n")
+    f.write("pixel count1 : " + str(count1_GT) + "\n\n")
 
     (
         intersection0_tab,
@@ -100,15 +160,29 @@ def do_stats(mask_pred_list, mask_gt_list, save_path):
 
     f.write("Pourcentage de pixels blanc bien classifiés\n")
     # c'est intersection1 sur la somme des pixels blanc (intersection1 + erreur_pred1)
-    pourcentage = sum(intersection1_tab) / (
-        sum(intersection1_tab) + sum(erreur_pred1_tab)
-    )
-    f.write(str(pourcentage) + "\n")
+    if sum(intersection1_tab) + sum(erreur_pred1_tab) == 0:
+        pourcentage = -2
+    else:
+        pourcentage = sum(intersection1_tab) / (
+            sum(intersection1_tab) + sum(erreur_pred1_tab)
+        )
+    f.write(str(pourcentage) + "\n\n")
 
     mcc = process_mcc(
         intersection0_tab, intersection1_tab, erreur_pred1_tab, erreur_pred0_tab
     )
 
     f.write("MCC : \n")
-    f.write(str(mcc))
+    f.write(str(mcc) + "\n\n")
+
+    iou = process_iou(mask_pred_list, mask_gt_list)
+
+    f.write("IOU : \n")
+    f.write(str(iou) + "\n\n")
+
+    auc = process_auc(mask_gt_list, mask_pred_list)
+
+    f.write("AUC : \n")
+    f.write(str(auc))
+
     f.close()

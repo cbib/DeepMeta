@@ -60,6 +60,13 @@ def postprocess_loop(seg):
     return np.array(res)
 
 
+def postprocess_meta(seg, k1=3, k2=3):
+    res = []
+    for elt in seg:
+        res.append(postprocess.dilate_and_erode(elt, k1=k1, k2=k2))  # try with 5x5
+    return np.array(res)
+
+
 if __name__ == "__main__":
     # Souris Test #
     souris_8 = os.path.join(gv.PATH_DATA, "Souris_Test/souris_8.tif")
@@ -69,12 +76,12 @@ if __name__ == "__main__":
     souris_no_label = os.path.join(gv.PATH_DATA, "Souris_Test/souris_test_contrast.tif")
 
     # Modèle de détection #
-    path_model_seg = os.path.join(
-        gv.PATH_SAVE, "Poumons/128model_small++_weighted24.h5"
-    )
+    path_model_seg = os.path.join(gv.PATH_SAVE, "Poumons/best_seg_model_weighted.h5")
 
     # Modèle de détection meta #
-    path_model_seg_meta = os.path.join(gv.PATH_SAVE, "Metastases/128model_small++.h5")
+    path_model_seg_meta = os.path.join(
+        gv.PATH_SAVE, "Metastases/128model_small++_weighted520.h5"
+    )
 
     slist = [
         (souris_8, True),
@@ -83,7 +90,7 @@ if __name__ == "__main__":
         (souris_new, False),
         (souris_no_label, False),
     ]
-    # slist = [souris_new]
+
     nlist = [
         "souris_8",
         "souris_28",
@@ -91,16 +98,14 @@ if __name__ == "__main__":
         "m2Pc_c1_10Corr_1",
         "souris_no_label",
     ]  # 28 saine, 8 petites meta, 56 grosses meta
+
     merged_list = zip(slist, nlist)
     for (souris, name) in merged_list:
         utils.print_red(name)
         dataset = data.get_predict_dataset(souris[0], souris[1])
+
         res_lungs = predict_seg(dataset, path_model_seg)
-        res_meta = predict_seg(
-            dataset, path_model_seg_meta
-        )  # dataset * reslung if masked data
-        # print(np.amax(res_meta))
-        # res_lungs = postprocess_loop(res_lungs)
-        save_res(dataset, res_lungs, name + "_lungs")
-        save_res(dataset, res_meta, name + "_meta")
-        save_res(dataset, postprocess_loop(res_lungs), name + "_postprocess_lungs")
+        res_meta = predict_seg(dataset, path_model_seg_meta)
+
+        save_res(dataset, postprocess_meta(res_meta * res_lungs), name + "_meta")
+        save_res(dataset, postprocess_loop(res_lungs), name + "_lungs")

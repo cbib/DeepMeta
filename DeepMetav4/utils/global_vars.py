@@ -24,8 +24,8 @@ PATH_LUNGS = os.path.join(PATH_DATA, "Poumons/")
 NEW_PATH_META = os.path.join(PATH_DATA, "Metastases_new/")
 # OLD_META_PATH = os.path.join(PATH_DATA, "Metastases_old/")
 
-path_classif_lungs = os.path.join(PATH_DATA, "Classif_lungs")
-path_classif_metas = os.path.join(PATH_DATA, "Classif_metas")
+# path_classif_lungs = os.path.join(PATH_DATA, "Classif_lungs")
+# path_classif_metas = os.path.join(PATH_DATA, "Classif_metas")
 
 
 # path_souris = os.path.join(PATH_CLASSIF, "Souris/")

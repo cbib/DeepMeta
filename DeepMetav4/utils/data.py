@@ -60,22 +60,23 @@ def configure_for_performance(ds, batch_size):
     return ds
 
 
-def dataset_detect(data_path, opt):
-    data_dir = pathlib.Path(data_path)
-    image_count = len(list(data_dir.glob("*/*.jpg")))
-    list_ds = tf.data.Dataset.list_files(str(data_dir / "*/*"), shuffle=False)
-    list_ds = list_ds.shuffle(image_count, reshuffle_each_iteration=True)
-    val_size = int(image_count * 0.2)
-    train_ds = list_ds.skip(val_size)
-    val_ds = list_ds.take(val_size)
-    train_ds = train_ds.map(
-        process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE
-    )
-    val_ds = val_ds.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    train_ds = configure_for_performance(train_ds, opt["batch_size"])
-    val_ds = configure_for_performance(val_ds, opt["batch_size"])
-    utils.print_gre("NB of images : {}".format(image_count))
-    return train_ds, val_ds
+#
+# def dataset_detect(data_path, opt):
+#     data_dir = pathlib.Path(data_path)
+#     image_count = len(list(data_dir.glob("*/*.jpg")))
+#     list_ds = tf.data.Dataset.list_files(str(data_dir / "*/*"), shuffle=False)
+#     list_ds = list_ds.shuffle(image_count, reshuffle_each_iteration=True)
+#     val_size = int(image_count * 0.2)
+#     train_ds = list_ds.skip(val_size)
+#     val_ds = list_ds.take(val_size)
+#     train_ds = train_ds.map(
+#         process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE
+#     )
+#     val_ds = val_ds.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)  # noqa
+#     train_ds = configure_for_performance(train_ds, opt["batch_size"])
+#     val_ds = configure_for_performance(val_ds, opt["batch_size"])
+#     utils.print_gre("NB of images : {}".format(image_count))
+#     return train_ds, val_ds
 
 
 def save_model_name(opt, path_save):
@@ -135,8 +136,8 @@ def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
 
 
 def get_dataset(path_data, path_label, opt):
-    data_files = utils.list_files_path(path_data)
-    label_files = utils.list_files_path(path_label)
+    data_files = utils.sorted_alphanumeric(utils.list_files_path(path_data))
+    label_files = utils.sorted_alphanumeric(utils.list_files_path(path_label))
     n_val = int(0.8 * len(data_files))
     dataset = Dataset(
         opt["batch_size"],
@@ -205,7 +206,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
             input_shape, filters=opt["filters"], drop_r=opt["drop_r"]
         )
         metric = "loss"
-        # metric_fn = mcc
+        # metric_fn = weighted_auc
         optim = tf.keras.optimizers.Adam(lr=opt["lr"])
         checkpoint = callbacks.ModelCheckpoint(
             file_path,
@@ -217,7 +218,7 @@ def prepare_for_training(path_data, path_label, file_path, opt):
         if opt["weighted"]:
             loss_fn = utils_model.weighted_cross_entropy
         else:
-            loss_fn = mcc_loss
+            loss_fn = "binary_crossentropy"
         model_seg.compile(
             loss=loss_fn,
             optimizer=optim,
