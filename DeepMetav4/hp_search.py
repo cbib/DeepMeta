@@ -7,7 +7,7 @@ from ray.tune.logger import DEFAULT_LOGGERS
 from ray.tune.schedulers import HyperBandForBOHB
 from ray.tune.suggest.bohb import TuneBOHB
 
-import DeepMetav4.train_seg as t_seg
+import DeepMetav4.train as t
 import DeepMetav4.utils.utils as utils
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     )
 
     analysis = tune.run(
-        t_seg.train,
+        t.train,
         loggers=DEFAULT_LOGGERS + (WandbLogger,),
         config=config,
         local_dir="ray_results",

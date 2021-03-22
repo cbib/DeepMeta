@@ -60,25 +60,6 @@ def configure_for_performance(ds, batch_size):
     return ds
 
 
-#
-# def dataset_detect(data_path, opt):
-#     data_dir = pathlib.Path(data_path)
-#     image_count = len(list(data_dir.glob("*/*.jpg")))
-#     list_ds = tf.data.Dataset.list_files(str(data_dir / "*/*"), shuffle=False)
-#     list_ds = list_ds.shuffle(image_count, reshuffle_each_iteration=True)
-#     val_size = int(image_count * 0.2)
-#     train_ds = list_ds.skip(val_size)
-#     val_ds = list_ds.take(val_size)
-#     train_ds = train_ds.map(
-#         process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE
-#     )
-#     val_ds = val_ds.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)  # noqa
-#     train_ds = configure_for_performance(train_ds, opt["batch_size"])
-#     val_ds = configure_for_performance(val_ds, opt["batch_size"])
-#     utils.print_gre("NB of images : {}".format(image_count))
-#     return train_ds, val_ds
-
-
 def save_model_name(opt, path_save):
     if opt["meta"]:
         res = "Metastases/" + str(opt["size"]) + "model_" + opt["model_name"]

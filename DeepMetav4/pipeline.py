@@ -6,22 +6,15 @@ import os
 import numpy as np
 import skimage.io as io
 
-import DeepMetav4.predict_seg as p_seg
+import DeepMetav4.predict as p
 import DeepMetav4.utils.data as data
 import DeepMetav4.utils.global_vars as gv
-import DeepMetav4.utils.stats as stats_manu
+import DeepMetav4.utils.stats as stats
 import DeepMetav4.utils.utils as utils
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
-
-# def multiply_detect_and_seg(detect, seg):
-#     for i, elt in enumerate(detect):
-#         if elt == 0:
-#             seg[i] = np.zeros((128, 128, 1))
-#     return seg
 
 
 def get_label_masks(mouse_path, name, folder="lungs"):
@@ -44,10 +37,7 @@ def get_label_masks(mouse_path, name, folder="lungs"):
 
 
 if __name__ == "__main__":
-    # Lungs detection model #
-    # path_model_detect = os.path.join(gv.PATH_SAVE, "Poumons/best_detection.h5")
-    # Metas detection model #
-    # path_model_detect_meta = os.path.join(gv.PATH_SAVE, "Metastases/best_detection.h5")  # noqa
+
     # Model seg lungs #
     path_model_seg_lungs = os.path.join(
         gv.PATH_SAVE, "Poumons/best_seg_model_weighted.h5"
@@ -65,27 +55,19 @@ if __name__ == "__main__":
     utils.print_red(name)
     dataset = data.get_predict_dataset(souris[0], souris[1])
 
-    # detect_lungs = p_detect.predict_detect(dataset, path_model_detect)
-    seg_lungs = p_seg.predict_seg(dataset, path_model_seg_lungs).reshape(128, 128, 128)
-    seg_lungs = p_seg.postprocess_loop(seg_lungs)
-    # seg_lungs = multiply_detect_and_seg(detect_lungs, seg_lungs)
+    seg_lungs = p.predict_seg(dataset, path_model_seg_lungs).reshape(128, 128, 128)
+    seg_lungs = p.postprocess_loop(seg_lungs)
 
-    # detect_metas = detect_lungs * p_detect.predict_detect(dataset, path_model_detect_meta)  # noqa
-    seg_metas = seg_lungs * p_seg.predict_seg(dataset, path_model_seg_metas).reshape(
+    seg_metas = seg_lungs * p.predict_seg(dataset, path_model_seg_metas).reshape(
         128, 128, 128
     )
-    seg_metas = p_seg.postprocess_meta(seg_metas, k1=3, k2=3)
-    # seg_metas = multiply_detect_and_seg(detect_metas, seg_metas)
+    seg_metas = p.postprocess_meta(seg_metas, k1=3, k2=3)
 
-    p_seg.save_res(dataset, seg_lungs, name + "_pipeline_lungs")
-    p_seg.save_res(dataset, seg_metas, name + "_pipeline_metas")
+    p.save_res(dataset, seg_lungs, name + "_pipeline_lungs")
+    p.save_res(dataset, seg_metas, name + "_pipeline_metas")
 
     label_lungs = get_label_masks(souris[0], name)
     label_metas = get_label_masks(souris[0], name, folder="metas")
 
-    stats_manu.do_stats(
-        seg_lungs, label_lungs, gv.PATH_RES + str(name) + "_pipeline_lungs/"
-    )
-    stats_manu.do_stats(
-        seg_metas, label_metas, gv.PATH_RES + str(name) + "_pipeline_metas/"
-    )
+    stats.do_stats(seg_lungs, label_lungs, gv.PATH_RES + str(name) + "_pipeline_lungs/")
+    stats.do_stats(seg_metas, label_metas, gv.PATH_RES + str(name) + "_pipeline_metas/")
