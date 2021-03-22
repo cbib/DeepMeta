@@ -3,7 +3,9 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 
-Deep learning techniques used to classify and segment lungs and metastasis on mice MRI images.
+Deep learning techniques used to segment lungs and metastasis on mice MRI images.
+
+SPEAK ABOUT DATA ? 
 
 ## Installation
 
@@ -18,6 +20,27 @@ conda env create -f environment.yml
 
 > The environment file asssume that you have at least one Nvidia Gpu installed on your computer.
 
+## Performance
+To mesure the performance of each network, we rely on several metrics:
+ - IoU (Jaccard index)
+ - MCC (Matthews Correlation Coeficient)
+ - AUC (AUROC).
+### Lungs
+![seg_lungs](docs/_static/lungs_seg.png)
+
+- Mean IoU on test data = 0.891
+- Mean MCC on test data = 0.878
+- Mean AUC on test data = 0.950
+
+### Metastasis
+
+![Small metas segmentation](docs/_static/sm_metas_seg.png)
+
+![Big metas segmentation](docs/_static/bg_meta_seg.png)
+
+- Mean IoU on test data = 0.768
+- Mean MCC on test data = 0.598
+- Mean AUC on test data = 0.821
 
 ## Usage
 
@@ -50,54 +73,28 @@ By calling train scripts you can pass some arguments that will define the setup 
 ```
 
 #### Run training
-If you want to train a network to detect lungs :
+To train a network to segment lungs :
 ```shell script
-python -m DeepMetav4.train_detect --batch_size=32 --model_name=resnetv2 --n_epochs=200 --lr=0.01
+python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --weighted=True
 ```
 
-If you want to train a network to segment metastasis :
+To train a network to segment metastasis :
 ```shell script
-python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.0002 --patience=100 --meta=True --weighted=True --w1=10 --w2=20
+python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta=True --weighted=True --w1=10 --w2=20
 ```
 
 #### Availiable models
- - Detection model
- - resnet
- - vgg
  - unet
  - small ++
  - unet ++
 
 ### Prediction
-
-If you want to predict detection :
-```shell script
-python -m DeepMetav4.predict_detect
-```
-
 If you want to segment images :
 ```shell script
 python -m DeepMetav4.predict_seg
 ```
 
-
-[comment]: <> (## Lungs)
-
-[comment]: <> (### Detection)
-
-[comment]: <> (todo : here stats + img of segmented lungs)
-
-[comment]: <> (### Segmentation)
-
-[comment]: <> (## Metastasis)
-
-[comment]: <> (### Detection)
-
-[comment]: <> (### Segmentation)
-
-[comment]: <> (todo : here stats + img of segmented metas)
-
-## Hyper-parameter search
+### Hyper-parameter search
 
 To find the optimal solution to our tasks, we use a combination of `Ray Tune` and `WandB`
 to implement hyper parameter search. Basically, we use the BOHB scheduler and search algorithm.
@@ -110,16 +107,25 @@ The parameters we search for are :
 
 To run HP search :
 ```shell
-python -m DeepMetav4.hp_search  # search for detection tasks
-python -m DeepMetav4.hp_search_seg  # search for segmentation tasks
+python -m DeepMetav4.hp_search
 ```
 
-# Sanity checker ideas
+### Pipeline
 
-## Techniques to be sure that all slices are well segmented
+The pipeline.py script aims to run inference on one mouse, save result and do stats 
+if possible.
 
-The average slice between t-1 and t+1 should be almost t slice : if t and average slice really different -> t is false
+To do so, fill the paths in the script and then :
+```shell
+python -m Deepmetav4.pipeline
+```
 
-## post process meta seg
+[comment]: <> (# Sanity checker ideas)
 
-multiply the two masks
+[comment]: <> (## Techniques to be sure that all slices are well segmented)
+
+[comment]: <> (The average slice between t-1 and t+1 should be almost t slice : if t and average slice really different -> t is false)
+
+[comment]: <> (## post process meta seg)
+
+[comment]: <> (multiply the two masks)
