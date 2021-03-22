@@ -123,6 +123,8 @@ python -m Deepmetav4.pipeline
 You can add flags to this script, if you do not want to save images or runs stats:
 `--no-save` and `--no-stats`.
 
+:cake:
+
 [comment]: <> (# Sanity checker ideas)
 
 [comment]: <> (## Techniques to be sure that all slices are well segmented)
