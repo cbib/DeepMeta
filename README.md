@@ -64,8 +64,8 @@ By calling train scripts you can pass some arguments that will define the setup 
   --batch_size BATCH_SIZE  size of the batches
   --lr LR                  adam: learning rate
   --model_name MODEL_NAME  Name of the model you want to train (detection, small++)
-  --meta META              True if we want to segment metastasis
-  --weighted WEIGHTED      Use weighted model (default False)
+  --meta                   If we want to segment metas
+  --weighted               If you want to use weighted crossentropy
   --size SIZE              Size of the image, one number
   --w1 W1                  weight inside
   --w2 W2                  Weight border
