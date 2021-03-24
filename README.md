@@ -47,7 +47,7 @@ To mesure the performance of each network, we rely on several metrics:
 ### Metastasis
 
 ![Small metas segmentation](docs/_static/sm_metas_seg.png)
-
+<img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="200">
 ![Big metas segmentation](docs/_static/bg_meta_seg.png)
 
 - Mean IoU on test data = 0.768
@@ -57,6 +57,8 @@ To mesure the performance of each network, we rely on several metrics:
 ## Usage
 
 ### Set up gpus
+If you have several GPUs :
+
 At the beginning of the scripts you can find Gpus ids, if you want to specify wich Gpu(s) to use just add or remove your ids in this line :
 ```python
 os.environ["CUDA_VISIBLE_DEVICES"] = "id0, id1, ...."
@@ -87,12 +89,12 @@ By calling train scripts you can pass some arguments that will define the setup 
 #### Run training
 To train a network to segment lungs :
 ```shell script
-python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --weighted=True
+python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001
 ```
 
 To train a network to segment metastasis :
 ```shell script
-python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta=True --weighted=True --w1=10 --w2=20
+python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta --weighted --w1=10 --w2=20
 ```
 
 #### Availiable models
@@ -134,14 +136,3 @@ python -m Deepmetav4.pipeline
 
 You can add flags to this script, if you do not want to save images or runs stats:
 `--no-save` and `--no-stats`.
-
-
-[comment]: <> (# Sanity checker ideas)
-
-[comment]: <> (## Techniques to be sure that all slices are well segmented)
-
-[comment]: <> (The average slice between t-1 and t+1 should be almost t slice : if t and average slice really different -> t is false)
-
-[comment]: <> (## post process meta seg)
-
-[comment]: <> (multiply the two masks)
