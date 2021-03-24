@@ -9,6 +9,12 @@ Deep learning techniques used to segment lungs and metastasis on mice MRI images
 
 SPEAK ABOUT DATA ?
 
+## Contents
+- [Installation](#installation)
+- [Performance](#performance)
+- [Usage](#usage)
+
+
 ## Installation
 
 This repo use python 3.8 and conda.

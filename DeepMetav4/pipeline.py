@@ -63,15 +63,15 @@ if __name__ == "__main__":
     )
 
     # MOUSE INFOS
-    MOUSE_PATH = os.path.join(gv.PATH_DATA, "Souris_Test/m2PR_ssiso_1.tif")
-    name = "unknown"
+    MOUSE_PATH = os.path.join(gv.PATH_DATA, "Souris_Test/souris_8.tif")
+    name = "souris_8"
     LABEL_PATH = get_label_path(MOUSE_PATH, name)
     LABEL_PATH_METAS = get_label_path(MOUSE_PATH, name, folder="metas")
 
     # merged_list = zip(gv.slist, gv.nlist, gv.label_list, gv.meta_label_list)
     # for (souris, name, label, label_meta) in merged_list:
 
-    souris = (MOUSE_PATH, False)  # True if need to change contrast
+    souris = (MOUSE_PATH, True)  # True if need to change contrast
 
     utils.print_red(name)
     dataset = data.get_predict_dataset(souris[0], souris[1])
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     seg_metas = seg_lungs * p.predict_seg(dataset, path_model_seg_metas).reshape(
         128, 128, 128
     )
-    seg_metas = p.postprocess_meta(seg_metas, k1=3, k2=3)
+    seg_metas = p.postprocess_meta(seg_metas, k1=5, k2=3)
 
     if flags.save:
         p.save_res(dataset, seg_lungs, name + "_pipeline_lungs")
