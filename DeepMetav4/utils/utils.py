@@ -90,11 +90,18 @@ def get_args():
         type=str,
         default="small++",
         help="Name of the model you want to train",
-        choices=['small++', 'unet', 'unet++'],
+        choices=["small++", "unet", "unet++"],
     )
-    parser.add_argument("--meta", dest="meta", action="store_true", help="If flag, segment metas")
+    parser.add_argument(
+        "--meta", dest="meta", action="store_true", help="If flag, segment metas"
+    )
     parser.set_defaults(meta=False)
-    parser.add_argument("--weighted", dest="weighted", action="store_true", help="If flag, use weighted crossentropy")
+    parser.add_argument(
+        "--weighted",
+        dest="weighted",
+        action="store_true",
+        help="If flag, use weighted crossentropy",
+    )
     parser.set_defaults(weighted=False)
     parser.add_argument(
         "--size", type=int, default=128, help="Size of the image, one number"

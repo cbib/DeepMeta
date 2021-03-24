@@ -3,7 +3,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <a href="https://gitmoji.dev">
   <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?style=flat-square" alt="Gitmoji">
-</a> 
+</a>
 
 Deep learning techniques used to segment lungs and metastasis on mice MRI images.
 
@@ -23,7 +23,7 @@ To install required librairies :
 conda env create -f environment.yml
 ```
 
-If you do not want to use conda : 
+If you do not want to use conda :
 ```shell script
 pip install -f requirements.txt
 ```
