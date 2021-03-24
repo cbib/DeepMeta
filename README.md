@@ -46,9 +46,11 @@ To mesure the performance of each network, we rely on several metrics:
 
 ### Metastasis
 
-![Small metas segmentation](docs/_static/sm_metas_seg.png)
-<img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="200">
-![Big metas segmentation](docs/_static/bg_meta_seg.png)
+[comment]: <> (![Small metas segmentation]&#40;docs/_static/sm_metas_seg.png&#41;)
+
+<img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="400">
+<img src="./docs/_static/bg_metas_seg.png" alt="bg meta seg" width="400">
+[comment]: <> (![Big metas segmentation]&#40;docs/_static/bg_meta_seg.png&#41;)
 
 - Mean IoU on test data = 0.768
 - Mean MCC on test data = 0.598
