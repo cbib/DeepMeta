@@ -17,16 +17,20 @@ SPEAK ABOUT DATA ?
 
 ## Installation
 
-This repo use python 3.8 and conda.
-
-We recommand you to use a fresh virtual environment.
+We recommand you to use conda to create and manage dependencies.
 
 To install required librairies :
 ```shell script
 conda env create -f environment.yml
 ```
 
-> The environment file asssume that you have at least one Nvidia Gpu installed on your computer.
+If you do not want to use conda : 
+```shell script
+pip install -f requirements.txt
+```
+
+
+> The environment files asssume that you have at least one Nvidia Gpu installed on your computer.
 
 ## Performance
 To mesure the performance of each network, we rely on several metrics:
