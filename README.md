@@ -7,7 +7,6 @@
 
 Deep learning techniques used to segment lungs and metastasis on mice MRI images.
 
-SPEAK ABOUT DATA ?
 
 ## Contents
 - [Installation](#installation)
