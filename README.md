@@ -37,7 +37,7 @@ To measure the performance of each network, we rely on several metrics:
  - MCC (Matthews Correlation Coefficient)
  - AUC (AUROC).
 ### Lungs
-<img src="./docs/_static/lungs_seg.png" alt="lungs seg" width="250">
+<img src="./docs/_static/lungs_seg.png" alt="lungs seg" width="500px">
 
 - Mean IoU on test data = 0.891
 - Mean MCC on test data = 0.878
@@ -47,8 +47,8 @@ To measure the performance of each network, we rely on several metrics:
 
 <table>
   <tr>
-    <td><img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="300px"></td>
-    <td align="right"><img src="./docs/_static/bg_meta_seg.png" alt="bg meta seg" width="300px"/></td>
+    <td><img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="500px"></td>
+    <td align="right"><img src="./docs/_static/bg_meta_seg.png" alt="bg meta seg" width="500px"/></td>
   </tr>
 <tr>
     <td align="center">Small metas</td>
