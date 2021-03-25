@@ -1,7 +1,7 @@
 import tensorflow.keras as keras
 import tensorflow.keras.layers as layers
 
-import DeepMetav4.models.utils_model as utils_model
+import DeepMeta.models.utils_model as utils_model
 
 
 def unet(input_shape, filters=16, drop_r=0.2):

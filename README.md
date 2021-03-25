@@ -1,4 +1,4 @@
-# DeepMetav4
+# DeepMeta
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <a href="https://gitmoji.dev">
@@ -16,25 +16,25 @@ Deep learning techniques used to segment lungs and metastasis on mice MRI images
 
 ## Installation
 
-We recommand you to use conda to create and manage dependencies.
+We recommend you to use conda to create and manage dependencies.
 
-To install required librairies :
+To install required libraries:
 ```shell script
 conda env create -f environment.yml
 ```
 
-If you do not want to use conda :
+If you do not want to use conda, with python 3.6 and pip:
 ```shell script
 pip install -f requirements.txt
 ```
 
 
-> The environment files asssume that you have at least one Nvidia Gpu installed on your computer.
+> The environment files assume that you have at least one Nvidia Gpu installed on your computer.
 
 ## Performance
-To mesure the performance of each network, we rely on several metrics:
+To measure the performance of each network, we rely on several metrics:
  - IoU (Jaccard index)
- - MCC (Matthews Correlation Coeficient)
+ - MCC (Matthews Correlation Coefficient)
  - AUC (AUROC).
 ### Lungs
 <img src="./docs/_static/lungs_seg.png" alt="lungs seg" width="250">
@@ -57,8 +57,9 @@ To mesure the performance of each network, we rely on several metrics:
 ### Set up gpus
 If you have several GPUs :
 
-At the beginning of the scripts you can find Gpus ids, if you want to specify wich Gpu(s) to use just add or remove your ids in this line :
+At the beginning of the scripts you can find Gpus ids, if you want to specify which Gpu(s) to use just add or remove your ids in this line :
 ```python
+import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "id0, id1, ...."
 ```
 if you want to use all gpus, comment this line.
@@ -87,14 +88,14 @@ By calling train scripts you can pass some arguments that will define the setup 
 #### Run training
 To train a network to segment lungs :
 ```shell script
-python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001
+python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001
 ```
 
 To train a network to segment metastasis :
 ```shell script
-python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta --weighted --w1=10 --w2=20
+python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta --weighted --w1=10 --w2=20
 ```
-
+>After each training, a training plot will be drawn and saved in the plot folder. 
 #### Availiable models
  - unet
  - small ++
@@ -103,7 +104,7 @@ python -m DeepMetav4.train_seg  --batch_size=32 --model_name=small++ --n_epochs=
 ### Prediction
 If you want to segment images :
 ```shell script
-python -m DeepMetav4.predict_seg
+python -m DeepMeta.predict_seg
 ```
 
 ### Hyper-parameter search
@@ -119,7 +120,7 @@ The parameters we search for are :
 
 To run HP search :
 ```shell
-python -m DeepMetav4.hp_search
+python -m DeepMeta.hp_search
 ```
 
 ### Pipeline
@@ -134,3 +135,5 @@ python -m Deepmetav4.pipeline
 
 You can add flags to this script, if you do not want to save images or runs stats:
 `--no-save` and `--no-stats`.
+
+>You need label masks to runs stats.

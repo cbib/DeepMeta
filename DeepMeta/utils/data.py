@@ -17,7 +17,7 @@ import tensorflow.keras.backend as K
 import tensorflow.keras.callbacks as callbacks
 from tensorflow.keras.preprocessing.image import load_img
 
-import DeepMetav4.models.utils_model as utils_model
+import DeepMeta.models.utils_model as utils_model
 
 from . import global_vars as gv
 from . import utils

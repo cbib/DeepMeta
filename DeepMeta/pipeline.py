@@ -7,11 +7,11 @@ import os
 import numpy as np
 import skimage.io as io
 
-import DeepMetav4.predict as p
-import DeepMetav4.utils.data as data
-import DeepMetav4.utils.global_vars as gv
-import DeepMetav4.utils.stats as stats
-import DeepMetav4.utils.utils as utils
+import DeepMeta.predict as p
+import DeepMeta.utils.data as data
+import DeepMeta.utils.global_vars as gv
+import DeepMeta.utils.stats as stats
+import DeepMeta.utils.utils as utils
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     if flags.save:
         p.save_res(dataset, seg_lungs, name + "_pipeline_lungs")
         p.save_res(dataset, seg_metas, name + "_pipeline_metas")
+        # todo : option save masks
 
     if flags.stats:
         label_lungs = get_label_masks(LABEL_PATH)

@@ -3,9 +3,9 @@
 
 import os
 
-import DeepMetav4.models.model_detection
-import DeepMetav4.models.small_plus_plus
-import DeepMetav4.utils.utils
+import DeepMeta.models.model_detection
+import DeepMeta.models.small_plus_plus
+import DeepMeta.utils.utils
 
 # PATH_DATA = "/scratch/elefevre/Datasets/deepmeta/Data/"
 PATH_DATA = "/home/edgar/Documents/Datasets/deepmeta/Data/"
@@ -25,8 +25,8 @@ meta_path_img = os.path.join(NEW_PATH_META, "Images/")
 meta_path_lab = os.path.join(NEW_PATH_META, "Labels/")
 
 model_list = {
-    "detection": DeepMetav4.models.model_detection.model_detection,
-    "small++": DeepMetav4.models.small_plus_plus.small_plus_plus,
+    "detection": DeepMeta.models.model_detection.model_detection,
+    "small++": DeepMeta.models.small_plus_plus.small_plus_plus,
 }
 
 # Souris Test #

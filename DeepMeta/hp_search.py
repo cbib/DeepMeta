@@ -7,8 +7,8 @@ from ray.tune.logger import DEFAULT_LOGGERS
 from ray.tune.schedulers import HyperBandForBOHB
 from ray.tune.suggest.bohb import TuneBOHB
 
-import DeepMetav4.train as t
-import DeepMetav4.utils.utils as utils
+import DeepMeta.train as t
+import DeepMeta.utils.utils as utils
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # adding wandb keys
     config["wandb"] = {
         "project": experiment_name,
-        "api_key_file": "/scratch/elefevre/Projects/DeepMetav4/.wandb_key",
+        "api_key_file": "/scratch/elefevre/Projects/DeepMeta/.wandb_key",
     }
 
     config["lr"] = tune.choice([0.01, 0.001, 0.0001])

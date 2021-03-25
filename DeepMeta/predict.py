@@ -7,11 +7,11 @@ import numpy as np
 import skimage.io as io
 import tensorflow.keras as keras
 
-import DeepMetav4.models.utils_model as utils_model
-import DeepMetav4.postprocessing.post_process_and_count as postprocess
-import DeepMetav4.utils.data as data
-import DeepMetav4.utils.global_vars as gv
-import DeepMetav4.utils.utils as utils
+import DeepMeta.models.utils_model as utils_model
+import DeepMeta.postprocessing.post_process_and_count as postprocess
+import DeepMeta.utils.data as data
+import DeepMeta.utils.global_vars as gv
+import DeepMeta.utils.utils as utils
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"

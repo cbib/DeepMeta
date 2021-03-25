@@ -1,7 +1,7 @@
 import numpy as np
 
-import DeepMetav4.utils.data as data
-import DeepMetav4.utils.global_vars as gv
+import DeepMeta.utils.data as data
+import DeepMeta.utils.global_vars as gv
 
 
 def test_data_lungs_classif():
