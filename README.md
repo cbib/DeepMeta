@@ -47,14 +47,15 @@ To measure the performance of each network, we rely on several metrics:
 
 <table>
   <tr>
-    <td><img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="250px"></td>
-    <td align="right"><img src="./docs/_static/bg_meta_seg.png" alt="bg meta seg" width="250px"/></td>
+    <td><img src="./docs/_static/sm_metas_seg.png" alt="sm meta seg" width="300px"></td>
+    <td align="right"><img src="./docs/_static/bg_meta_seg.png" alt="bg meta seg" width="300px"/></td>
   </tr>
 <tr>
     <td align="center">Small metas</td>
     <td align="center">Big metas</td>
   </tr>
 </table>
+
 - Mean IoU on test data = 0.768
 - Mean MCC on test data = 0.598
 - Mean AUC on test data = 0.821
@@ -76,6 +77,18 @@ if you want to use all gpus, comment this line.
 #### Set up training
 In the file `utils/global_vars.py` you will find all the paths to the dataset and the saving paths, feel free to modify it to fit your repos.
 
+#### Run training
+To train a network to segment lungs :
+```shell script
+python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001
+```
+
+To train a network to segment metastasis :
+```shell script
+python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta --weighted --w1=10 --w2=20
+```
+>After each training, a training plot will be drawn and saved in the plot folder. 
+
 By calling train scripts you can pass some arguments that will define the setup of the training :
 ```shell script
   --n_epochs N_EPOCHS      number of epochs of training
@@ -92,17 +105,6 @@ By calling train scripts you can pass some arguments that will define the setup 
   --drop_r RATE            Dropout rate
 ```
 
-#### Run training
-To train a network to segment lungs :
-```shell script
-python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001
-```
-
-To train a network to segment metastasis :
-```shell script
-python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta --weighted --w1=10 --w2=20
-```
->After each training, a training plot will be drawn and saved in the plot folder. 
 #### Availiable models
  - unet
  - small ++
@@ -129,7 +131,7 @@ To run HP search :
 ```shell
 python -m DeepMeta.hp_search
 ```
-
+> You'll need a WandB api key to see the result in the WandB interface.
 ### Pipeline
 
 The pipeline.py script aims to run inference on one mouse, save result and do stats
