@@ -34,7 +34,13 @@ class CustomStopper(tune.Stopper):
         return self.should_stop
 
 
+def create_folders():
+    os.makedirs("ray_result", exist_ok=True)
+    os.makedirs("wandb", exist_ok=True)
+
+
 if __name__ == "__main__":
+    create_folders()
     ray.init(num_cpus=20, num_gpus=2)
 
     config = vars(utils.get_args())

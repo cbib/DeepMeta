@@ -82,7 +82,7 @@ if __name__ == "__main__":
     seg_metas = seg_lungs * p.predict_seg(dataset, path_model_seg_metas).reshape(
         128, 128, 128
     )
-    seg_metas = p.postprocess_meta(seg_metas, k1=5, k2=3)
+    seg_metas = p.postprocess_meta(seg_metas, k1=3, k2=3)
 
     if flags.save:
         p.save_res(dataset, seg_lungs, name + "_pipeline_lungs")
