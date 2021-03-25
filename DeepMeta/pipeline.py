@@ -24,6 +24,8 @@ def get_flags():
     parser.set_defaults(stats=True)
     parser.add_argument("--no-save", dest="save", action="store_false")
     parser.set_defaults(save=True)
+    parser.add_argument("--mask", dest="mask", action="store_true")
+    parser.set_defaults(mask=False)
     args = parser.parse_args()
     utils.print_red(args)
     return args
@@ -85,9 +87,8 @@ if __name__ == "__main__":
     seg_metas = p.postprocess_meta(seg_metas, k1=3, k2=3)
 
     if flags.save:
-        p.save_res(dataset, seg_lungs, name + "_pipeline_lungs")
-        p.save_res(dataset, seg_metas, name + "_pipeline_metas")
-        # todo : option save masks
+        p.save_res(dataset, seg_lungs, name + "_pipeline_lungs", mask=flags.mask)
+        p.save_res(dataset, seg_metas, name + "_pipeline_metas", mask=flags.mask)
 
     if flags.stats:
         label_lungs = get_label_masks(LABEL_PATH)

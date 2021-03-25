@@ -39,14 +39,14 @@ def predict_seg(dataset, path_model_seg, tresh=0.5):
     return (res > tresh).astype(np.uint8).reshape(len(dataset), 128, 128, 1)
 
 
-def save_res(dataset, seg, name_folder, mask=False, mask_path=None):
+def save_res(dataset, seg, name_folder, mask):
     assert len(dataset) == len(seg)
     if not os.path.exists(gv.PATH_RES + str(name_folder)):
         os.makedirs(gv.PATH_RES + str(name_folder))
     seg = seg.reshape(len(seg), 128, 128)
     for k in range(len(dataset)):
         if mask:
-            io.imsave(mask_path + str(k) + ".png", seg[k] * 255)
+            io.imsave(gv.PATH_RES + str(name_folder) + "/" + str(k) + "_mask.png", seg[k] * 255)
         utils.border_detected(dataset, k, seg, gv.PATH_RES, name_folder)
 
 

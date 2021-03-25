@@ -145,4 +145,6 @@ python -m Deepmetav4.pipeline
 You can add flags to this script, if you do not want to save images or runs stats:
 `--no-save` and `--no-stats`.
 
+If you want to save masks use the `--mask` flag.
+
 >You need label masks to runs stats.

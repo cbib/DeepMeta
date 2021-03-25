@@ -64,7 +64,7 @@ def sorted_alphanumeric(data):
     return sorted(data, key=alphanum_key)
 
 
-def border_detected(dataset, k, seg, path_result, name_folder, prefix="/p_"):
+def border_detected(dataset, k, seg, path_result, name_folder):
     cell_contours = measure.find_contours(seg[k], 0.8)
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 10))
     for contour in cell_contours:
@@ -72,7 +72,7 @@ def border_detected(dataset, k, seg, path_result, name_folder, prefix="/p_"):
     plt.xlim((0, 128))
     plt.ylim((128, 0))
     plt.imshow(dataset[k], cmap="gray")
-    plt.savefig(path_result + str(name_folder) + prefix + str(k) + ".png")
+    plt.savefig(path_result + str(name_folder) + "/" + str(k) + ".png")
     plt.close(fig)
 
 
