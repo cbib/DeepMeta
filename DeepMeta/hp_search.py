@@ -1,3 +1,19 @@
+#!/usr/bin/python3.6
+# -*- coding: utf-8 -*-
+
+"""
+Hp Search
+==========
+This file is used to run hyper parameter search on a model.
+Just fill all the variables, fill you search space and run the script.
+
+.. warning::
+    To see the result, you have to create a file `.wandb_key` containing your
+    WandB api key.
+
+    todo: resolve issue sphinx
+"""
+
 import os
 
 import ray
@@ -21,20 +37,10 @@ METRIC = "val_accuracy"  # this is the name of the attribute in tune reporter
 MODE = "max"
 
 
-class CustomStopper(tune.Stopper):
-    def __init__(self):
-        self.should_stop = False
-
-    def __call__(self, trial_id, result):
-        if not self.should_stop and result["val_loss"] < 0.1:  # always val acc
-            self.should_stop = True
-        return self.should_stop
-
-    def stop_all(self):
-        return self.should_stop
-
-
 def create_folders():
+    """
+    This function creates the needed folders for ray and WandB (if needed).
+    """
     os.makedirs("ray_result", exist_ok=True)
     os.makedirs("wandb", exist_ok=True)
 
@@ -86,7 +92,6 @@ if __name__ == "__main__":
         search_alg=search_alg,
         scheduler=scheduler,
         resources_per_trial={"cpu": 10, "gpu": 1},
-        # stop=CustomStopper(),
     )
     print(
         "Best hyperparameters found were: ",

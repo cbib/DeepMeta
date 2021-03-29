@@ -1,6 +1,12 @@
 #!/usr/bin/python3.6
 # -*- coding: utf-8 -*-
 
+"""
+Pipeline
+==========
+This file is used to run prediction on a mouse.
+"""
+
 import argparse
 import os
 
@@ -19,6 +25,12 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 def get_flags():
+    """
+    Argument parser for the script
+
+    :return: Object containing flags.
+    :rtype: Dict
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-stats", dest="stats", action="store_false")
     parser.set_defaults(stats=True)
@@ -32,6 +44,18 @@ def get_flags():
 
 
 def get_label_path(mouse_path, name, folder="lungs"):
+    """
+    Get the label path from mouse name.
+
+    :param mouse_path: Path of the current segmented mouse
+    :type mouse_path: str
+    :param name: Name of the mouse
+    :type name: str
+    :param folder: "Lungs" Or "Metas", task related argument
+    :type folder: str
+    :return: The label folder path for the current mouse
+    :rtype: str
+    """
     return (
         "/".join(mouse_path.split("/")[:-1])
         + "/"
@@ -43,6 +67,14 @@ def get_label_path(mouse_path, name, folder="lungs"):
 
 
 def get_label_masks(folder_path):
+    """
+    Create a list of images from folder_path
+
+    :param folder_path: Path of the label folder
+    :type folder_path: str
+    :return: List containing all labels images
+    :rtype: List
+    """
     res = []
     file_list = utils.sorted_alphanumeric(utils.list_files_path(folder_path))
     for file in file_list:

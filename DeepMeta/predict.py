@@ -23,16 +23,12 @@ def predict_seg(dataset, path_model_seg, tresh=0.5):
     if "weighted" not in path_model_seg:
         model_seg = keras.models.load_model(
             path_model_seg,
-            custom_objects={
-                "mcc_loss": data.mcc_loss,
-            },
         )
     else:
         model_seg = keras.models.load_model(
             path_model_seg,
             custom_objects={
-                "weighted_cross_entropy": utils_model.weighted_cross_entropy,
-                "weighted_bin_acc": data.weighted_bin_acc,
+                "weighted_cross_entropy": utils_model.weighted_cross_entropy
             },
         )
     res = model_seg.predict(dataset)

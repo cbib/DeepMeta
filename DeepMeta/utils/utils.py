@@ -11,15 +11,31 @@ import skimage.measure as measure
 import tensorflow as tf
 
 
-def list_files(path):
-    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-
-
 def list_files_path(path):
+    """
+    List files from a path.
+
+    :param path: Folder path
+    :type path: str
+    :return: A list containing all files in the folder
+    :rtype: List
+    """
     return [path + f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 
 def plot_learning_curves(history, name, metric, path="plots/"):
+    """
+    Plot training curves.
+
+    :param history: Result of model.fit
+    :param name: Name of the plot (saving name)
+    :type name: str
+    :param metric: Metric to monitor
+    :type metric: str
+    :param path: Saving path
+    :type path: str
+
+    """
     loss = history.history["loss"]
     val_loss = history.history["val_loss"]
     acc = history.history[metric]
@@ -47,17 +63,33 @@ def plot_learning_curves(history, name, metric, path="plots/"):
 
 
 def print_red(skk):
+    """
+    Print in red.
+
+    :param skk: Str to print
+    :type skk: str
+    """
     print("\033[91m{}\033[00m".format(skk))
 
 
 def print_gre(skk):
+    """
+    Print in green.
+
+    :param skk: Str to print
+    :type skk: str
+    """
     print("\033[92m{}\033[00m".format(skk))
 
 
 def sorted_alphanumeric(data):
     """
-    :param data: list d'element alphanumerique.
-    :return: list triee dans l'ordre croissant alphanumerique.
+    Sort function.
+
+    :param data: str list
+    :type data: List
+    :return: Sorted list
+    :rtype: List
     """
     convert = lambda text: int(text) if text.isdigit() else text.lower()  # noqa
     alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]  # noqa
@@ -65,6 +97,20 @@ def sorted_alphanumeric(data):
 
 
 def border_detected(dataset, k, seg, path_result, name_folder):
+    """
+    Draw mask borders on image and save it.
+
+    :param dataset: Image you want to draw on
+    :type dataset: np.array
+    :param k: Index of the image
+    :type k: int
+    :param seg: Mask
+    :type seg: np.array
+    :param path_result: path where you want to save images
+    :type path_result: str
+    :param name_folder: Folder in which you want to save images.
+    :type name_folder: str
+    """
     cell_contours = measure.find_contours(seg[k], 0.8)
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 10))
     for contour in cell_contours:
@@ -77,6 +123,12 @@ def border_detected(dataset, k, seg, path_result, name_folder):
 
 
 def get_args():
+    """
+    Argument parser.
+
+    :return: Object containing all the parameters needed to train a model
+    :rtype: Dict
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--n_epochs", type=int, default=200, help="number of epochs of training"
@@ -123,7 +175,14 @@ def get_args():
 
 
 class PrintLR(tf.keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs=None):
+    """
+    Callback used to print learning rate at each epoch.
+    """
+    def on_epoch_begin(self, epoch, logs=None):
+        """
+        At the beginning of each epoch, print the current learning rate.
+
+        """
         print_gre(
             "\nLearning rate for epoch {} is {}".format(
                 epoch + 1, self.model.optimizer.lr.numpy()
@@ -132,24 +191,47 @@ class PrintLR(tf.keras.callbacks.Callback):
 
 
 class LRDecay(tf.keras.callbacks.Callback):
+    """
+    Callback used to linearly reduce the learning rate.
+
+    :param epoch_decay: Number of epoch to do before reduce learning rate
+    :type epoch_decay: int
+    :param coef: Reduce coefficient
+    :type coef: int
+    """
     def __init__(self, epoch_decay, coef=10):
         super().__init__()
         self.epoch_decay = epoch_decay
         self.coef = coef
 
     def on_epoch_begin(self, epoch, logs=None):
+        """
+        At the beginning of each epoch, if enough epochs are done, reduce the learning rate by coef.
+        """
         if (epoch + 1) % self.epoch_decay == 0:
             self.model.optimizer.lr = self.model.optimizer.lr / self.coef
             print_gre("\nLearning rate is {}".format(self.model.optimizer.lr.numpy()))
 
 
 class CosLRDecay(tf.keras.callbacks.Callback):
+    """
+    Callback used to perform cosine learning rate decay.
+
+    .. note::
+       Idea come from : https://openreview.net/forum?id=Skq89Scxx&noteId=Skq89Scxx
+
+    :param nb_epochs: Number total of epoch to run.
+    :type nb_epochs: int
+    """
     def __init__(self, nb_epochs, lr):
         super().__init__()
         # self.f_lr = self.model.optimizer.lr
         self.nb_epochs = nb_epochs
 
     def on_epoch_begin(self, epoch, logs=None):
+        """
+        At the beginning of each epoch, process a new learning rate.
+        """
         self.model.optimizer.lr = (
             0.5
             * (1 + math.cos(epoch * math.pi / self.nb_epochs))

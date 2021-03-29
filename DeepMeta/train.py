@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Train seg
+Train
 ==========
 This file is used to train networks to segment images.
 """
@@ -22,8 +22,19 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-def train(args, path_images=gv.path_img, path_labels=gv.path_lab, hp_search=True):
+def train(args, path_images, path_labels, hp_search=True):
+    """
+    Train function
 
+    :param args: Script arguments object
+    :type args: Dict
+    :param path_images: Path of images folder
+    :type path_images: str
+    :param path_labels: Path of label folder
+    :type path_labels: str
+    :param hp_search: Flag which add the Tune reporter to the callback list
+    :type hp_search: bool
+    """
     file_path = data.save_model_name(args, gv.PATH_SAVE)
     dataset, dataset_val, model_seg, checkpoint, metric = data.prepare_for_training(
         path_images, path_labels, file_path, args
@@ -63,4 +74,9 @@ if __name__ == "__main__":
             hp_search=False,
         )
     else:
-        train(opt, hp_search=False)
+        train(
+            opt,
+            path_images=gv.path_img,
+            path_labels=gv.path_lab,
+            hp_search=False,
+        )

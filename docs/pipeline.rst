@@ -1,3 +1,3 @@
-.. automodule:: DeepMeta.train
+.. automodule:: DeepMeta.pipeline
     :members:
     :member-order: bysource

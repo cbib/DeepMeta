@@ -24,6 +24,18 @@ from . import utils
 
 
 def shuffle_lists(lista, listb, seed=42):
+    """
+    Shuffle two list with the same seed.
+
+    :param lista: List of elements
+    :type lista: List
+    :param listb: List of elements
+    :type listb: List
+    :param seed: Seed number
+    :type seed: int
+    :return: lista and listb shuffled
+    :rtype: (List, List)
+    """
     random.seed(seed)
     random.shuffle(lista)
     random.seed(seed)
@@ -31,36 +43,17 @@ def shuffle_lists(lista, listb, seed=42):
     return lista, listb
 
 
-def get_label(file_path):
-    data_dir = pathlib.Path(gv.path_classif_metas)
-    class_names = np.array(sorted([item.name for item in data_dir.glob("*")]))
-    parts = tf.strings.split(file_path, os.path.sep)
-    one_hot = tf.cast(parts[-2] == class_names, dtype=tf.uint8)
-    # one_hot = tf.argmax(one_hot)
-    return one_hot
-
-
-def decode_img(img):
-    img = tf.cast(tf.image.decode_jpeg(img, channels=1), dtype=tf.float32) / 255
-    return tf.image.resize(img, [128, 128])
-
-
-def process_path(file_path):
-    label = get_label(file_path)
-    img = tf.io.read_file(file_path)
-    img = decode_img(img)
-    return img, label
-
-
-def configure_for_performance(ds, batch_size):
-    ds = ds.shuffle(buffer_size=50000)
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-    ds = ds.cache()
-    return ds
-
-
 def save_model_name(opt, path_save):
+    """
+    Creates a path and a name for the current model.
+
+    :param opt: Args from the script
+    :type opt: Dict
+    :param path_save: Folder we want to save the weights
+    :type path_save: str
+    :return: Saving path for the model
+    :rtype: str
+    """
     if opt["meta"]:
         res = "Metastases/" + str(opt["size"]) + "model_" + opt["model_name"]
     else:
@@ -81,6 +74,7 @@ def weight_map(label, a, b, size=128):
     :param b: Border pixel weight
     :param size: size of the image
     :return: Weight map array
+    :rtype: np.array
     """
     weight = np.zeros((label.shape[0], size, size))
 
@@ -106,6 +100,24 @@ def weight_map(label, a, b, size=128):
 
 
 def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
+    """
+    Concat weights maps and label list.
+
+    :param dataset: The dataset we want to train on
+    :type dataset: np.array
+    :param label: Label list
+    :type label: np.array
+    :param n_sample: size of the dataset
+    :type n_sample: int
+    :param w1: Border weight
+    :type w1: int
+    :param w2: Inside weight
+    :type w2: int
+    :param size: Image size (we assume image is a square)
+    :type size: int
+    :return: Dataset and labels
+    :rtype: (np.array, np.array)
+    """
     weight_2D = weight_map(label, w1, w2, size)
     dataset = dataset.reshape(-1, size, size, 1)[n_sample]  # 1 ici si pas de concat
     label = label.reshape(-1, size, size, 1)[n_sample]
@@ -117,6 +129,18 @@ def get_label_weights(dataset, label, n_sample, w1, w2, size=128):
 
 
 def get_dataset(path_data, path_label, opt):
+    """
+    Create a dataset (train and validation) from data and label path.
+
+    :param path_data: Path to the data
+    :type path_data: str
+    :param path_label: Path to the labels
+    :type path_label: str
+    :param opt: Script args object
+    :type opt: Dict
+    :return: Dataset, Validation dataset
+    :rtype: (keras.utils.Sequence, keras.utils.Sequence)
+    """
     data_files = utils.sorted_alphanumeric(utils.list_files_path(path_data))
     label_files = utils.sorted_alphanumeric(utils.list_files_path(path_label))
     n_val = int(0.8 * len(data_files))
@@ -141,42 +165,21 @@ def get_dataset(path_data, path_label, opt):
     return dataset, dataset_val
 
 
-def weighted_bin_acc(y_true, y_pred):
-    return tf.keras.metrics.binary_accuracy(
-        tf.reshape(y_true[:, :, :, 0], (-1, 128, 128, 1)), y_pred
-    )
-
-
-def mcc(y_true, y_pred):
-    """
-    Matthews Correlation Coefficient
-    """
-    tp = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    tn = K.sum(K.round(K.clip((1 - y_true) * (1 - y_pred), 0, 1)))
-    fp = K.sum(K.round(K.clip((1 - y_true) * y_pred, 0, 1)))
-    fn = K.sum(K.round(K.clip(y_true * (1 - y_pred), 0, 1)))
-
-    num = tp * tn - fp * fn
-    den = (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)
-    return num / K.sqrt(den + K.epsilon())
-
-
-def mcc_loss(y_true, y_pred):
-    tp = K.sum(K.cast(y_true * y_pred, "float"), axis=0)
-    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), "float"), axis=0)
-    fp = K.sum(K.cast((1 - y_true) * y_pred, "float"), axis=0) * 1e2
-    fn = K.sum(K.cast(y_true * (1 - y_pred), "float"), axis=0) / 1e2
-
-    up = tp * tn - fp * fn
-    down = K.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-
-    mcc = up / (down + K.epsilon())
-    mcc = tf.where(tf.math.is_nan(mcc), tf.zeros_like(mcc), mcc)
-
-    return 1 - K.mean(mcc)
-
-
 def prepare_for_training(path_data, path_label, file_path, opt):
+    """
+    Function used to create model, dataset, choose metric and create a checkpoint callback.
+
+    :param path_data: Path to the images
+    :type path_data: str
+    :param path_label: Path to the labels
+    :type path_label: str
+    :param file_path: Saving path for the model
+    :type file_path: str
+    :param opt: Script args object
+    :type opt: Dict
+    :return: Dataset (train, val), model, checkpoint cb, metric name
+    :rtype: (keras.utils.Sequence, keras.utils.Sequence, keras.Model, keras.callback, str)
+    """
     dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
     input_shape = (opt["size"], opt["size"], 1)
@@ -212,10 +215,18 @@ def prepare_for_training(path_data, path_label, file_path, opt):
 
 def contrast_and_reshape(souris, size=128):
     """
-    :param souris: Ensemble d'image, verification si ensemble ou image
-    unique avec la condition if.
-    :return: Ensemble d'image avec contraste ameliore et shape modifie
-    pour entrer dans le reseaux.
+    For some mice, we need to readjust the contrast.
+
+    :param souris: Slices of the mouse we want to segment
+    :type souris: np.array
+    :param size: Size of the images (we assume images are squares)
+    :type size: int
+    :return: Images list with readjusted contrast
+    :rtype: np.array
+
+    .. warning:
+       If the contrast pf the mouse should not be readjusted, the network will fail prediction.
+       Same if the image should be contrasted and you do not run it.
     """
     if len(souris.shape) > 2:
         data = []
@@ -233,6 +244,16 @@ def contrast_and_reshape(souris, size=128):
 
 
 def get_predict_dataset(path_souris, contrast=True):
+    """
+    Creates an image array from a file path (tiff file).
+
+    :param path_souris: Path to the mouse file.
+    :type path_souris: str
+    :param contrast: Flag to run contrast and reshape
+    :type contrast: Bool
+    :return: Images array containing the whole mouse
+    :rtype: np.array
+    """
     mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
     mouse = np.array(mouse) / np.amax(mouse)
     if contrast:
@@ -243,7 +264,24 @@ def get_predict_dataset(path_souris, contrast=True):
 
 
 class Dataset(keras.utils.Sequence):
-    """Helper to iterate over the data (as Numpy arrays)."""
+    """
+    Helper to iterate over the data (as Numpy arrays).
+
+    :param batch_size: Batch size we want to use during the training
+    :type batch_size: int
+    :param img_size: Size of the images (we assume image are squares)
+    :type img_size: int
+    :param input_img_paths: Path where to find images
+    :type input_img_paths: str
+    :param target_img_paths: Path where to find labels
+    :type target_img_paths: str
+    :param weighted: Flag for the weighted cross entropy
+    :type weighted: Bool
+    :param w1: Border weight (for weighted cross entropy)
+    :type w1: int
+    :param w2: Inside weight (for weighted cross entropy)
+    :type w2: int
+    """
 
     def __init__(
         self,
@@ -293,7 +331,19 @@ class Dataset(keras.utils.Sequence):
         return x, y
 
 
-def plot_iou(result, label, title, save=False):
+def plot_iou(result, label, title, save=True):  # todo: remove save flag
+    """
+    Function used to draw and save IoU plot.
+
+    :param result: Prediction output
+    :type result: np.array
+    :param label: Ground truth
+    :type label: np.array
+    :param title: Name of the plot
+    :type title: str
+    :param save: Flag for save image
+    :type save: Bool
+    """
     fig = plt.figure(1, figsize=(12, 12))
     for i in range(len(label)):
         plt.plot(np.arange(len(result)) + 29, result.values[:, i], label=label[i])
@@ -307,7 +357,19 @@ def plot_iou(result, label, title, save=False):
     plt.close("all")
 
 
-def box_plot(result, label, title, save=False):
+def box_plot(result, label, title, save=False):  # todo: remove save flag
+    """
+    Function used to draw and save box plot.
+
+    :param result: Prediction output
+    :type result: np.array
+    :param label: Ground truth
+    :type label: np.array
+    :param title: Name of the plot
+    :type title: str
+    :param save: Flag for save image
+    :type save: Bool
+    """
     fig = plt.figure(1, figsize=(15, 15))
     plt.boxplot([result.values[:, i] for i in range(len(label))])
     plt.ylim(0, 1)
@@ -319,13 +381,4 @@ def box_plot(result, label, title, save=False):
     plt.title(title, fontsize=18)
     if save:
         fig.savefig(gv.PATH_RES + "stats/boxplot_" + title + ".png")
-    plt.close("all")
-
-
-def heat_map(result, title, slice_begin=30, slice_end=106, save=False):
-    fig = plt.figure(1, figsize=(12, 12))
-    sns.heatmap(result[slice_begin:slice_end])
-    plt.title(title)
-    if save:
-        fig.savefig(gv.PATH_RES + "stats/heat_map_" + title + ".png")
     plt.close("all")

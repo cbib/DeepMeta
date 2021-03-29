@@ -1,3 +1,6 @@
+#!/usr/bin/python3.6
+# -*- coding: utf-8 -*-
+
 import math
 
 import numpy as np
@@ -6,6 +9,13 @@ from tqdm import tqdm
 
 
 def count_pixels(mask_list):
+    """
+    Process a mask list to count pixels divided in two categories (0 and non 0)
+    :param mask_list: Mask list
+    :type mask_list: np.array
+    :return: zero count, non zero count
+    :rtype: (int, int)
+    """
     count0 = 0
     count1_pred = 0
     for j in tqdm(range(0, len(mask_list))):
@@ -15,6 +25,16 @@ def count_pixels(mask_list):
 
 
 def process_intersections(mask_pred_list, mask_gt_list):
+    """
+    Process confusion matrix between masks.
+
+    :param mask_pred_list: Prediction list
+    :type mask_pred_list: np.array
+    :param mask_gt_list: Ground truth list
+    :type mask_gt_list: np.array
+    :return: TN, TP, FN, FP
+    :rtype: (int, int, int, int)
+    """
     intersection0_tab = []
     intersection1_tab = []
 
@@ -54,14 +74,28 @@ def process_intersections(mask_pred_list, mask_gt_list):
 
 def inverse_binary_mask(msk):
     """
-    :param msk: masque binaire 128x128
-    :return: masque avec binarisation inversée 128x128
+    Invert bytes of mask.
+
+    :param msk: Binary mask (128x128)
+    :type msk: np.array
+    :return: Inverted mask
+    :rtype: np.array
     """
     new_mask = np.ones((128, 128)) - msk
     return new_mask
 
 
 def stats_pixelbased(y_true, y_pred):
+    """
+    Process IoU between pred and gt.
+
+    :param y_true: Ground truth
+    :type y_true: np.array
+    :param y_pred: Prediction
+    :type y_pred: np.array
+    :return: IoU coefficient
+    :rtype: float
+    """
     y_pred = y_pred.reshape(128, 128)
     if y_pred.shape != y_true.shape:
         raise ValueError(
@@ -89,6 +123,16 @@ def stats_pixelbased(y_true, y_pred):
 
 
 def process_iou(mask_pred, mask_gt):
+    """
+    Process IoU over lists.
+
+    :param mask_pred: Prediction list
+    :type mask_pred: np.array
+    :param mask_gt: Ground truth list
+    :type mask_gt: np.array
+    :return: Mean IoU over the lists
+    :rtype: float
+    """
     tmp = []
     for i, pred in enumerate(mask_pred):
         gt = mask_gt[i]
@@ -100,6 +144,20 @@ def process_iou(mask_pred, mask_gt):
 def process_mcc(
     intersection0_tab, intersection1_tab, erreur_pred1_tab, erreur_pred0_tab
 ):
+    """
+    Process MCC over confusion matrix.
+
+    :param intersection0_tab: TN
+    :type intersection0_tab: int
+    :param intersection1_tab: TP
+    :type intersection1_tab: int
+    :param erreur_pred1_tab: FP
+    :type erreur_pred1_tab: int
+    :param erreur_pred0_tab: FN
+    :type erreur_pred0_tab: int
+    :return: Return mean MCC
+    :rtype: float
+    """
     TP = sum(intersection1_tab)
     TN = sum(intersection0_tab)
     FP = sum(erreur_pred1_tab)
@@ -115,6 +173,16 @@ def process_mcc(
 
 
 def process_auc(gt_list, pred_list):
+    """
+    Process AUC (AUROC) over lists.
+
+    :param gt_list: Ground truth list
+    :type gt_list: np.array
+    :param pred_list: Predictions list
+    :type pred_list: np.array
+    :return: Mean AUC over the lists
+    :rtype: float
+    """
     res = []
     for i, gt in enumerate(gt_list):
         if np.amax(gt) != 0:
@@ -125,6 +193,18 @@ def process_auc(gt_list, pred_list):
 
 
 def do_stats(mask_pred_list, mask_gt_list, save_path):
+    """
+    Run stat metrics over lists and write a report in a file.
+
+    :param mask_pred_list: Prediction list
+    :type mask_pred_list: np.array
+    :param mask_gt_list: Ground truth list
+    :type mask_gt_list: np.array
+    :param save_path: Path for the report file
+    :type save_path: str
+    :return:
+    :rtype:
+    """
     f = open(save_path + "finestat.txt", "w")
     f.write("STAT PREDICTION" + "\n\n")
 
