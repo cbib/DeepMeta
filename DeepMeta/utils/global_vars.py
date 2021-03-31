@@ -3,7 +3,7 @@
 
 import os
 
-import DeepMeta.models.model_detection
+import DeepMeta.models.model_unet
 import DeepMeta.models.small_plus_plus
 import DeepMeta.utils.utils
 
@@ -25,7 +25,7 @@ meta_path_img = os.path.join(NEW_PATH_META, "Images/")
 meta_path_lab = os.path.join(NEW_PATH_META, "Labels/")
 
 model_list = {
-    "detection": DeepMeta.models.model_detection.model_detection,
+    "unet": DeepMeta.models.model_unet.unet,
     "small++": DeepMeta.models.small_plus_plus.small_plus_plus,
 }
 

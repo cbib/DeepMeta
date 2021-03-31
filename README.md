@@ -12,6 +12,7 @@ Deep learning techniques used to segment lungs and metastasis on mice MRI images
 - [Installation](#installation)
 - [Performance](#performance)
 - [Usage](#usage)
+- [Documentation](#Documentation)
 
 
 ## Installation
@@ -148,3 +149,13 @@ You can add flags to this script, if you do not want to save images or runs stat
 If you want to save masks use the `--mask` flag.
 
 >You need label masks to runs stats.
+
+## Documentation
+
+To generate documentation files and read them :
+
+```shell
+cd docs
+make html
+open _build/html/index.html
+```
