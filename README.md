@@ -63,6 +63,11 @@ To measure the performance of each network, we rely on several metrics:
 
 ## Usage
 
+### Example
+
+You can find an example notebook in `example` folder. In this notebook, we run the pipeline and show the results.
+
+
 ### Set up gpus
 If you have several GPUs :
 
@@ -88,7 +93,7 @@ To train a network to segment metastasis :
 ```shell script
 python -m DeepMeta.train_seg  --batch_size=32 --model_name=small++ --n_epochs=200 --lr=0.001 --meta --weighted --w1=10 --w2=20
 ```
->After each training, a training plot will be drawn and saved in the plot folder. 
+>After each training, a training plot will be drawn and saved in the plot folder.
 
 By calling train scripts you can pass some arguments that will define the setup of the training :
 ```shell script
@@ -109,7 +114,6 @@ By calling train scripts you can pass some arguments that will define the setup 
 #### Availiable models
  - unet
  - small ++
- - unet ++
 
 ### Prediction
 If you want to segment images :

@@ -6,6 +6,7 @@ import os
 import cv2
 import numpy as np
 import skimage.io as io
+import skimage.measure as measure
 
 # FOLDER_PATH = "/home/elefevre/Desktop/mask_prediction/"
 # FOLDER_PATH = "/home/elefevre/Desktop/Mask_Souris8bis/"
@@ -16,13 +17,12 @@ def get_imgs(path):
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 
-def remove_blobs(img):
+def remove_blobs(img, min_size=10):
     nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(
         img, connectivity=8
     )
     sizes = stats[1:, -1]
     nb_components = nb_components - 1  # remove background
-    min_size = 10
     img2 = np.zeros(output.shape)
     # for every component in the image, you keep it only if it's above min_size
     for i in range(nb_components):
@@ -56,6 +56,17 @@ def post_process(mask_path):
     blob_removed = remove_blobs(mask)
     eroded = dilate_and_erode(blob_removed)
     return eroded
+
+
+def mean_vol_per_meta(mask, vol=0.0047):
+    _, num = measure.label(mask, return_num=True)
+    nb_pix = mask.sum()
+    return (nb_pix * vol) / num
+
+
+def vol_mask(mask, vol=0.0047):
+    nb_pix = mask.sum()
+    return nb_pix * vol
 
 
 if __name__ == "__main__":

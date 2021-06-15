@@ -18,18 +18,15 @@ Performance
 
 To measure the performance of each network, we rely on several metrics:
 - IoU (Jaccard index)
-- MCC (Matthews Correlation Coefficient)
 - AUC (AUROC)
 
 Lungs
     - Mean IoU on test data: 0.891
-    - Mean MCC on test data: 0.878
     - Mean AUC on test data: 0.950
 
 Metas
     - Mean IoU on test data: 0.768
-    - Mean MCC on test data: 0.598
-    - Mean AUC on test data: 0.
+    - Mean AUC on test data: 0.820
 
 
 .. toctree::

@@ -42,7 +42,10 @@ def save_res(dataset, seg, name_folder, mask):
     seg = seg.reshape(len(seg), 128, 128)
     for k in range(len(dataset)):
         if mask:
-            io.imsave(gv.PATH_RES + str(name_folder) + "/" + str(k) + "_mask.png", seg[k] * 255)
+            io.imsave(
+                gv.PATH_RES + str(name_folder) + "/" + str(k) + "_mask.png",
+                seg[k] * 255,
+            )
         utils.border_detected(dataset, k, seg, gv.PATH_RES, name_folder)
 
 
@@ -58,7 +61,8 @@ def postprocess_loop(seg):
 def postprocess_meta(seg, k1=3, k2=3):
     res = []
     for elt in seg:
-        res.append(postprocess.dilate_and_erode(elt, k1=k1, k2=k2))  # try with 5x5
+        elt = postprocess.remove_blobs(elt, min_size=3)
+        res.append(postprocess.dilate_and_erode(elt, k1=k1, k2=k2))
     return np.array(res)
 
 

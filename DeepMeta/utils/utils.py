@@ -142,7 +142,7 @@ def get_args():
         type=str,
         default="small++",
         help="Name of the model you want to train",
-        choices=["small++", "unet", "unet++"],
+        choices=["small++", "unet"],
     )
     parser.add_argument(
         "--meta", dest="meta", action="store_true", help="If flag, segment metas"
@@ -178,6 +178,7 @@ class PrintLR(tf.keras.callbacks.Callback):
     """
     Callback used to print learning rate at each epoch.
     """
+
     def on_epoch_begin(self, epoch, logs=None):
         """
         At the beginning of each epoch, print the current learning rate.
@@ -199,6 +200,7 @@ class LRDecay(tf.keras.callbacks.Callback):
     :param coef: Reduce coefficient
     :type coef: int
     """
+
     def __init__(self, epoch_decay, coef=10):
         super().__init__()
         self.epoch_decay = epoch_decay
@@ -223,6 +225,7 @@ class CosLRDecay(tf.keras.callbacks.Callback):
     :param nb_epochs: Number total of epoch to run.
     :type nb_epochs: int
     """
+
     def __init__(self, nb_epochs, lr):
         super().__init__()
         # self.f_lr = self.model.optimizer.lr
