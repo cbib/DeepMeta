@@ -12,6 +12,7 @@ import os
 
 import numpy as np
 import skimage.io as io
+import skimage.measure as measure
 
 import DeepMeta.postprocessing.post_process_and_count as post_count
 import DeepMeta.predict as p
@@ -178,27 +179,9 @@ def get_vol_metaid(mask, id, vol=0.0047):
     return np.count_nonzero(mask == id) * vol
 
 
-if __name__ == "__main__":
-    flags = get_flags()
-    # Model seg lungs #
-    path_model_seg_lungs = os.path.join(
-        gv.PATH_SAVE, "Poumons/best_seg_model_weighted.h5"
-    )
-    # Model seg metas #
-    path_model_seg_metas = os.path.join(gv.PATH_SAVE, "Metastases/best_seg_weighted.h5")
-
-    # MOUSE INFOS
-    MOUSE_PATH = os.path.join(
-        gv.PATH_DATA, "Original_Data/melanome/B16F10/" + flags.mousename
-    )  # todo   "Souris_Test/"
-    name = os.path.basename(MOUSE_PATH)
-    LABEL_PATH = get_label_path(MOUSE_PATH, name)
-    LABEL_PATH_METAS = get_label_path(MOUSE_PATH, name, folder="metas")
-    souris = (MOUSE_PATH, flags.contrast)
-
-    # PREDICTIONS
+def process_mouse(path, name, contrast):
     utils.print_red(name)
-    dataset = data.get_predict_dataset(souris[0], souris[1])
+    dataset = data.get_predict_dataset(path, contrast)
 
     seg_lungs = p.predict_seg(dataset, path_model_seg_lungs).reshape(128, 128, 128)
     seg_lungs = p.postprocess_loop(seg_lungs)
@@ -207,24 +190,36 @@ if __name__ == "__main__":
         128, 128, 128
     )
     seg_metas = p.postprocess_meta(seg_metas, k1=3, k2=3)
+    return dataset, seg_lungs, seg_metas
 
-    # OUTPUT
-    if flags.save:
-        p.save_res(dataset, seg_lungs, name + "_pipeline_lungs", mask=flags.mask)
-        p.save_res(dataset, seg_metas, name + "_pipeline_metas", mask=flags.mask)
 
-    if flags.stats:
-        label_lungs = get_label_masks(LABEL_PATH)
-        label_metas = get_label_masks(LABEL_PATH_METAS)
+def nb_meta_volume(meta_mask, i):
+    """
+    Write csv 1 line = 1 meta
 
-        stats.do_stats(
-            seg_lungs, label_lungs, gv.PATH_RES + str(name) + "_pipeline_lungs/"
+    :param meta_mask: Metas mask list
+    :type meta_mask: np.array
+    :param i: slice number
+    :type i: int
+    """
+    labeled_mask, num = measure.label(meta_mask, return_num=True)
+    for nb in range(num):
+        vol_metaid = get_vol_metaid(labeled_mask, nb + 1)
+        write_meta_in_csv(
+            flags.csv_file, flags.mousename, i, nb + 1, vol_metaid, flags.mut
         )
-        stats.do_stats(
-            seg_metas, label_metas, gv.PATH_RES + str(name) + "_pipeline_metas/"
-        )
 
-    # todo: wrap this; too long for main
+
+def process_for_stats(seg_lungs, seg_metas):
+    """
+
+    :param seg_lungs: Lungs mask list
+    :type seg_lungs: np.array
+    :param seg_metas: Metas mask list
+    :type seg_metas: np.array
+    :return: Lungs volume, meta volume, volume per meta
+    :rtype: (float, float, float)
+    """
     vol = 0
     for mask in seg_lungs:
         vol += post_count.vol_mask(mask)
@@ -236,17 +231,7 @@ if __name__ == "__main__":
         if np.amax(meta_mask) == 1.0:
             vol_meta += post_count.vol_mask(meta_mask)
             vol_per_meta += post_count.mean_vol_per_meta(meta_mask)
-            # graph meta = 1 line
-            # labeled_mask, num = measure.label(meta_mask, return_num=True)
-            # for nb in range(num):
-            #     vol_metaid = get_vol_metaid(labeled_mask, nb+1)
-            #     write_meta_in_csv(
-            #         flags.csv_file,
-            #         flags.mousename,
-            #         i,
-            #         nb+1,
-            #         vol_metaid,
-            #         flags.mut)
+            # nb_meta_volume(meta_mask, i)
             meta_slice += 1
     vol_per_meta /= meta_slice
     print(100 * "-")
@@ -266,6 +251,48 @@ if __name__ == "__main__":
             vol_per_meta, (vol_per_meta * 0.001)
         )
     )
+    return vol, vol_meta, vol_per_meta
+
+
+if __name__ == "__main__":
+    flags = get_flags()
+    # Model seg lungs #
+    path_model_seg_lungs = os.path.join(
+        gv.PATH_SAVE, "Poumons/best_seg_model_weighted.h5"
+    )
+    # Model seg metas #
+    path_model_seg_metas = os.path.join(gv.PATH_SAVE, "Metastases/best_seg_weighted.h5")
+
+    # MOUSE INFOS
+    MOUSE_PATH = os.path.join(
+        gv.PATH_DATA, "Original_Data/melanome/B16F10/" + flags.mousename
+    )  # todo   "Souris_Test/"
+    name = os.path.basename(MOUSE_PATH)
+    # keep labels for stats ? Flag ???
+    LABEL_PATH = get_label_path(MOUSE_PATH, name)
+    LABEL_PATH_METAS = get_label_path(MOUSE_PATH, name, folder="metas")
+    souris = (MOUSE_PATH, flags.contrast)
+
+    # PREDICTIONS
+    dataset, seg_lungs, seg_metas = process_mouse(souris[0], name, souris[1])
+
+    # OUTPUT
+    if flags.save:
+        p.save_res(dataset, seg_lungs, name + "_pipeline_lungs", mask=flags.mask)
+        p.save_res(dataset, seg_metas, name + "_pipeline_metas", mask=flags.mask)
+
+    if flags.stats:
+        label_lungs = get_label_masks(LABEL_PATH)
+        label_metas = get_label_masks(LABEL_PATH_METAS)
+
+        stats.do_stats(
+            seg_lungs, label_lungs, gv.PATH_RES + str(name) + "_pipeline_lungs/"
+        )
+        stats.do_stats(
+            seg_metas, label_metas, gv.PATH_RES + str(name) + "_pipeline_metas/"
+        )
+
+    vol, vol_meta, vol_per_meta = process_for_stats(seg_lungs, seg_metas)
     #########################
 
     if flags.csv:
@@ -289,6 +316,5 @@ if __name__ == "__main__":
             )
 
 # todo: readme pour csv
-# todo: postprocess meta -> rm blob < 3px
 # todo: clean this code -> thingz to generate graphs are polluting the code
-#  -> create an example for graph creation
+# todo: lien vers napari-deepmeta dans le readme
