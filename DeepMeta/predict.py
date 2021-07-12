@@ -62,7 +62,7 @@ def postprocess_meta(seg, k1=3, k2=3):
     res = []
     for elt in seg:
         elt = postprocess.remove_blobs(elt, min_size=3)
-        res.append(postprocess.dilate_and_erode(elt, k1=k1, k2=k2))
+        res.append(postprocess.dilate_and_erode(elt, k1=k1, k2=k2) / 255)
     return np.array(res)
 
 

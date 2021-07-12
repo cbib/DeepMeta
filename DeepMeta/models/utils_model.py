@@ -1,9 +1,7 @@
-import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
 import tensorflow.keras.layers as layers
 import tensorflow.keras.regularizers as regularizers
-from tensorflow.python.framework import dtypes
 
 
 def block_down(inputs, filters, drop, w_decay=0.0001, kernel_size=3, name=""):

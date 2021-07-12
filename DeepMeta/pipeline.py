@@ -13,6 +13,7 @@ import os
 import numpy as np
 import skimage.io as io
 import skimage.measure as measure
+from scipy import ndimage
 
 import DeepMeta.postprocessing.post_process_and_count as post_count
 import DeepMeta.predict as p
@@ -69,7 +70,7 @@ def get_flags():
     parser.add_argument(
         "--mousename",
         type=str,
-        default="souris_8.tif",
+        default="m2Pc_c1_10Corr_1.tif",
         help="Name of the file to do inference on. (File in test folder)",
     )
     parser.add_argument("--day", type=str, default=None, help="Day of the mouse in csv")
@@ -124,6 +125,25 @@ def get_label_masks(folder_path):
 
 
 def write_in_csv(filename, mousename, day, vol_l, vol_m, vol_pm, mutation):
+    """
+    Create a csv file and fill it with
+    :param filename:
+    :type filename:
+    :param mousename:
+    :type mousename:
+    :param day:
+    :type day:
+    :param vol_l:
+    :type vol_l:
+    :param vol_m:
+    :type vol_m:
+    :param vol_pm:
+    :type vol_pm:
+    :param mutation:
+    :type mutation:
+    :return:
+    :rtype:
+    """
     check_and_create_file(filename)
     f = open(filename, "a")
     f.write(
@@ -144,6 +164,23 @@ def write_in_csv(filename, mousename, day, vol_l, vol_m, vol_pm, mutation):
 
 
 def write_meta_in_csv(filename, mousename, slice_nb, meta_id, vol, mutation):
+    """
+    Create a csv file and fill it in order to create graph number of meta
+    in function of time.
+
+    :param filename: csv filename
+    :type filename: Str
+    :param mousename: Name of the mouse file
+    :type mousename: Str
+    :param slice_nb: Id of the slice
+    :type slice_nb: int
+    :param meta_id:
+    :type meta_id: Int
+    :param vol: Meta volume
+    :type vol: int
+    :param mutation: Name of the mesured mutation
+    :type mutation: Str
+    """
     check_and_create_file_meta(filename)
     f = open(filename, "a")
     f.write(
@@ -179,16 +216,85 @@ def get_vol_metaid(mask, id, vol=0.0047):
     return np.count_nonzero(mask == id) * vol
 
 
+def laplace(img_stack, mask_list):  # move to post process
+    """
+    Remove false positives in lung segmentation. Apply a
+    laplace of gaussian filter on slices, if the mean value of the
+    result is <1 we remove the mask.
+
+    .. note::
+       We process only first and last slices (until we find a value >1).
+       This ensure that we do not remove false
+       negative slices.
+
+    :param img_stack: Full image stack (dataset).
+    :type img_stack: np.array
+    :param mask_list: Full lung segmentation output
+    :type mask_list: np.array
+    :return: Updated mask list
+    :rtype: np.array
+    """
+    img_stack2 = (img_stack * 255).astype(np.uint8)
+    for i, img in enumerate(img_stack2):
+        new_im = ndimage.gaussian_laplace(img, sigma=7)
+        if np.mean(new_im) < 1:
+            mask_list[i] = np.zeros((128, 128))
+        else:
+            break
+    for i, img in enumerate(img_stack2[::-1]):
+        new_im = ndimage.gaussian_laplace(img, sigma=7)
+        if np.mean(new_im) < 1:
+            mask_list[(len(mask_list) - 1) - i] = np.zeros((128, 128))
+        else:
+            break
+    return mask_list
+
+
+def lungs_sanity_check(mask_list):  # move to post process
+    """
+    Check if there is some false positive. If mask < 15px -> mask is null.
+    If i-1 and i+1 do not contain mask, i does not contains a mask either.
+
+    :param mask_list: Lungs segmentation output
+    :type mask_list: np.array
+    :return: Checked segmentation output
+    :rtype: np.array
+    """
+    mask_list[0] = np.zeros((128, 128))
+    mask_list[-1] = np.zeros((128, 128))
+    for i in range(1, len(mask_list) - 1):
+        if mask_list[i].sum() > 15:
+            if mask_list[i - 1].sum() < 15 and mask_list[i + 1].sum() < 15:
+                mask_list[i] = np.zeros((128, 128))
+        else:
+            mask_list[i] = np.zeros((128, 128))
+    return mask_list
+
+
 def process_mouse(path, name, contrast):
+    """
+    Run pipeline on mouse.
+
+    :param path: Mouse path
+    :type path: Str
+    :param name: Name of the mouse file
+    :type name: Str
+    :param contrast: Flag to enhance contrast
+    :type contrast: Bool
+    :return: Image stack, Lungs segmentation, Metastasis segmentation
+    :rtype: np.array, np.array, np.array
+    """
     utils.print_red(name)
     dataset = data.get_predict_dataset(path, contrast)
 
-    seg_lungs = p.predict_seg(dataset, path_model_seg_lungs).reshape(128, 128, 128)
+    seg_lungs = p.predict_seg(dataset, path_model_seg_lungs).reshape(-1, 128, 128)
+    seg_lungs = laplace(dataset, seg_lungs)
+    seg_lungs = lungs_sanity_check(seg_lungs)
     seg_lungs = p.postprocess_loop(seg_lungs)
 
-    seg_metas = seg_lungs * p.predict_seg(dataset, path_model_seg_metas).reshape(
-        128, 128, 128
-    )
+    seg_metas = (
+        seg_lungs * p.predict_seg(dataset, path_model_seg_metas).reshape(-1, 128, 128)
+    ).astype(np.uint8)
     seg_metas = p.postprocess_meta(seg_metas, k1=3, k2=3)
     return dataset, seg_lungs, seg_metas
 
@@ -256,21 +362,16 @@ def process_for_stats(seg_lungs, seg_metas):
 
 if __name__ == "__main__":
     flags = get_flags()
-    # Model seg lungs #
+    # Model seg lungs
     path_model_seg_lungs = os.path.join(
         gv.PATH_SAVE, "Poumons/best_seg_model_weighted.h5"
     )
-    # Model seg metas #
+    # Model seg metas
     path_model_seg_metas = os.path.join(gv.PATH_SAVE, "Metastases/best_seg_weighted.h5")
 
     # MOUSE INFOS
-    MOUSE_PATH = os.path.join(
-        gv.PATH_DATA, "Original_Data/melanome/B16F10/" + flags.mousename
-    )  # todo   "Souris_Test/"
+    MOUSE_PATH = os.path.join(gv.PATH_DATA, "Souris_Test/" + flags.mousename)
     name = os.path.basename(MOUSE_PATH)
-    # keep labels for stats ? Flag ???
-    LABEL_PATH = get_label_path(MOUSE_PATH, name)
-    LABEL_PATH_METAS = get_label_path(MOUSE_PATH, name, folder="metas")
     souris = (MOUSE_PATH, flags.contrast)
 
     # PREDICTIONS
@@ -282,6 +383,8 @@ if __name__ == "__main__":
         p.save_res(dataset, seg_metas, name + "_pipeline_metas", mask=flags.mask)
 
     if flags.stats:
+        LABEL_PATH = get_label_path(MOUSE_PATH, name)
+        LABEL_PATH_METAS = get_label_path(MOUSE_PATH, name, folder="metas")
         label_lungs = get_label_masks(LABEL_PATH)
         label_metas = get_label_masks(LABEL_PATH_METAS)
 
@@ -315,6 +418,6 @@ if __name__ == "__main__":
                 flags.mut,
             )
 
-# todo: readme pour csv
+# todo: readme pour csv, move csv function in a new file (?)
 # todo: clean this code -> thingz to generate graphs are polluting the code
 # todo: lien vers napari-deepmeta dans le readme

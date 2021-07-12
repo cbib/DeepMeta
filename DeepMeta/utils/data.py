@@ -2,18 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pathlib
 import random
 
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import skimage.exposure as exposure
 import skimage.io as io
 import skimage.measure as measure
+import skimage.transform as transform
 import tensorflow as tf
 import tensorflow.keras as keras
-import tensorflow.keras.backend as K
 import tensorflow.keras.callbacks as callbacks
 from tensorflow.keras.preprocessing.image import load_img
 
@@ -167,7 +165,8 @@ def get_dataset(path_data, path_label, opt):
 
 def prepare_for_training(path_data, path_label, file_path, opt):
     """
-    Function used to create model, dataset, choose metric and create a checkpoint callback.
+    Function used to create model, dataset, choose metric and
+    create a checkpoint callback.
 
     :param path_data: Path to the images
     :type path_data: str
@@ -178,7 +177,8 @@ def prepare_for_training(path_data, path_label, file_path, opt):
     :param opt: Script args object
     :type opt: Dict
     :return: Dataset (train, val), model, checkpoint cb, metric name
-    :rtype: (keras.utils.Sequence, keras.utils.Sequence, keras.Model, keras.callback, str)
+    :rtype: (keras.utils.Sequence, keras.utils.Sequence, keras.Model,
+    keras.callback, str)
     """
     dataset, dataset_val = get_dataset(path_data, path_label, opt)
     utils.print_gre("Prepare for Training...")
@@ -225,7 +225,8 @@ def contrast_and_reshape(souris, size=128):
     :rtype: np.array
 
     .. warning:
-       If the contrast pf the mouse should not be readjusted, the network will fail prediction.
+       If the contrast pf the mouse should not be readjusted,
+        the network will fail prediction.
        Same if the image should be contrasted and you do not run it.
     """
     if len(souris.shape) > 2:
@@ -255,6 +256,7 @@ def get_predict_dataset(path_souris, contrast=True):
     :rtype: np.array
     """
     mouse = io.imread(path_souris, plugin="tifffile").astype(np.uint8)
+    mouse = transform.resize(mouse, (len(mouse), 128, 128), anti_aliasing=True)
     mouse = np.array(mouse) / np.amax(mouse)
     if contrast:
         mouse = contrast_and_reshape(mouse)
