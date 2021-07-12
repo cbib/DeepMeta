@@ -13,7 +13,7 @@ Deep learning techniques used to segment lungs and metastasis on mice MRI images
 - [Performance](#performance)
 - [Usage](#usage)
 - [Documentation](#Documentation)
-- [Napari Demo](#Napari demo)
+- [Demo](#Demo)
 
 
 ## Installation
@@ -74,7 +74,7 @@ make html
 open _build/html/index.html
 ```
 
-## Napari demo
+## Demo
 
 To test our network rapidly on your images, we advise you to try our plugin for napari,
 [napari-deepmeta](https://github.com/EdgarLefevre/napari-deepmeta). This plugin allows you to try our 2 networks on your
