@@ -77,5 +77,5 @@ open _build/html/index.html
 ## Demo
 
 To test our network rapidly on your images, we advise you to try our plugin for napari,
-[napari-deepmeta](https://github.com/EdgarLefevre/napari-deepmeta). This plugin allows you to try our 2 networks on your
+[napari-deepmeta](https://www.napari-hub.org/plugins/napari-deepmeta). This plugin allows you to try our 2 networks on your
 images without writing any line of code.
