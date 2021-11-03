@@ -4,7 +4,7 @@
 import math
 
 import numpy as np
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import f1_score, roc_auc_score
 from tqdm import tqdm
 
 
@@ -188,7 +188,8 @@ def process_auc(gt_list, pred_list):
         if np.amax(gt) != 0:
             pred = pred_list[i].flatten()
             gt = gt.flatten()
-            res.append(roc_auc_score(gt, pred))
+            # res.append(roc_auc_score(gt, pred))
+            res.append(f1_score(gt, pred))
     return np.mean(res)
 
 
