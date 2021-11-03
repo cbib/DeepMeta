@@ -3,6 +3,7 @@
 
 import os
 
+import cc3d
 import cv2
 import numpy as np
 import skimage.io as io
@@ -67,6 +68,18 @@ def mean_vol_per_meta(mask, vol=0.0047):
 def vol_mask(mask, vol=0.0047):
     nb_pix = mask.sum()
     return nb_pix * vol
+
+
+def process_meta_number(meta_masks):
+    labels_out, N = cc3d.connected_components(
+        meta_masks, return_N=True, connectivity=18
+    )
+    # print('N 18: {}'.format(N))
+    #
+    # for segid in range(1, N + 1):
+    #     extracted_image = labels_out * (labels_out == segid)
+    #     io.imsave("img_{}.tiff".format(segid), extracted_image, plugin="tifffile")
+    return N
 
 
 if __name__ == "__main__":

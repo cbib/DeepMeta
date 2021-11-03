@@ -10,6 +10,7 @@ This file is used to run prediction on a mouse.
 import argparse
 import os
 
+import cc3d
 import numpy as np
 import skimage.io as io
 import skimage.measure as measure
@@ -163,7 +164,7 @@ def write_in_csv(filename, mousename, day, vol_l, vol_m, vol_pm, mutation):
     f.close()
 
 
-def write_meta_in_csv(filename, mousename, slice_nb, meta_id, vol, mutation):
+def write_meta_in_csv(filename, mousename, meta_id, vol, mutation):
     """
     Create a csv file and fill it in order to create graph number of meta
     in function of time.
@@ -183,25 +184,14 @@ def write_meta_in_csv(filename, mousename, slice_nb, meta_id, vol, mutation):
     """
     check_and_create_file_meta(filename)
     f = open(filename, "a")
-    f.write(
-        mousename
-        + ","
-        + str(slice_nb)
-        + ","
-        + str(meta_id)
-        + ","
-        + str(vol)
-        + ","
-        + mutation
-        + "\n"
-    )
+    f.write(mousename + "," + str(meta_id) + "," + str(vol) + "," + mutation + "\n")
     f.close()
 
 
 def check_and_create_file_meta(path):
     if not os.path.isfile(path):
         f = open(path, "a+")
-        f.write("name,slice_nb,meta_id,vol,mutation\n")
+        f.write("name,meta_id,vol,mutation\n")
         f.close()
 
 
@@ -316,6 +306,19 @@ def nb_meta_volume(meta_mask, i):
         )
 
 
+def nb_meta_volume_v2(stack):
+    labels_out, N = cc3d.connected_components(stack, return_N=True, connectivity=18)
+    for id in range(1, N + 1):
+        extracted_image = labels_out * (labels_out == id)
+        write_meta_in_csv(
+            flags.csv_file,
+            flags.mousename,
+            id,
+            (extracted_image.sum() * 0.0047),
+            flags.mut,
+        )
+
+
 def process_for_stats(seg_lungs, seg_metas):
     """
 
@@ -329,17 +332,15 @@ def process_for_stats(seg_lungs, seg_metas):
     vol = 0
     for mask in seg_lungs:
         vol += post_count.vol_mask(mask)
-
     vol_meta = 0
-    vol_per_meta = 0
     meta_slice = 0
+    N = post_count.process_meta_number(seg_metas.astype(np.uint8))
     for i, meta_mask in enumerate(seg_metas):
         if np.amax(meta_mask) == 1.0:
             vol_meta += post_count.vol_mask(meta_mask)
-            vol_per_meta += post_count.mean_vol_per_meta(meta_mask)
             # nb_meta_volume(meta_mask, i)
             meta_slice += 1
-    vol_per_meta /= meta_slice
+    vol_per_meta = vol_meta / N
     print(100 * "-")
     print("\n")
     utils.print_gre(name)
@@ -352,12 +353,13 @@ def process_for_stats(seg_lungs, seg_metas):
             vol_meta, (vol_meta * 0.001)
         )
     )
+    utils.print_gre("Number of detected metas : {}".format(N))
     utils.print_gre(
         "Volume per meta : {:.2f} mm cubed ; {:.5f} mL".format(
             vol_per_meta, (vol_per_meta * 0.001)
         )
     )
-    return vol, vol_meta, vol_per_meta
+    return vol, vol_meta, N, vol_per_meta
 
 
 if __name__ == "__main__":
@@ -395,29 +397,29 @@ if __name__ == "__main__":
             seg_metas, label_metas, gv.PATH_RES + str(name) + "_pipeline_metas/"
         )
 
-    vol, vol_meta, vol_per_meta = process_for_stats(seg_lungs, seg_metas)
+    vol, vol_meta, nb_meta, vol_per_meta = process_for_stats(seg_lungs, seg_metas)
     #########################
 
     if flags.csv:
         if flags.day is None:
             utils.print_red("flag --day is None")
-        if flags.mousename is None:
+        elif flags.mousename is None:
             utils.print_red("flag --mousename is None")
-        if flags.csv_file is None:
+        elif flags.csv_file is None:
             utils.print_red("flag --csv_file is None")
-        if flags.mut is None:
+        elif flags.mut is None:
             utils.print_red("flag --mut is None")
         else:
-            write_in_csv(
-                flags.csv_file,
-                flags.mousename,
-                flags.day,
-                vol,
-                vol_meta,
-                vol_per_meta,
-                flags.mut,
-            )
+            # write_in_csv(
+            #     flags.csv_file,
+            #     flags.mousename,
+            #     flags.day,
+            #     vol,
+            #     vol_meta,
+            #     vol_per_meta,
+            #     flags.mut,
+            # )
+            nb_meta_volume_v2(seg_metas.astype(np.uint8))
+
 
 # todo: readme pour csv, move csv function in a new file (?)
-# todo: clean this code -> thingz to generate graphs are polluting the code
-# todo: lien vers napari-deepmeta dans le readme

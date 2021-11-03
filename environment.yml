@@ -26,10 +26,10 @@ dependencies:
   - brunsli=0.1=h2531618_0
   - bzip2=1.0.8=h7b6447c_0
   - c-ares=1.17.1=h27cfd23_0
-  - ca-certificates=2020.12.5=ha878542_0
+  - ca-certificates=2021.5.30=ha878542_0
   - cachetools=4.2.1=pyhd3eb1b0_0
   - cairo=1.16.0=h7979940_1007
-  - certifi=2020.12.5=py38h578d9bd_1
+  - certifi=2021.5.30=py38h578d9bd_0
   - cffi=1.14.5=py38h261ae71_0
   - chardet=3.0.4=py38h06a4308_1003
   - charls=2.1.0=he6710b0_2
@@ -158,7 +158,7 @@ dependencies:
   - openh264=2.1.1=h780b84a_0
   - openjpeg=2.3.0=h05c96fa_1
   - openssl=1.1.1k=h7f98852_0
-  - opt_einsum=3.1.0=py_0
+  - opt_einsum=3.3.0=pyhd8ed1ab_1
   - packaging=20.9=pyhd3eb1b0_0
   - pandas=1.2.2=py38ha9443f7_0
   - pandoc=2.12=h7f98852_0
@@ -171,6 +171,7 @@ dependencies:
   - pillow=8.1.0=py38he98fc37_0
   - pip=21.0.1=py38h06a4308_0
   - pixman=0.40.0=h36c2ea0_0
+  - progressbar2=3.53.1=pyh9f0ad1d_0
   - prometheus_client=0.9.0=pyhd3deb0d_0
   - prompt-toolkit=3.0.18=pyha770c72_0
   - protobuf=3.14.0=py38h2531618_1
@@ -188,6 +189,7 @@ dependencies:
   - pysocks=1.7.1=py38h06a4308_0
   - python=3.8.5=h7579374_1
   - python-dateutil=2.8.1=pyhd3eb1b0_0
+  - python-utils=2.5.6=pyh44b312d_0
   - python_abi=3.8=1_cp38
   - pytz=2021.1=pyhd3eb1b0_0
   - pywavelets=1.1.1=py38h7b6447c_2
@@ -214,6 +216,7 @@ dependencies:
   - sphinxcontrib-qthelp=1.0.3=pyhd3eb1b0_0
   - sphinxcontrib-serializinghtml=1.1.4=pyhd3eb1b0_0
   - sqlite=3.34.0=h74cdb3f_0
+  - tensorboard-data-server=0.6.0=py38h2b97feb_0
   - tensorboard-plugin-wit=1.6.0=py_0
   - tensorflow=2.2.0=gpu_py38hb782248_0
   - tensorflow-base=2.2.0=gpu_py38h83e3d50_0
@@ -261,6 +264,7 @@ dependencies:
     - blessings==1.7
     - cfgv==3.2.0
     - colorful==0.5.4
+    - connected-components-3d==3.3.0
     - distlib==0.3.1
     - filelock==3.0.12
     - focal-loss==0.0.6
